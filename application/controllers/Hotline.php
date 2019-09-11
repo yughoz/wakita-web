@@ -64,12 +64,12 @@ class Hotline extends CI_Controller
             ]);die();
         } else {
             $data = array(
-        		'customer_phone' => $this->input->post('customer_phone',TRUE),
-        		'message' => $this->input->post('message',TRUE),
-        		'flag_status' => $this->input->post('flag_status',TRUE),
-        		'created' => date("Y-m-d H:i:s"),
-        		'createdby' => $this->session->userdata('email'),
-            );
+		'customer_phone' => $this->input->post('customer_phone',TRUE),
+		'message' => $this->input->post('message',TRUE),
+		'flag_status' => $this->input->post('flag_status',TRUE),
+		'created' => date("Y-m-d H:i:s"),
+		'createdby' => $this->session->userdata('email'),
+	    );
 
             $this->Hotline_model->insert($data);
             echo json_encode([
@@ -93,12 +93,12 @@ class Hotline extends CI_Controller
             ]);die();
         } else {
             $data = array(
-        		'customer_phone' => $this->input->post('customer_phone',TRUE),
-        		'message' => $this->input->post('message',TRUE),
-        		'flag_status' => $this->input->post('flag_status',TRUE),
-        		'created' => $this->input->post('created',TRUE),
-        		'createdby' => $this->input->post('createdby',TRUE),
-    	    );
+		'customer_phone' => $this->input->post('customer_phone',TRUE),
+		'message' => $this->input->post('message',TRUE),
+		'flag_status' => $this->input->post('flag_status',TRUE),
+		'created' => $this->input->post('created',TRUE),
+		'createdby' => $this->input->post('createdby',TRUE),
+	    );
 
             $this->Hotline_model->update($this->input->post('id', TRUE), $data);
             echo json_encode([
@@ -128,12 +128,12 @@ class Hotline extends CI_Controller
 
     public function _rules() 
     {
-    	$this->form_validation->set_rules('customer_phone', 'customer phone', 'trim|required');
-    	$this->form_validation->set_rules('message', 'message', 'trim|required');
-    	$this->form_validation->set_rules('flag_status', 'flag status', 'trim|required');
+	$this->form_validation->set_rules('customer_phone', 'customer phone', 'trim|required');
+	$this->form_validation->set_rules('message', 'message', 'trim|required');
+	$this->form_validation->set_rules('flag_status', 'flag status', 'trim|required');
 
-    	$this->form_validation->set_rules('id', 'id', 'trim');
-    	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
+	$this->form_validation->set_rules('id', 'id', 'trim');
+	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
     }
 
 }

@@ -12,102 +12,29 @@ class Hotline extends CI_Controller
         date_default_timezone_set('Asia/Jakarta');
         $this->load->model('Hotline_model');
         $this->load->library('form_validation');        
-	    $this->load->library('datatables');
-        $this->load->model('Milis_member_model');
-        $this->load->model('Milis_model');
-
+	$this->load->library('datatables');
     }
 
     public function index()
     {
         header('Content-Type: application/json');
-        $where = [
-            "group_hotline" =>$this->input->post('group_hotline',TRUE),
-            "flag_status >" => "2"
-        ];
-        $datas = $this->Hotline_model->group_json($where);
-        $dataNew = [];
-        $dataTemp =[];
-        $countTemp = 0;
-        foreach ($datas as $key => $value) {
-            if ($value->flag_status == "3") {
-                $value->dateParse = $this->getDate($value->created);
-                $dataNew[]        = $value;
-            } else {
-
-                $dataTemp[$countTemp] = $value;
-                if (!empty($value->image_name)) {
-                    $dataTemp[$countTemp]->message = "Photo";
-                }
-                if ($value->createdby == "API_WABLAS") {
-                    $dataTemp[$countTemp]->statusReplay = "customer";
-                    $dataTemp[$countTemp]->statusColor  = "#ffb300";
-                } else {
-                    $dataTemp[$countTemp]->statusReplay = "cs";
-                    $dataTemp[$countTemp]->statusColor  = "#cfcdcc";
-                }
-
-                $dataTemp[$countTemp]->message   = str_replace("\n", " ", $dataTemp[$countTemp]->message);
-                
-                $dataTemp[$countTemp]->dateParse =$this->getDate($value->created);
-
-                $countTemp++;
-            }
-
-        }
-        echo json_encode(["data" => $dataTemp,"dataNew" => $dataNew]);
+        echo json_encode(["data" => $this->Hotline_model->group_json()]);
     } 
 
-
-    function getDate($date)
-    {
-        $current = strtotime(date("Y-m-d"));
-        $date    = strtotime($date);
-
-        $datediff = $date - $current;
-        $difference = floor($datediff/(60*60*24));
-        if($difference==0)
-        {
-            return date("H:i",$date);
-        }
-        else if($difference > 1)
-        {
-            return 'Future Date';
-        }
-        else if($difference > 0)
-        {
-            return 'tomorrow';
-        }
-        else if($difference < -1)
-        {
-            return date("Y/m/d",$date);
-        }
-        
-        return 'yesterday';
-        
-    }
 
     public function detail()
     {
         header('Content-Type: application/json');
          $whereArr = array(
-            'customer_phone'    => $this->input->post('customer_phone',TRUE),
-            'group_hotline'     => $this->input->post('group_hotline',TRUE),
+            'customer_phone' => $this->input->post('customer_phone',TRUE),
+            'group_hotline' => "huawei_cloud",
         );
         $startFrom = $this->input->post('start',TRUE);
         $datas =  $this->Hotline_model->detail_list($whereArr,$startFrom);
         $count =  $this->Hotline_model->count_all($whereArr);
         foreach ($datas as $key => $value) {
-            if (!empty($value->image_name)) {
-            	$datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
-            }
             if ($value->createdby == "API_WABLAS") {
                 $datas[$key]->username = "Customer";
-                if (!empty($value->image_name)) {
-                    $datas[$key]->image = "https://simo.wablas.com/image/".$value->image_name;
-                    // /$datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
-                }
-
             }
             $datas[$key]->_idUser = $value->user_phone ?? $value->customer_phone;
          }
@@ -135,7 +62,6 @@ class Hotline extends CI_Controller
             ]);die();
         }
     }
-
     
     public function create_action() 
     {
@@ -202,30 +128,6 @@ class Hotline extends CI_Controller
             echo json_encode([
                 "code" => "success",
                 "message" => "Delete Record Success",
-            ]);die();
-        } else {
-            echo json_encode([
-                "code" => "error",
-                "message" => "Record Not Found",
-            ]);die();
-        }
-    }
-
-    public function list() 
-    {
-        $dataHotline  = $this->Milis_member_model->get_all_where(['user_id' => $this->session->userdata('id_users')]);
-
-        if ($dataHotline) {
-            $row = [];
-            foreach ($dataHotline as $key => $value) {
-                $dataTemp = $this->Milis_model->get_by_id($value->milis_id);
-                $dataTemp->group_hotline = $dataTemp->phone_number ;
-                $row[] = $dataTemp;
-            }
-            echo json_encode([
-                "code" => "success",
-                "data"  => $row,
-                "message" => "",
             ]);die();
         } else {
             echo json_encode([

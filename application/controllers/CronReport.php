@@ -17,8 +17,7 @@ class CronReport extends CI_Controller
 
         $this->apiToken     = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";
         // $this->wablasClient = new WablasClient($apiToken);
-        // $this->url          = 'https://wablas.com/api';/
-        $this->url          = $this->config->item('APIWeb');
+        $this->url          = 'https://wablas.com/api';
         $this->client       = new GuzzleHttp\Client();
         $this->startRes = time();
 

@@ -42,10 +42,10 @@ class ManageUserLevel extends CI_Controller
     function akses(){
         $data['level'] = $this->db->get_where('tbl_user_level',array('id_user_level'=>  $this->uri->segment(3)))->row_array();
         $data['menu'] = $this->db->get('tbl_menu')->result();
-        $this->template->load('template','manageuserlevel/akses',$data);
+        $this->template->load('template','manageuserlevel/manageuserlevel_access',$data);
     }
     
-    function kasi_akses_ajax(){
+    function get_access_ajax(){
         $id_menu        = $_GET['id_menu'];
         $id_user_level  = $_GET['level'];
         // chek data
