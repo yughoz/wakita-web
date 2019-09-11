@@ -19,14 +19,11 @@ class Whatsapp extends CI_Controller
         $this->load->library('form_validation');        
         $this->load->library('datatables');
         $this->config->load('apiwha');
-        $this->config->load('companyProfile');
         $this->load->model('Inbox_model');
-        $this->load->model('Milis_model');
 
-        // $this->apiToken     = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";
+        $this->apiToken     = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";
         // $this->wablasClient = new WablasClient($apiToken);
-        $this->apiToken     = "";
-        $this->url          = $this->config->item('APIWeb');
+        $this->url          = 'https://wablas.com/api';
         $this->client       = new GuzzleHttp\Client();
         $this->load->model('Milis_member_model');
         $this->load->model('Hotline_model');
@@ -89,12 +86,12 @@ class Whatsapp extends CI_Controller
                         'message'       => $this->input->post('message',TRUE),
                         'created'       => date("Y-m-d H:i:s"),
                         'message_id'	=> $data['message_id'],
-                        'group_hotline'	=> $data['receiver'],
+                        'group_hotline'	=> "huawei_cloud",
                         'createdby'     => "API_WABLAS",
                         'flag_status'   => "2",
                     );
                     $this->Inbox_model->insertHotline($insHotline);
-                    echo "Terimakasih infonya \napa yang bisa kami bantu ?";
+                    echo "Terimakasih infonya ".$name."\napa yang bisa kami bantu ?";
 
                 } elseif ($dataHotline->flag_status == 2) {
                     $insHotline = array(
@@ -102,21 +99,16 @@ class Whatsapp extends CI_Controller
                         'message'       => $this->input->post('message',TRUE),
                         'created'       => date("Y-m-d H:i:s"),
                         'message_id'	=> $data['message_id'],
-                        'group_hotline'	=> $data['receiver'],
+                        'group_hotline'	=> "huawei_cloud",
                         'createdby'     => "API_WABLAS",
                         'flag_status'   => "3",
                     );
                     $this->Inbox_model->insertHotline($insHotline);
                     // 
-                    $dataMilis = $this->parsingNum($data['receiver']);
+                    $dataMilis = $this->parsingNum('1');
                     $dataMsg   = $this->parsingMsg($data['phone']);
-                    $this->apiToken  = $this->Milis_model->get_token($data['receiver']);
                     $this->sendMessage($dataMilis,$dataMsg);
 
-
-                    // $this->sendSocket($insHotline);
-                    $insHotline['message'] = "You have new customer";
-                    $this->sendFCM($insHotline);
 
                     // echo "Layanan apa yang ingin di tanyakan";
 
@@ -126,24 +118,14 @@ class Whatsapp extends CI_Controller
                         'message'       => $this->input->post('message',TRUE),
                         'created'       => date("Y-m-d H:i:s"),
                         'message_id'	=> $data['message_id'],
-                        'group_hotline'	=> $data['receiver'],
+                        'group_hotline'	=> "huawei_cloud",
                         'createdby'     => "API_WABLAS",
-                        'image_name'    => $this->input->post('image',TRUE),
-                        'doc_name'      => $this->input->post('file',TRUE),
                         'flag_status'   => "4",
                     );
                     $this->Inbox_model->insertHotline($insHotline);
 
                     $dataHotline = $this->Inbox_model->get_hotline($data['phone']);
                     $insHotline['username'] = "Customer";
-                    // echo "balas";
-                    if (!empty($this->input->post('image'))) {
-                        $insHotline['image']    = "https://simo.wablas.com/image/".$this->input->post('image',TRUE);                        
-                        $insHotline['imageUrl'] = "https://simo.wablas.com/image/".$this->input->post('image',TRUE);                        
-                    } else {
-                        $insHotline['image']    = "";
-                        $insHotline['imageUrl'] = "";
-                    }
                     $this->sendSocket($insHotline);
                     $this->sendFCM($insHotline);
 
@@ -158,12 +140,12 @@ class Whatsapp extends CI_Controller
                         'message'       => $this->input->post('message',TRUE),
                         'created'       => date("Y-m-d H:i:s"),
                         'message_id'	=> $data['message_id'],
-                        'group_hotline'	=> $data['receiver'],
+                        'group_hotline'	=> "huawei_cloud",
                         'createdby'     => "API_WABLAS",
                         'flag_status'   => "1",
                     );
                     $this->Inbox_model->insertHotline($insHotline);
-                    echo "Selamat pagi, kami dari ".$this->config->item('wa_company_name')." \nMohon info nama anda : ";
+                    echo "Selamat pagi, kami dari totech \nMohon info nama anda : ";
                 // }
 
             }
@@ -173,32 +155,12 @@ class Whatsapp extends CI_Controller
             // ]);die();
     }
 
-
-    public function webhook_track() 
-    {
-        $this->Loging("webhook_track" , $_POST);
-        $data = array(
-            'status' => $this->input->post('status',TRUE),
-            // 'device_id' => $this->input->post('device_id',TRUE),/
-            'updated' => date("Y-m-d H:i:s"),
-            'updatedby' => "API_webhook",
-        );
-
-        $where = [
-            'message_id' => $this->input->post('id',TRUE),
-        ];
-        
-        $this->Loging("webhook_track_end" , $data);
-        $this->Send_message_detail_model->updateWhere($data,$where);
-        // $this->Inbox_model->insert($data);/
-    }
-
     function sendFCM($data){
         $data = json_encode([
             // "to" => 'egVqgonXXHM:APA91bEPXbTBW2iW16UQHQOyXI0f-Yfb6HcRX6Q2_7BYs6vZ_Y7JBzUmH8JDPITPRSyQt-t0JKGKRK64dqgvBFAEuXjfw4hKekS6MDZmRFEPjC9AfwZZBg0ZfDJI-z3PWQ3N7JK8P6WJ',
             // "to" => 'cYhsZSacooo:APA91bEWIS4j_C1SXLMx1uLQaw_0bzzE-SCiS6j2u7ruWnT-REQo20yNhy0pbqYUD76-KwBclQTB7K475SzgYxRyxRfqfjq3P7WEgPSmy0vDJ8wCVojBVvpZiZjwtZkHZXQ0LOGV9Pxo',
             
-            'to'=>'/topics/'.$data['group_hotline'],
+            'to'=>'/topics/huawei_cloud',
             'priority'=>'high',
             "notification" => [
                 "body" => $data['message'],
@@ -237,12 +199,12 @@ class Whatsapp extends CI_Controller
         $client->initialize();
 
         // send message to connected clients
-        $client->emit('post_key', ['socket_session' => '', 'id_account' => $data['customer_phone'], 'datas' => json_encode($data)]);
-        $client->emit('sendWA', ['socket_session' => '', 'id_account' => $data['group_hotline'], 'datas' => json_encode($data)]);
+        $client->emit('post_key', ['socket_session' => '', 'id_account' => '6285693784939', 'datas' => json_encode($data)]);
+        $client->emit('sendWA', ['socket_session' => '', 'id_account' => 'huawei_cloud', 'datas' => json_encode($data)]);
         $client->close();
     }
     function parsingNum($id){
-        $dataMilis = $this->Milis_member_model->getAllCustomWebhook($id);
+        $dataMilis = $this->Milis_member_model->getAllCustom("1");
         $resultArr = "";
         foreach ($dataMilis as $key => $value) {
             $resultArr[] = $value->phone;
@@ -253,13 +215,10 @@ class Whatsapp extends CI_Controller
     function parsingMsg($phone){
         $dataMsg  = $this->Hotline_model->get_all_where(["customer_phone" => $phone]);
         foreach ($dataMsg as $key => $value) {
-            $resultArr[] = "[".date("m/d H:i",strtotime($value->created))."] +".$value->customer_phone.": ".$value->message;
+            $resultArr[] = $value->message;
         }
-        $parsing = "You have new customer.\n\n";
-        // $parsing .= "Customer chat : \n";
-        $parsing .= implode("\n", $resultArr);
-        $parsing .= "\n\nPlease check your app.";
-        return $parsing;
+
+        return implode("\n", $resultArr);
     }
 
     public function send_wa() 
@@ -293,7 +252,6 @@ class Whatsapp extends CI_Controller
         );
 
 
-            // $this->apiToken  = $data['receiver'];
             $this->sendMessage($data['dest_num'],$data['message_text']);
             echo json_encode([
                 "code" => "success",
@@ -335,7 +293,6 @@ class Whatsapp extends CI_Controller
         );
 
 
-            $this->apiToken  = $this->Milis_model->get_token($this->input->post('group_hotline',TRUE));
             if ($dataResult = $this->sendMessage($data['dest_num'],$data['message_text'])) {
                  $this->Loging("api_whatsapp_send_wa_milis_message" , [
                                                         "dataResult"=>$dataResult,
@@ -354,7 +311,6 @@ class Whatsapp extends CI_Controller
 
                 $insHotline['username'] = $this->session->userdata('full_name');
                 $this->sendSocket($insHotline);
-                $this->sendFCM($insHotline);
 
 
             };
@@ -365,147 +321,6 @@ class Whatsapp extends CI_Controller
         // }
     }
     
-
-    public function send_img_wa_milis() 
-    {
-         $this->Loging("send_wa_milis" , ["POST"=>$_POST]);
-        
-        $data = array(
-            // 'header_id' => $this->input->post('header_id',TRUE),
-            'from_num' => $this->config->item('keys')[0]['numbers'],
-            'number' => $this->input->post('noPhone',TRUE),
-            'message_id' => $this->input->post('message_id',TRUE),
-            'message' => $this->input->post('message',TRUE),
-            'status' => $this->input->post('status',TRUE),
-            'type_file' => $this->input->post('type_file',TRUE),
-            'created' => date("Y-m-d H:i:s"),
-            'createdby' => "API",
-            'updated' => date("Y-m-d H:i:s"),
-            'updatedby' => "API",
-        );
-        $imgUrl = "";
-        $resultUpload['file_name'] = $this->saveIMG($this->input->post('file_img'));
-        $data['imageUrl'] = base_url('assets/foto_wa')."/".$resultUpload['file_name'];
-        $data['doc_name'] = $resultUpload['file_name'];
-
-        $this->apiToken  = $this->Milis_model->get_token($this->input->post('group_hotline',TRUE));
-        $this->sendImg($data);
-
-        // if ($dataResult = $this->sendMessage($data['dest_num'],$data['message_text'])) {
-        //      $this->Loging("api_whatsapp_send_wa_milis_message" , [
-        //                                             "dataResult"=>$dataResult,
-        //                                         ]);
-            $insHotline = array(
-                'customer_phone' => $this->input->post('noPhone',TRUE),
-                'message'       => $this->input->post('message',TRUE),
-                'created'       => date("Y-m-d H:i:s"),
-                // 'message_id'    => $dataResult['data']['message'][0]['id'],
-                'group_hotline' => $this->input->post('group_hotline',TRUE),
-                'createdby'     => $this->session->userdata('email'),
-                'image_name'    => $resultUpload['file_name'],
-                'user_phone'    => $this->session->userdata('phone'),
-                'flag_status'   => "5",
-            );
-            $this->Inbox_model->insertHotline($insHotline);
-
-            $insHotline['username'] = $this->session->userdata('full_name');
-            $this->sendSocket($insHotline);
-
-
-        // };
-        $insHotline['imageUrl'] = $data['imageUrl'];
-        echo json_encode([
-            "code" => "success",
-            "message" => "Create Record Success",
-            "data"    => $insHotline,
-            "imgUrl"  => $data['doc_name'],
-        ]);die();
-        // }
-    }
-
-    public function sendImg($data, $type = 'random') {
-        
-        $this->Loging("sendDOC" , $data);
-       
-       try {
-        $url =  $this->url."/send-image";
-        if ($data['type_file'] == "doc_file") {
-            $url =  $this->url."/send-document";
-        }
-            $response = $this->client->request( 'POST', 
-                                          $url, 
-                                          [ 
-                                            'headers' => [
-                                                                // 'Accept' => 'application/json',
-                                                                'Authorization' => $this->apiToken,
-                                                            ],
-                                            'form_params' 
-                                                => [
-                                                'phone'     => $data['number'],
-                                                'caption'   => $data['message'],
-                                                'image'     => $data['imageUrl'],
-                                                'document'  => $data['imageUrl'],
-                                            ] 
-                                          ]
-                                        );
-            #guzzle repose for future use
-            $res['status_code'] = $response->getStatusCode(); // 200
-            // $response = $response->getReasonPhrase(); // OK
-            // echo $response->getBody();die(); // 1.1
-            $res['body'] =  json_decode($response->getBody(),true);
-            $this->Loging("response_wablas" , $res);
-            // echo print_r($res['body']);die();
-
-            $dataInsert = [
-                'status'        => $res['body']['status'],
-                'message'       => $res['body']['message'],
-                'quota'         => $res['body']['data']['quota'],
-                'status_code'   => $res['status_code'],
-                // 'response'   => $response,
-                'created'       => date("Y-m-d H:i:s"),
-                'createdby'     => $this->session->userdata('email'),
-            ];
-            // echo print_r($dataInsert);die();
-            $id = $this->Send_message_detail_model->insert_header($dataInsert);
-            
-            foreach ($res['body']['data']['message'] as $key => $value) {
-                $data = array(
-                'header_id' => $id,
-                'from_num' => $this->config->item('keys')[0]['numbers'],
-                'dest_num' => $value['phone'],
-                'message_id' => $value['id'],
-                'message_text' => $value['caption'] ?? "",
-                'message_image'   => $value['image'] ?? "",
-                'status' =>     $value['status'],
-                'created' => date("Y-m-d H:i:s"),
-                'type'      => $data['type_file'],
-                'doc_name'      => $data['doc_name'],
-                'createdby' => $this->session->userdata('email'),
-                'updated' => date("Y-m-d H:i:s"),
-                'updatedby' => $this->session->userdata('email'),
-                );
-                $this->Send_message_detail_model->insert($data);
-            }
-            // echo json_encode($body);
-          } catch (GuzzleHttp\Exception\BadResponseException $e) {
-            #guzzle repose for future use
-            $res['response'] = $e->getResponse();
-            $res['responseBodyAsString'] = $res['response']->getBody()->getContents();
-            $this->Loging("response_wablas_error" , $res);
-            // print_r($responseBodyAsString);
-          }
-
-        return false;
-    }
-    
-    public function saveIMG($file64){
-        $filename = time().rand(100,999).".png";
-        $path = FCPATH."/assets/foto_wa/".$filename;
-        file_put_contents($path, base64_decode($file64));
-
-        return $filename;
-    }
-
 
     
     public function sendMessage($number,$message, $type = 'random') {
