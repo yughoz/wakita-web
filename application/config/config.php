@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://149.129.248.52/wakita-server/';
+$config['base_url'] = 'http://149.129.248.52/wakita-web/';
 
 /*
 |--------------------------------------------------------------------------

@@ -1,7 +1,5 @@
 .DS_Store
 
-Log/
-native/log/
 application/cache/*
 !application/cache/index.html
 !application/cache/.htaccess
@@ -30,4 +28,5 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 *.sublime-workspace
 *.sublime-project
 
-application/libraries
+Log
+native/log
