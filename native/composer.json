@@ -1,0 +1,5 @@
+{
+    "require": {
+        "wablas/wablas-client-php": "^1.0"
+    }
+}

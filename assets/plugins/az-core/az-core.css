@@ -1,0 +1,321 @@
+/*
+	1 - GLOBAL
+	2 - HELPER
+	3 - MODAL
+	4 - FORM
+		4.1 - SELECT2
+	5 - LOADING
+	6 - DATETIMEPICKER
+	7 - BUTTON
+	8 - DATATABLE
+	9 - ELEMENT
+		9.1	LOGIN
+		9.2 IMAGE UPLOAD
+*/
+
+/* 1 - GLOBAL */
+a {
+	text-decoration: none !important;
+}
+body {
+	width: 100%;
+	overflow-x: hidden;
+	padding-right: 0px !important;
+}
+
+/*=========================*/
+/*END GLOBAL */
+
+/* 2 - HELPER*/
+.div-table {
+	display: table;
+}
+.div-table-cell {
+	display: table-cell;
+}
+.full-width {
+	width: 100% !important;
+}
+.va-top {
+	vertical-align: top;
+}
+.va-middle {
+	vertical-align: middle;
+}
+.va-bottom {
+	vertical-align: bottom;
+}
+.txt-left {
+	text-align: left !important;
+}
+.txt-center {
+	text-align: center;
+}
+.txt-right {
+	text-align: right;
+}
+.ptop-2 {
+	padding-top: 2px;
+}
+.pbot-2 {
+	padding-top: 2px;
+}
+.ptop-5 {
+	padding-bottom: 5px;
+}
+.pbot-5 {
+	padding-bottom: 5px;
+}
+.mtop-10 {
+	margin-top: 10px;
+}
+.ptop-10 {
+	padding-top: 10px
+}
+.pos-relative {
+	position: relative !important;
+}
+/*=====================*/
+/* END HELPER */
+
+
+/* 3 - MODAL */
+.modal-content {
+	border-radius: 0px;
+}
+.modal-header {
+	background-color: #07c9c9;
+	color: #007A7A;
+}
+.az-modal-close {
+	background-color: red;
+	position: absolute;
+	right: -18px;
+	top: 0px;
+	padding: 18.5px;
+	border-radius: 15px 0px 0px 15px;
+}
+	.az-modal-close .caret-close {
+		border-bottom: 30px solid transparent;
+		border-left: 18px solid #A51F14;
+		position: absolute;
+		right: 0px;
+		bottom: -30px;
+	}
+	.az-modal-close:hover {
+		cursor: pointer;
+		background-color: #A51F14;
+	}
+	.az-modal-close .close {
+		opacity: 1;
+	}
+.modal-body {
+	background-color: rgba(87, 217, 217, 0.07)
+}
+.modal-footer {
+	background-color: rgba(7, 201, 201, 0.14);;
+}
+
+/*========================?*/
+/* END MODAL*/
+
+
+/* 4 - FORM */
+input, textarea, select {
+	border-radius: 0px !important;
+}
+.div-between-col {
+	text-align: center;
+	line-height: 2.5;
+}
+.form-top-filter {
+	border-bottom:2px dashed #dadada;
+	margin-bottom:20px;
+	background-color:#f8f8f8;
+	border-radius:10px 10px 0px 0px;
+	padding:20px 10px;
+}
+.form-horizontal .control-label {
+	font-size: 13px;
+}
+
+/* 4.1 SELECT 2 */
+.select2-container .select2-choice {
+	border-radius: 0;
+}
+.select2-container {
+	width: 100% !important;
+}
+.select2-container--default .select2-selection--single {
+	height: 34px;
+	border-radius: 0px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	line-height: 34px;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+	top: 4px;
+}
+.select2-container--default .select2-selection--single .select2-selection__clear {
+	margin-top: -1px;
+}
+/*=======================*/
+/* END FORM*/
+
+
+/* 5 - LOADING */
+.az-loading {
+    position: fixed;
+    top: 0px;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    margin-left: -50%;
+    margin-top: 0px;
+    text-align: center;
+    background: rgba(8, 13, 113, 0.72);
+    z-index: 999999;
+    display: none;
+}
+.az-loading div {
+    position: absolute;
+    top: 50%;
+    margin-top: -100px;
+    width: 100% ;
+}
+/*==========================*/
+/* LOADING*/
+
+
+/* 6 - DATETIMEPICKER */
+.bootstrap-datetimepicker-widget {
+    z-index: 1200   !important;
+}
+/*===========================*/
+/* END DATETIMEPICKER*/
+
+
+/* 7 - BUTTON */
+.btn {
+	border-radius: 0px;
+}
+.btn-top-table {
+	position: absolute;
+}
+/*========================*/
+/* END BUTTON*/
+
+
+/* 8 - DATATABLE */
+div.dataTables_info {
+	padding-top: 0px;
+}
+.az-table th {
+	text-align: center;
+	font-weight: bold;
+}
+
+.az-table > tbody > tr.selected {
+	background-color: #FF8C83;
+	color: #7E0900;
+}
+
+.az-table > tbody > tr:hover {
+	cursor: pointer;
+}
+
+.form-top-filter {
+	position: relative;
+}
+.form-top-filter-hide {
+	font-size: 25px;
+	position: absolute;
+	right: 14px;
+	line-height: 1;
+	top: 8px;
+}
+	.form-top-filter-hide:hover {
+		cursor: pointer;
+	}
+/*=======================*/
+/* END DATATABLE */
+
+/* 9 - ELEMENT */
+/* 9.1 - LOGIN */
+.login-container {
+	text-align: center;
+	margin-top: 100px;
+}
+	.login-container-content {
+		display: inline-block;
+		width: 300px;
+		text-align: left;
+		border: 5px solid rgb(122, 193, 239);
+		padding: 20px;
+		box-shadow: 1px 2px 4px rgb(122, 193, 239);
+		background-color: rgb(249, 252, 255);
+		border-radius: 0px 45px;
+	}
+	.login-logo {
+		text-align: center;
+		margin-bottom: 20px;
+	}
+.login-error-message {
+	background-color: red;
+	padding: 5px;
+	margin-bottom: 14px;
+	color: rgb(255, 255, 255);
+	text-align: center;
+}
+.login-copyright {
+	text-align: center;
+	margin-top: 30px;
+	font-size: 12px;
+}
+
+/*=======================*/
+/* END LOGIN */
+
+
+/* 9.2 - IMAGE UPLOAD */
+.az-image-container {
+	display: inline-block;
+	position: relative;
+}
+	.az-image-container .az-image .az-image-x {
+		position: absolute;
+		right: -5px;
+		top: -5px;
+		background-color: red;
+		color: #fff;
+		padding: 5px 7px;
+		border-radius: 50%;
+		font-weight: bold;
+		line-height: 1;
+		border: 1px solid #fff;
+	}
+		.az-image-container .az-image .az-image-x:hover {
+			cursor: pointer;
+		}
+	.az-image-container .az-image img{
+		border-radius: 5px;
+		box-shadow: 1px 2px 3px 0px rgb(181, 225, 249);
+	}
+	.az-image-container .az-image .az-image-file {
+		position: absolute;
+		bottom: 3px;
+		left: 3px;
+		opacity: 0;
+	}
+	.az-image-container .az-image .div-choose-image {
+		position: absolute;
+		bottom: 3px;
+		left: 3px;
+	}
+		.az-image-container .az-image .div-choose-image button{
+			padding: 2px 12px;
+		}
+
+/*=======================*/
+/* END IMAGE UPLOAD */
