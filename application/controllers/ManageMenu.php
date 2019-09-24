@@ -8,7 +8,7 @@ class ManageMenu extends CI_Controller
     function __construct()
     {
         parent::__construct();
-        $this->load->model('ManageMenu_Model');
+        $this->load->model('ManageMenu_model');
         $this->load->library('form_validation');
 	    $this->load->library('datatables');
     }
@@ -23,17 +23,17 @@ class ManageMenu extends CI_Controller
         $value = $this->input->post('tampil_menu');
         $this->db->where('id_setting',1);
         $this->db->update('tbl_setting',array('value'=>$value));
-        redirect('managemenu');
+        redirect('ManageMenu');
     }
     
     public function json() {
         header('Content-Type: application/json');
-        echo $this->ManageMenu_Model->json();
+        echo $this->ManageMenu_model->json();
     }
 
     public function read($id) 
     {
-        $row = $this->ManageMenu_Model->get_by_id($id);
+        $row = $this->ManageMenu_model->get_by_id($id);
         if ($row) {
             $data = array(
                 'id_menu' => $row->id_menu,
@@ -46,7 +46,7 @@ class ManageMenu extends CI_Controller
             $this->template->load('template','managemenu/managemenu_read', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('managemenu'));
+            redirect(site_url('ManageMenu'));
         }
     }
 
@@ -54,7 +54,7 @@ class ManageMenu extends CI_Controller
     {
         $data = array(
             'button' => 'Create',
-            'action' => site_url('managemenu/create_action'),
+            'action' => site_url('ManageMenu/create_action'),
             'id_menu' => set_value('id_menu'),
             'title' => set_value('title'),
             'url' => set_value('url'),
@@ -80,20 +80,20 @@ class ManageMenu extends CI_Controller
                 'is_aktif' => $this->input->post('is_aktif',TRUE),
             );
 
-            $this->ManageMenu_Model->insert($data);
+            $this->ManageMenu_model->insert($data);
             $this->session->set_flashdata('message', 'Create Record Success');
-            redirect(site_url('managemenu'));
+            redirect(site_url('ManageMenu'));
         }
     }
     
     public function update($id) 
     {
-        $row = $this->ManageMenu_Model->get_by_id($id);
+        $row = $this->ManageMenu_model->get_by_id($id);
 
         if ($row) {
             $data = array(
                 'button' => 'Update',
-                'action' => site_url('managemenu/update_action'),
+                'action' => site_url('ManageMenu/update_action'),
                 'id_menu' => set_value('id_menu', $row->id_menu),
                 'title' => set_value('title', $row->title),
                 'url' => set_value('url', $row->url),
@@ -104,7 +104,7 @@ class ManageMenu extends CI_Controller
             $this->template->load('template','managemenu/managemenu_form', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('managemenu'));
+            redirect(site_url('ManageMenu'));
         }
     }
     
@@ -123,23 +123,23 @@ class ManageMenu extends CI_Controller
                 'is_aktif' => $this->input->post('is_aktif',TRUE),
             );
 
-            $this->ManageMenu_Model->update($this->input->post('id_menu', TRUE), $data);
+            $this->ManageMenu_model->update($this->input->post('id_menu', TRUE), $data);
             $this->session->set_flashdata('message', 'Update Record Success');
-            redirect(site_url('managemenu'));
+            redirect(site_url('ManageMenu'));
         }
     }
     
     public function delete($id) 
     {
-        $row = $this->ManageMenu_Model->get_by_id($id);
+        $row = $this->ManageMenu_model->get_by_id($id);
 
         if ($row) {
-            $this->ManageMenu_Model->delete($id);
+            $this->ManageMenu_model->delete($id);
             $this->session->set_flashdata('message', 'Delete Record Success');
-            redirect(site_url('managemenu'));
+            redirect(site_url('ManageMenu'));
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('managemenu'));
+            redirect(site_url('ManageMenu'));
         }
     }
 
@@ -182,7 +182,7 @@ class ManageMenu extends CI_Controller
         xlsWriteLabel($tablehead, $kolomhead++, "Is Main Menu");
         xlsWriteLabel($tablehead, $kolomhead++, "Is Aktif");
 
-	foreach ($this->ManageMenu_Model->get_all() as $data) {
+	foreach ($this->ManageMenu_model->get_all() as $data) {
         $kolombody = 0;
 
         //ubah xlsWriteLabel menjadi xlsWriteNumber untuk kolom numeric
@@ -207,7 +207,7 @@ class ManageMenu extends CI_Controller
         header("Content-Disposition: attachment;Filename=tbl_menu.doc");
 
         $data = array(
-            'managemenu_data' => $this->ManageMenu_Model->get_all(),
+            'managemenu_data' => $this->ManageMenu_model->get_all(),
             'start' => 0
         );
         

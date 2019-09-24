@@ -30,7 +30,6 @@ class Whatsapp extends CI_Controller
         $this->client       = new GuzzleHttp\Client();
         $this->load->model('Milis_member_model');
         $this->load->model('Hotline_model');
-        $this->load->model('Contact_model');
         $this->startRes = time();
 
     }
@@ -78,38 +77,26 @@ class Whatsapp extends CI_Controller
             'createdby' => "API_",
         );
 
-        $dataContat = [
-            "name_wa"       => $data['pushName'],
-            "name_replace"  => $data['pushName'],
-            "phone"         => $data['phone'],
-            'group_hotline' => $data['receiver'],
-            'created'       => date("Y-m-d H:i:s"),
-            'createdby'     => "API_webhook",
-            'updated'       => date("Y-m-d H:i:s"),
-            'updatedby'     => "API_webhook",
-        ];
-
             $this->Inbox_model->insert($data);
-            $customer_name  = $this->Contact_model->insert_update($dataContat);
-            $dataHotline    = $this->Inbox_model->get_hotline($data['phone']);
+            $dataHotline = $this->Inbox_model->get_hotline($data['phone']);
             if (!empty($dataHotline)) {
                 if ($dataHotline->flag_status == 1) {
-                //     $messageArr = explode(" ", $this->input->post('message',TRUE));
-                //     $name  = end($messageArr);
-                //     // echo end($messageArr);die();
-                //     $insHotline = array(
-                //         'customer_phone' => $this->input->post('phone',TRUE),
-                //         'message'       => $this->input->post('message',TRUE),
-                //         'created'       => date("Y-m-d H:i:s"),
-                //         'message_id'	=> $data['message_id'],
-                //         'group_hotline'	=> $data['receiver'],
-                //         'createdby'     => "API_WABLAS",
-                //         'flag_status'   => "2",
-                //     );
-                //     $this->Inbox_model->insertHotline($insHotline);
-                //     echo "Terimakasih infonya \napa yang bisa kami bantu ?";
+                    $messageArr = explode(" ", $this->input->post('message',TRUE));
+                    $name  = end($messageArr);
+                    // echo end($messageArr);die();
+                    $insHotline = array(
+                        'customer_phone' => $this->input->post('phone',TRUE),
+                        'message'       => $this->input->post('message',TRUE),
+                        'created'       => date("Y-m-d H:i:s"),
+                        'message_id'	=> $data['message_id'],
+                        'group_hotline'	=> $data['receiver'],
+                        'createdby'     => "API_WABLAS",
+                        'flag_status'   => "2",
+                    );
+                    $this->Inbox_model->insertHotline($insHotline);
+                    echo "Terimakasih infonya \napa yang bisa kami bantu ?";
 
-                // } elseif ($dataHotline->flag_status == 2) {
+                } elseif ($dataHotline->flag_status == 2) {
                     $insHotline = array(
                         'customer_phone' => $this->input->post('phone',TRUE),
                         'message'       => $this->input->post('message',TRUE),
@@ -148,8 +135,7 @@ class Whatsapp extends CI_Controller
                     $this->Inbox_model->insertHotline($insHotline);
 
                     $dataHotline = $this->Inbox_model->get_hotline($data['phone']);
-                    $insHotline['username'] = "Customer - " .  $customer_name;
-                    $insHotline['username_title'] = $customer_name;
+                    $insHotline['username'] = "Customer";
                     // echo "balas";
                     if (!empty($this->input->post('image'))) {
                         $insHotline['image']    = "https://simo.wablas.com/image/".$this->input->post('image',TRUE);                        
@@ -177,9 +163,7 @@ class Whatsapp extends CI_Controller
                         'flag_status'   => "1",
                     );
                     $this->Inbox_model->insertHotline($insHotline);
-
-                    $timeStr = $this->parsingTime(date("H"));
-                    echo $timeStr.", kami dari ".$this->config->item('wa_company_name')." \napa yang bisa kami bantu ?";
+                    echo "Selamat pagi, kami dari ".$this->config->item('wa_company_name')." \nMohon info nama anda : ";
                 // }
 
             }
@@ -337,7 +321,7 @@ class Whatsapp extends CI_Controller
         //         "form_error" => $this->form_validation->error_array(),
         //     ]);die();
         // } else {
-        $data = array(
+            $data = array(
             // 'header_id' => $this->input->post('header_id',TRUE),
             'from_num' => $this->config->item('keys')[0]['numbers'],
             'dest_num' => $this->input->post('noPhone',TRUE),
@@ -592,23 +576,6 @@ class Whatsapp extends CI_Controller
           }
 
         return false;
-    }
-
-
-    public function parsingTime($dateParam) {
-        $date =  intval($dateParam);
-        $timeSting = "";
-        if ($date < 10) {
-            $timeSting = "Selamat pagi";
-        } elseif($date < 15){
-            $timeSting = "Selamat siang";
-        }  elseif($date < 18){
-            $timeSting = "Selamat sore";
-        } else {
-            $timeSting = "Selamat malam";
-        }
-
-        return $timeSting;
     }
 
     function Loging($name,$param){
