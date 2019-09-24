@@ -16,7 +16,7 @@ class ManageUser extends CI_Controller
 
     public function index()
     {
-        $this->template->load('template','manageuser/manageuser_list');
+        $this->template->load('template','ManageUser/ManageUser_list');
     } 
     
     public function json() {
@@ -38,10 +38,10 @@ class ManageUser extends CI_Controller
             'id_user_level' => $row->id_user_level,
             'is_aktif'      => $row->is_aktif,
 	        );
-            $this->template->load('template','manageuser/manageuser_read', $data);
+            $this->template->load('template','ManageUser/ManageUser_read', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('manageuser'));
+            redirect(site_url('ManageUser'));
         }
     }
 
@@ -49,7 +49,7 @@ class ManageUser extends CI_Controller
     {
         $data = array(
             'button'        => 'Create',
-            'action'        => site_url('manageuser/create_action'),
+            'action'        => site_url('ManageUser/create_action'),
             'id_users'      => set_value('id_users'),
             'full_name'     => set_value('full_name'),
             'phone'         => set_value('phone'),
@@ -59,7 +59,7 @@ class ManageUser extends CI_Controller
             'id_user_level' => set_value('id_user_level'),
             'is_aktif'      => set_value('is_aktif'),
 	    );
-        $this->template->load('template','manageuser/manageuser_form', $data);
+        $this->template->load('template','ManageUser/ManageUser_form', $data);
     }
     
     
@@ -86,7 +86,7 @@ class ManageUser extends CI_Controller
 
             $this->ManageUser_model->insert($data);
             $this->session->set_flashdata('message', 'Create Record Success');
-            redirect(site_url('manageuser'));
+            redirect(site_url('ManageUser'));
         }
     }
     
@@ -97,7 +97,7 @@ class ManageUser extends CI_Controller
         if ($row) {
             $data = array(
                 'button'        => 'Update',
-                'action'        => site_url('manageuser/update_action'),
+                'action'        => site_url('ManageUser/update_action'),
                 'id_users'      => set_value('id_users', $row->id_users),
                 'full_name'     => set_value('full_name', $row->full_name),
                 'email'         => set_value('email', $row->email),
@@ -107,10 +107,10 @@ class ManageUser extends CI_Controller
                 'id_user_level' => set_value('id_user_level', $row->id_user_level),
                 'is_aktif'      => set_value('is_aktif', $row->is_aktif),
             );
-            $this->template->load('template','manageuser/manageuser_form', $data);
+            $this->template->load('template','ManageUser/ManageUser_form', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('manageuser'));
+            redirect(site_url('ManageUser'));
         }
     }
     
@@ -143,7 +143,7 @@ class ManageUser extends CI_Controller
 
             $this->ManageUser_model->update($this->input->post('id_users', TRUE), $data);
             $this->session->set_flashdata('message', 'Update Record Success');
-            redirect(site_url('manageuser'));
+            redirect(site_url('ManageUser'));
         }
     }
     
@@ -166,10 +166,10 @@ class ManageUser extends CI_Controller
         if ($row) {
             $this->ManageUser_model->delete($id);
             $this->session->set_flashdata('message', 'Delete Record Success');
-            redirect(site_url('manageuser'));
+            redirect(site_url('ManageUser'));
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('manageuser'));
+            redirect(site_url('ManageUser'));
         }
     }
 

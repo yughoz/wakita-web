@@ -16,7 +16,7 @@ class ManageUserLevel extends CI_Controller
 
     public function index()
     {
-        $this->template->load('template','manageuserlevel/manageuserlevel_list');
+        $this->template->load('template','ManageUserLevel/ManageUserLevel_list');
     } 
     
     public function json() {
@@ -32,17 +32,17 @@ class ManageUserLevel extends CI_Controller
                 'id_user_level' => $row->id_user_level,
                 'nama_level' => $row->nama_level,
 	        );
-            $this->template->load('template','manageuserlevel/manageuserlevel_read', $data);
+            $this->template->load('template','ManageUserLevel/ManageUserLevel_read', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('manageuserlevel'));
+            redirect(site_url('ManageUserLevel'));
         }
     }
     
     function akses(){
         $data['level'] = $this->db->get_where('tbl_user_level',array('id_user_level'=>  $this->uri->segment(3)))->row_array();
         $data['menu'] = $this->db->get('tbl_menu')->result();
-        $this->template->load('template','manageuserlevel/akses',$data);
+        $this->template->load('template','ManageUserLevel/ManageUserLevel_akses',$data);
     }
     
     function kasi_akses_ajax(){
@@ -65,11 +65,11 @@ class ManageUserLevel extends CI_Controller
     {
         $data = array(
             'button' => 'Create',
-            'action' => site_url('manageuserlevel/create_action'),
+            'action' => site_url('ManageUserLevel/create_action'),
             'id_user_level' => set_value('id_user_level'),
             'nama_level' => set_value('nama_level'),
         );
-        $this->template->load('template','manageuserlevel/manageuserlevel_form', $data);
+        $this->template->load('template','ManageUserLevel/ManageUserLevel_form', $data);
     }
     
     public function create_action() 
@@ -85,7 +85,7 @@ class ManageUserLevel extends CI_Controller
 
             $this->ManageUserLevel_model->insert($data);
             $this->session->set_flashdata('message', 'Create Record Success');
-            redirect(site_url('manageuserlevel'));
+            redirect(site_url('ManageUserLevel'));
         }
     }
     
@@ -96,14 +96,14 @@ class ManageUserLevel extends CI_Controller
         if ($row) {
             $data = array(
                 'button' => 'Update',
-                'action' => site_url('manageuserlevel/update_action'),
+                'action' => site_url('ManageUserLevel/update_action'),
 		        'id_user_level' => set_value('id_user_level', $row->id_user_level),
 		        'nama_level' => set_value('nama_level', $row->nama_level),
 	        );
-            $this->template->load('template','manageuserlevel/manageuserlevel_form', $data);
+            $this->template->load('template','ManageUserLevel/ManageUserLevel_form', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('manageuserlevel'));
+            redirect(site_url('ManageUserLevel'));
         }
     }
     
@@ -120,7 +120,7 @@ class ManageUserLevel extends CI_Controller
 
             $this->ManageUserLevel_model->update($this->input->post('id_user_level', TRUE), $data);
             $this->session->set_flashdata('message', 'Update Record Success');
-            redirect(site_url('manageuserlevel'));
+            redirect(site_url('ManageUserLevel'));
         }
     }
     
@@ -131,10 +131,10 @@ class ManageUserLevel extends CI_Controller
         if ($row) {
             $this->ManageUserLevel_model->delete($id);
             $this->session->set_flashdata('message', 'Delete Record Success');
-            redirect(site_url('manageuserlevel'));
+            redirect(site_url('ManageUserLevel'));
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
-            redirect(site_url('manageuserlevel'));
+            redirect(site_url('ManageUserLevel'));
         }
     }
 
@@ -194,7 +194,7 @@ class ManageUserLevel extends CI_Controller
             'start' => 0
         );
         
-        $this->load->view('manageuserlevel/tbl_user_level_doc',$data);
+        $this->load->view('ManageUserLevel/tbl_user_level_doc',$data);
     }
 
 }

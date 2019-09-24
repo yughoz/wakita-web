@@ -11,7 +11,7 @@
                     </div>
 
                     <div class="box-body">
-                        <?php echo form_open('managemenu/simpan_setting')?>
+                        <?php echo form_open('ManageMenu/simpan_setting')?>
                         <table class="table table-bordered">
                             <tr><td width="250">Display Menu By Level</td><td>
                                     
@@ -37,9 +37,9 @@
 
                     <div class="box-body">
                         <div style="padding-bottom: 10px;"'>
-                            <?php echo anchor(site_url('managemenu/create'), '<i class="fa fa-wpforms" aria-hidden="true"></i> Add Data', 'class="btn btn-danger btn-sm"'); ?>
-                            <?php //echo anchor(site_url('managemenu/excel'), '<i class="fa fa-file-excel-o" aria-hidden="true"></i> Export Ms Excel', 'class="btn btn-success btn-sm"'); ?>
-                            <?php //echo anchor(site_url('managemenu/word'), '<i class="fa fa-file-word-o" aria-hidden="true"></i> Export Ms Word', 'class="btn btn-primary btn-sm"'); ?></div>
+                            <?php echo anchor(site_url('ManageMenu/create'), '<i class="fa fa-wpforms" aria-hidden="true"></i> Add Data', 'class="btn btn-danger btn-sm"'); ?>
+                            <?php //echo anchor(site_url('ManageMenu/excel'), '<i class="fa fa-file-excel-o" aria-hidden="true"></i> Export Ms Excel', 'class="btn btn-success btn-sm"'); ?>
+                            <?php //echo anchor(site_url('ManageMenu/word'), '<i class="fa fa-file-word-o" aria-hidden="true"></i> Export Ms Word', 'class="btn btn-primary btn-sm"'); ?></div>
                         <table class="table table-bordered table-striped" id="mytable">
                             <thead>
                                 <tr>
@@ -94,7 +94,7 @@
             },
             processing: true,
             serverSide: true,
-            ajax: {"url": "managemenu/json", "type": "POST"},
+            ajax: {"url": "ManageMenu/json", "type": "POST"},
             columns: [
                 {
                     "data": "id_menu",
