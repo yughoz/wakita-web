@@ -24,17 +24,30 @@ class Hotline_model extends CI_Model
         $this->datatables->add_column('action', '<a href="#" class="btn btn-danger btn-sm" onclick="editModal($1);return false;"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> </a>'. ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf($1);return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', 'id');
         return $this->datatables->generate();
     }
+
     // datatables
     function group_json($where = []) {
-        $this->db->select('max(id),id,customer_phone,message,flag_status,created,createdby,image_name,group_hotline'); 
+        $this->db->select('max(vw_group_milis.id),vw_group_milis.id,customer_phone,message,flag_status,vw_group_milis.created,vw_group_milis.createdby,vw_group_milis.group_hotline,image_name,name_replace as username_title');  
         // $this->db->from('hotline');
         $this->db->where($where);
         $this->db->group_by('customer_phone');
-        $this->db->order_by('id', 'DESC');
-        // $this->db->order_by('flag_status', 'ASC');
-
+        $this->db->order_by('vw_group_milis.id', 'DESC'); 
+        // $this->db->order_by('flag_status', 'ASC'); 
+        $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
         return $this->db->get('vw_group_milis')->result();
-    }
+    } 
+
+
+    // function group_json($where = []) {
+    //     $this->db->select('max(id),id,customer_phone,message,flag_status,created,createdby,image_name,group_hotline'); 
+    //     // $this->db->from('hotline');
+    //     $this->db->where($where);
+    //     $this->db->group_by('customer_phone');
+    //     $this->db->order_by('id', 'DESC');
+    //     // $this->db->order_by('flag_status', 'ASC');
+
+    //     return $this->db->get('vw_group_milis')->result();
+    // }
     // datatables
     
     function detail_list($where,$start) {
@@ -48,7 +61,6 @@ class Hotline_model extends CI_Model
 
         return $this->db->get($this->table)->result();
     }
-    
     function count_all($where) {
         // $this->db->select($this->table.".*,tbl_user.full_name as username");
         // $this->db->from('hotline');
@@ -83,12 +95,12 @@ class Hotline_model extends CI_Model
     // get total rows
     function total_rows($q = NULL) {
         $this->db->like('id', $q);
-	$this->db->or_like('customer_phone', $q);
-	$this->db->or_like('message', $q);
-	$this->db->or_like('flag_status', $q);
-	$this->db->or_like('created', $q);
-	$this->db->or_like('createdby', $q);
-	$this->db->from($this->table);
+    	$this->db->or_like('customer_phone', $q);
+    	$this->db->or_like('message', $q);
+    	$this->db->or_like('flag_status', $q);
+    	$this->db->or_like('created', $q);
+    	$this->db->or_like('createdby', $q);
+    	$this->db->from($this->table);
         return $this->db->count_all_results();
     }
 
