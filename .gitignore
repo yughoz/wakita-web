@@ -1,6 +1,8 @@
 .DS_Store
 
 application/cache/*
+assets/foto_wa/*
+assets/doc_wa/*
 !application/cache/index.html
 !application/cache/.htaccess
 
