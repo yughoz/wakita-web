@@ -95,6 +95,13 @@ class Milis_model extends CI_Model
         return $data;
     }
 
+    function get_all_where($where)
+    {
+        $this->db->order_by($this->id, 'asc');
+        $this->db->where($where);
+        return $this->db->get($this->table)->result();
+    }
+
 }
 
 /* End of file Milis_model.php */

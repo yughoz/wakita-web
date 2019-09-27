@@ -8,6 +8,7 @@ Class Auth extends CI_Controller{
         date_default_timezone_set('Asia/Jakarta');
         $this->load->model('Milis_member_model');
         $this->load->model('Milis_model');
+        $this->config->load('companyProfile');
     }
     
     function index(){
@@ -51,6 +52,7 @@ Class Auth extends CI_Controller{
                 $this->session->set_userdata($user);
                 $data['response']   = 'success';
                 $data['data']       =   $user ;
+                $data['data']['company_name'] = $this->config->item('wa_company_name');
                 $data['dataHotline']=   $dataHotlineDetail ;
                 echo json_encode($data);
                 // redirect('welcome');

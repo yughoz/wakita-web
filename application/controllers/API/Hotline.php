@@ -1,4 +1,3 @@
-
 <?php
 
 if (!defined('BASEPATH'))
@@ -13,7 +12,7 @@ class Hotline extends CI_Controller
         date_default_timezone_set('Asia/Jakarta');
         $this->load->model('Hotline_model');
         $this->load->library('form_validation');        
-	    $this->load->library('datatables');
+        $this->load->library('datatables');
         $this->load->model('Milis_member_model');
         $this->load->model('Milis_model');
 
@@ -23,19 +22,35 @@ class Hotline extends CI_Controller
     {
         header('Content-Type: application/json');
         $where = [
-            "group_hotline" =>$this->input->post('group_hotline',TRUE),
+            "vw_group_milis.group_hotline" =>$this->input->post('group_hotline',TRUE),
             "flag_status >" => "2"
         ];
-        $datas = $this->Hotline_model->group_json($where);
-        $dataNew = [];
-        $dataTemp =[];
-        $countTemp = 0;
+        $datas          =   $this->Hotline_model->group_json($where);
+        $dataNew        =   []  ;
+        $dataTemp       =   []  ;
+        $countTemp      =   0   ;
+        $strLengtLabel  =   13  ;
+        $strLengtMsg    =   30  ;
+
         foreach ($datas as $key => $value) {
+            if (empty($value->username_title) ) {
+                $value->username_title      = "+".$value->customer_phone;
+                $value->username_title_sort = "+".$value->customer_phone;
+                $value->username_num        = "";
+                // $dataTemp[$countTemp]->username = "312";
+            } else {
+                $value->full_name       = $value->username_title;
+                $moreStr = strlen($value->username_title) > $strLengtLabel ? "..." : ""; 
+                // $value->username_title_sort  = substr($value->username_title, 0, $strLengtLabel ).$moreStr; 
+                $value->username_title_sort  = $value->username_title_sort.$moreStr; 
+                $value->username_num    = "+".$value->customer_phone;
+                // $value->username = $value->username." +".$value->customer_phone."";
+            }
+
             if ($value->flag_status == "3") {
                 $value->dateParse = $this->getDate($value->created);
                 $dataNew[]        = $value;
             } else {
-
                 $dataTemp[$countTemp] = $value;
                 if (!empty($value->image_name)) {
                     $dataTemp[$countTemp]->message = "Photo";
@@ -48,9 +63,15 @@ class Hotline extends CI_Controller
                     $dataTemp[$countTemp]->statusColor  = "#cfcdcc";
                 }
 
-                $dataTemp[$countTemp]->message   = str_replace("\n", " ", $dataTemp[$countTemp]->message);
+
+                $moreStr = strlen($dataTemp[$countTemp]->message) >= $strLengtMsg ? "...." : ""; 
+                // $value->username_title  = substr($value->username_title, 0, $strLengtMsg ).$moreStr;
+
+                // $dataTemp[$countTemp]->message   =  str_replace("\n", " ", $dataTemp[$countTemp]->message);
+                // $dataTemp[$countTemp]->message   =  substr($dataTemp[$countTemp]->message, 0, $strLengtMsg ).$moreStr;
+                $dataTemp[$countTemp]->message   =  str_replace("\n", " ", $dataTemp[$countTemp]->message).$moreStr;
                 
-                $dataTemp[$countTemp]->dateParse =$this->getDate($value->created);
+                $dataTemp[$countTemp]->dateParse =  $this->getDate($value->created);
 
                 $countTemp++;
             }
@@ -93,20 +114,34 @@ class Hotline extends CI_Controller
         header('Content-Type: application/json');
          $whereArr = array(
             'customer_phone'    => $this->input->post('customer_phone',TRUE),
-            'group_hotline'     => $this->input->post('group_hotline',TRUE),
+            'hotline.group_hotline'     => $this->input->post('group_hotline',TRUE),
         );
         $startFrom = $this->input->post('start',TRUE);
         $datas =  $this->Hotline_model->detail_list($whereArr,$startFrom);
         $count =  $this->Hotline_model->count_all($whereArr);
         foreach ($datas as $key => $value) {
             if (!empty($value->image_name)) {
-            	$datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
+                // $datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
+                $datas[$key]->image	= base_url("API/DirectLink/file/")."image/".$value->image_name;
             }
             if ($value->createdby == "API_WABLAS") {
-                $datas[$key]->username = "Customer";
+                $datas[$key]->username = "Customer - ".$value->username_title;
                 if (!empty($value->image_name)) {
-                    $datas[$key]->image = "https://simo.wablas.com/image/".$value->image_name;
+                    $datas[$key]->image 		= base_url("API/DirectLink/file/")."image/".$value->image_name;
+                    $datas[$key]->extension 	= pathinfo($value->image_name, PATHINFO_EXTENSION);
                     // /$datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
+                }
+
+                if (!empty($value->video_name)) {
+                    $datas[$key]->video 		= base_url("API/DirectLink/file/")."video/".$value->video_name;
+                    $datas[$key]->extension 	= pathinfo($value->video_name, PATHINFO_EXTENSION);
+                    // /$datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
+                }
+
+                if (!empty($value->document_name)) {
+                    $datas[$key]->document_name = base_url("API/DirectLink/file/")."document/".$value->document_name;
+                    $datas[$key]->extension 	= pathinfo($value->document_name, PATHINFO_EXTENSION);
+                    // /$datas[$key]->image 	= base_url('assets/foto_wa')."/".$value->image_name;
                 }
 
             }
@@ -150,12 +185,12 @@ class Hotline extends CI_Controller
             ]);die();
         } else {
             $data = array(
-    		'customer_phone' => $this->input->post('customer_phone',TRUE),
-    		'message' => $this->input->post('message',TRUE),
-    		'flag_status' => $this->input->post('flag_status',TRUE),
-    		'created' => date("Y-m-d H:i:s"),
-    		'createdby' => $this->session->userdata('email'),
-	    );
+            'customer_phone' => $this->input->post('customer_phone',TRUE),
+            'message' => $this->input->post('message',TRUE),
+            'flag_status' => $this->input->post('flag_status',TRUE),
+            'created' => date("Y-m-d H:i:s"),
+            'createdby' => $this->session->userdata('email'),
+        );
 
             $this->Hotline_model->insert($data);
             echo json_encode([
@@ -179,12 +214,12 @@ class Hotline extends CI_Controller
             ]);die();
         } else {
             $data = array(
-    		'customer_phone' => $this->input->post('customer_phone',TRUE),
-    		'message' => $this->input->post('message',TRUE),
-    		'flag_status' => $this->input->post('flag_status',TRUE),
-    		'created' => $this->input->post('created',TRUE),
-    		'createdby' => $this->input->post('createdby',TRUE),
-	    );
+            'customer_phone' => $this->input->post('customer_phone',TRUE),
+            'message' => $this->input->post('message',TRUE),
+            'flag_status' => $this->input->post('flag_status',TRUE),
+            'created' => $this->input->post('created',TRUE),
+            'createdby' => $this->input->post('createdby',TRUE),
+        );
 
             $this->Hotline_model->update($this->input->post('id', TRUE), $data);
             echo json_encode([
@@ -238,12 +273,12 @@ class Hotline extends CI_Controller
 
     public function _rules() 
     {
-	$this->form_validation->set_rules('customer_phone', 'customer phone', 'trim|required');
-	$this->form_validation->set_rules('message', 'message', 'trim|required');
-	$this->form_validation->set_rules('flag_status', 'flag status', 'trim|required');
+        $this->form_validation->set_rules('customer_phone', 'customer phone', 'trim|required');
+        $this->form_validation->set_rules('message', 'message', 'trim|required');
+        $this->form_validation->set_rules('flag_status', 'flag status', 'trim|required');
 
-	$this->form_validation->set_rules('id', 'id', 'trim');
-	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
+        $this->form_validation->set_rules('id', 'id', 'trim');
+        $this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
     }
 
 }
