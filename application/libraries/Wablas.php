@@ -23,11 +23,16 @@ class Wablas
      */
     const sendgrid_host         = 'smtp.sendgrid.net';
     const sendgrid_port         = 587; //25, 456 , 587
-    const wablas_url            = 'https://simo.wablas.com/api';
-    const wablas_url_message    = self::wablas_url.'/send-message';
-    const wablas_url_image      = self::wablas_url.'/send-image';
-    const wablas_url_video      = self::wablas_url.'/send-video';
-    const wablas_url_document   = self::wablas_url.'/send-document';
+    const wablas_url            = 'https://simo.wablas.com/';
+    const wablas_url_qrcode     = self::wablas_url.'generate/qr.php?url=aHR0cHM6Ly9zaW1vLndhYmxhcy5jb20&';
+    const wablas_url_message    = self::wablas_url.'api/send-message';
+    const wablas_url_image      = self::wablas_url.'api/send-image';
+    const wablas_url_video      = self::wablas_url.'api/send-video';
+    const wablas_url_document   = self::wablas_url.'api/send-document';
+    const path_wablas_image     = self::wablas_url.'image/';
+    const path_wablas_video     = self::wablas_url.'video/';
+    const path_wablas_document  = self::wablas_url.'document/';
+
     const fcm_url               = 'https://fcm.googleapis.com';
     const fcm_url_send          = self::fcm_url.'/fcm/send';
     const fcm_server_key        = 'AIzaSyC3rX7bePdEZnRLZJ_asuCdBEDqp6BrFUI';
@@ -35,6 +40,7 @@ class Wablas
     const path_image            = 'assets/foto_wa/';
     const path_video            = 'assets/video_wa/';
     const path_document         = 'assets/document_wa/';
+    
     
     /**
      * constructor
@@ -60,6 +66,14 @@ class Wablas
 
         // $this->_ci->config->load('apiwha');
         // $this->url          = $this->_ci->config->item('APIWeb');
+    }
+
+    public function globalvariable($variable){
+        switch ($variable){
+            case "path_image": return self::path_image; break;
+            case "path_video": return self::path_video; break;
+            case "path_document": return self::path_document; break;
+        }
     }
 
     public function _sendSendgrid($to = null, $subject = null, $message = null, $attach = null)
@@ -160,161 +174,204 @@ class Wablas
             
             $status_code    = $response->getStatusCode(); // 200
             $body           =  json_decode($response->getBody(),true);
-            
-            $dataInsert = [
-                'status'        => $body['status'],//
-                'message'       => $body['message'],
-                'quota'         => $body['data']['quota'],
-                'status_code'   => $status_code,
-                //'response'      => $response,
-                'created'       => date("Y-m-d H:i:s"),
-                'createdby'     => $array['session_email'],
-            ];
-           
-            $id     = $this->_ci->Send_message_detail_model->insert_header($dataInsert);
+            // print_r($body);
+            // die();
 
-            foreach ($body['data']['message'] as $key => $value) {
-                $data = array(
-                    'header_id'     => $id,
-                    'from_num'      => $array['hotline'],
-                    'dest_num'      => $value['phone'],
-                    'message_id'    => $value['id'],
-                    'status'        => $value['status'],
-                    'created'       => date("Y-m-d H:i:s"),
-                    'createdby'     => $array['session_email'],
-                    'updated'       => date("Y-m-d H:i:s"),
-                    'updatedby'     => $array['session_email'],
-                );
-                 switch ($array['type']){
-                    case 'text': 
-                        $data['message_text'] = $value['text'];
-                        break;
-                    case 'image':
-                        $data['message_text']   = $value['caption'];
-                        $data['message_image']  = '';
-                        $data['doc_name']       = '';
-                        break;
-                    case 'video':
-                        $data['message_text']   = $value['caption'];
-                        $data['message_image']  = '';
-                        $data['doc_name']       = '';
-                        break;
-                    case 'document':
-                        $data['message_text']   = $value['caption'];
-                        $data['message_image']  = '';
-                        $data['doc_name']       = '';
-                        break;
-                }
+            $get_id     = $this->insert_header_message_detail($array, $body, $status_code);
+            $this->update_hotline($array, $body, $get_id);
+            $status1    = $this->update_message_detail($array, $body);
+            $status2    = $this->sendSocket($array, $body);
+            $status3    = $this->sendFCM($array, $body);
 
-                $this->_ci->Send_message_detail_model->insert($data);
-            }
-
-            $insert2 = array(
-                'customer_phone'    => $array['phone'],
-                'message'           => $array['caption'],
-                'created'           => date("Y-m-d H:i:s"),
-                'message_id'	    => $body['data']['message'][0]['id'],
-                'group_hotline'	    => $array['hotline'],
-                'createdby'         => $array['session_email'],
-                'user_phone'        => $array['session_userphone'],
-                'flag_status'       => "5",
-            );
-            // echo json_encode($body);
-
-            if($this->updatestatus_wablas($insert2, $array['session_username']) == true){
+            if($status1 == true && $status2 == true && $status3 == true){
                 return true;
             }else{
                 return false;
             }
         } catch (GuzzleHttp\Exception\BadResponseException $e) {
-            $response = $e->getResponse();
-            $responseBodyAsString = $response->getBody()->getContents();
+            $response               = $e->getResponse();
+            $responseBodyAsString   = $response->getBody()->getContents();
             // print_r($responseBodyAsString);
+            //print_r($e);
             return false;
         }
-        return array("status"=>false, "result" => "failed");
     }
 
-    private function updatestatus_wablas($array, $session_username){
+    private function insert_header_message_detail($array, $body, $status_code ){
+        $insert = [
+            'status'        => $body['status'],
+            'message'       => $body['message'],
+            'quota'         => $body['data']['quota'],
+            'status_code'   => $status_code,
+            //'response'      => $response,
+            'created'       => date("Y-m-d H:i:s"),
+            'createdby'     => $array['session_email'],
+        ];
+       
+        return $this->_ci->Send_message_detail_model->insert_header($insert);
+    }
+
+    private function update_hotline($array, $body, $id){
+        foreach ($body['data']['message'] as $key => $value) {
+            $data = array(
+                'header_id'     => $id,
+                'from_num'      => $array['hotline'],
+                'dest_num'      => $value['phone'],
+                'message_id'    => $value['id'],
+                'message_text'  => !empty($value['text']) ? $value ['text'] : $value ['caption'] ?? "",
+                'message_image' => $value['image'] ?? "",
+                'document_name' => $value['document'] ?? "",
+                'video_name'    => $value['video'] ?? "",
+                'status'        => $value['status'],
+                'created'       => date("Y-m-d H:i:s"),
+                'createdby'     => $array['session_email'],
+                'updated'       => date("Y-m-d H:i:s"),
+                'updatedby'     => $array['session_email'],
+            );
+
+            $this->_ci->Send_message_detail_model->insert($data);
+        }
+    }
+
+    private function update_message_detail($array, $body){
+
+        $value = $body['data']['message'][0];
+        try{
+            $data = array(
+                'created'           => date("Y-m-d H:i:s"),
+                'createdby'         => $array['session_email'],
+                'customer_phone'    => $array['phone'],
+                'user_phone'        => $array['session_userphone'],
+                'message'           => !empty($value['text']) ? $value ['text'] : $value ['caption'] ?? "",
+                'image_name'        => $value ['image'] ?? "",
+                'video_name'        => $value ['video'] ?? "",
+                'document_name'     => $value ['document'] ?? "", 
+                'message_id'	    => $value ['id'] ?? "", 
+                'group_hotline'	    => $array['hotline'],
+                'flag_status'       => "4",
+            );
+            $this->_ci->Inbox_model->insertHotline($data);
+            return true;
+        }catch(Exception $e){
+            //print_r("umd => ".$e);
+            return false;
+        }
+    }
+
+    private function sendSocket($array, $body){
+        
+        $value = $body['data']['message'][0];
+        $data = array(
+            'created'           => date("Y-m-d H:i:s"),
+            'createdby'         => $array['session_email'],
+            'user_send_phone'   => "6281299898515",	//<-- user yang kirim  bisa customer / cs/admin
+            'user_send_title'   => "fafa",		//<-- user yang kirim  bisa customer / cs/admin
+            'user_send_username'=> "baba",		//<-- user yang kirim  bisa customer / cs/admin klo customer ditambah customer di depan
+            'customer_phone'    => $array['phone'],
+            'customer_title'    => "",		        //<-- customer title
+            'customer_username' => "",		        //<-- customer title ditambah customer di depan
+            'file'              => $value ['document'] ?? "",
+            'fileUrl'           => !empty($value ['document']) ? base_url().'API/DirectLink/file/document/'.$value ['document'] :"",
+            'flag_status'       => "4",
+            'group_hotline'     => $array['hotline'],
+            'image'             => $value ['image'] ?? "",
+            'imageUrl'          => !empty($value ['image']) ? base_url().'API/DirectLink/file/image/'.$value ['image'] :"",
+            'image_name'        => $value ['image'] ?? "",
+            'message'           => $array['caption'],
+            'message_id'        => $value ['id'],
+            'username_phone'    => $array['session_userphone'],
+            'username_user'     => $array['session_username'],	//<-- username yang login
+            'username_title'    => 'Reza',
+            'video'             => $value ['video'] ?? "",
+            'videoUrl'          => !empty($value ['video']) ? base_url().'API/DirectLink/file/video/'.$value ['video'] :"",
+            'destination'       => 'outbox',
+            'type'              => ''			//<--- type file gif|jpg|png|jpeg|mp4|mpeg|doc|docx|pdf|odt|csv|ppt|pptx|xls|xlsx|mp3|ogg|
+        );
+        // print_r($data);
+
+        if(!empty($value ['image'])){
+            $data['type'] = pathinfo($value ['image'])['extension'];
+
+        }else if(!empty($value ['video'])){
+            $data['type'] = pathinfo($value ['video'])['extension'];
+        }else if(!empty($value ['document'])){
+            $data['type'] = pathinfo($value ['document'])['extension'];
+        }else{
+            $data['type'] = "php";
+        }
 
         try{
-            $this->_ci->Inbox_model->insertHotline($array);
-            $array['username'] = $session_username;
     
-            $this->sendSocket($array);
-            $this->sendFCM($array);
-
+            $client = new Client(new Version1X(self::socket_url));
+            $client->initialize();
+            // send message to connected clients
+            $client->emit('post_key', 
+                                    [
+                                        'socket_session'    => '', 
+                                        'id_account'        => $data['customer_phone'], 
+                                        'datas'             => json_encode($data)
+                                    ]
+                            );
+            $client->emit('sendWA', 
+                                    [
+                                        'socket_session'    => '', 
+                                        'id_account'        => $data['group_hotline'], 
+                                        'datas'             => json_encode($data)]
+                            );
+            $client->close();
             return true;
-        }catch (Exception $e){
+        }catch(Exception $e){
+            //print_r("sendSocket => ".$e);
             return false;
         }
-        
     }
 
-    private function sendFCM($data){
-        $data = json_encode([
-            'to'            =>'/topics/'.$data['group_hotline'],
-            'priority'      =>'high',
-            "notification"  => [
-                "body"  => $data['message'],
-                "title" => $data['customer_phone'],
-                "icon"  => "ic_launcher"
-            ],
-            "data" => $data
-        ]);
-       
-        $headers = array(
-            'Content-Type:application/json',
-            'Authorization:key='.self::fcm_server_key
+    private function sendFCM($array, $body){
+
+        $data = array(
+            'created'           => date("Y-m-d H:i:s"),
+            'createdby'         => $array['session_email'],
+            'customer_phone'    => $array['phone'],
+            'user_phone'        => $array['session_userphone'],
+            'message'           => $body['data']['message'][0]['caption'] ?? "",
+            'image_name'        => $body['data']['message'][0]['image'] ?? "",
+            'video_name'        => $body['data']['message'][0]['video'] ?? "",
+            'document_name'     => $body['data']['message'][0]['document'] ?? "", 
+            'message_id'	    => $body['data']['message'][0]['id'] ?? "", 
+            'group_hotline'	    => $array['hotline'],
+            'flag_status'       => "4",
+            'username'          => $array['session_username']
         );
-        //CURL request to route notification to FCM connection server (provided by Google)
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, self::fcm_url_send);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        $result = curl_exec($ch);
-        print_r($result);
-        // if ($result === FALSE) {
-        //     die('Oops! FCM Send Error: ' . curl_error($ch));
-        // }
-        // $this->Loging("send_fcm" , ["result"=>$result]);
-        curl_close($ch);
-        die();
 
-        // $response = $this->client->request( 'POST', self::fcm_url_send,
-        //                 [   
-        //                     'headers'       => ['Content-Type:application/json','Authorization:key='.self::fcm_server_key],
-        //                     'form_params'   => 
-        //                             array([
-        //                                 'to'            =>'/topics/'.$data['group_hotline'],
-        //                                 'priority'      =>'high',
-        //                                 "notification"  => [
-        //                                     "body"  => $data['message'],
-        //                                     "title" => $data['customer_phone'],
-        //                                     "icon"  => "ic_launcher"
-        //                                 ],
-        //                                 "data" => $data
-        //                             ])
-        //                 ]
-        //             );
-    }
-
-    private function sendSocket($data){
-        $client = new Client(new Version1X(self::socket_url));
-        $client->initialize();
-
-        // send message to connected clients
-        $client->emit('post_key', ['socket_session' => '', 'id_account' => $data['customer_phone'], 'datas' => json_encode($data)]);
-        $client->emit('sendWA', ['socket_session' => '', 'id_account' => $data['group_hotline'], 'datas' => json_encode($data)]);
-        $client->close();
+        try{
+            $response = $this->client->request( 
+                'POST', self::fcm_url_send,
+                [   
+                    'headers'   => ['Content-Type' => 'application/json','Authorization' => 'key='.self::fcm_server_key],
+                    'json'      => 
+                        [
+                            'to'            => '/topics/'.$data['group_hotline'],
+                            'priority'      => 'high',
+                            'notification'  => [
+                                                'body' => $data['message'],
+                                                'title' => $data['customer_phone'],
+                                                'icon' => 'ic_launcher'
+                                            ],
+                            'data'          => $data,
+                        ]
+                ]
+            );
+            return true;
+        } catch (GuzzleHttp\Exception\BadResponseException $e) {
+            $response               = $e->getResponse();
+            $responseBodyAsString   = $response->getBody()->getContents();
+            // print_r($responseBodyAsString);
+            //print_r("sendFcm => ".$e);
+            return false;
+        }
     }
 
     public function upload_file($type = '', $file = ''){
-
 
         $name = time().rand(100,999);
         if($type == 'image'){
@@ -333,13 +390,22 @@ class Wablas
             $config['file_name']        = 'document_'.$name;
         }
         
-        
         //$config['max_size']             = 100;
         //$config['max_width']            = 1024;
         //$config['max_height']           = 768;
         $this->_ci->load->library('upload', $config);
         $this->_ci->upload->do_upload($file);
         return $this->_ci->upload->data();
+    }
+
+    public function delete_file($path){
+        try{
+            $this->_ci->load->helper("file");
+            unlink($path);
+            return true;
+        }catch(Exception $e){
+            return false;
+        }
     }
     
 }
