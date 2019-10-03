@@ -27,7 +27,7 @@ class ManageChat_model extends CI_Model
     }
 
     function group_json($where = []) {
-        $this->db->select('max(id),id,customer_phone,message,flag_status,created,createdby,image_name,group_hotline'); 
+        $this->db->select('max(id),id,name_wa,name_replace,customer_phone,message,flag_status,created,createdby,image_name,group_hotline'); 
         // $this->db->from('hotline');
         $this->db->where($where);
         $this->db->group_by('customer_phone');

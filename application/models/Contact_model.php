@@ -71,6 +71,32 @@ class Contact_model extends CI_Model
         return $data['name_replace'];
     }
 
+    function insert_update_web($data)
+    {
+        $where = array(
+            "phone"         => $data["phone"],
+            "group_hotline" => $data["group_hotline"],
+        );
+        $this->db->select('*');
+        $this->db->where($where);//you can use another field
+        $dataContact = $this->db->get($this->table)->row();
+        if (!$dataContact) {
+            $query = $this->db->insert($this->table, $data);//insert data
+            echo $query;
+        } else {
+            $dataContact = [
+                "name_replace"       => $data['name_replace'],
+                'updated'       => date("Y-m-d H:i:s"),
+                'updatedby'     => "API_webhook",
+            ];
+            $this->db->where($where);
+            $this->db->update($this->table, $dataContact);
+            return $dataContact['name_replace'];
+        }
+
+        return $data['name_replace'];
+    }
+
     // get data by id
     function get_by($where)
     {

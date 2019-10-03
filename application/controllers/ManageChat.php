@@ -14,19 +14,23 @@ class ManageChat extends CI_Controller
         parent::__construct();
         is_login();
         date_default_timezone_set('Asia/Jakarta');
-            $this->load->model('Send_message_detail_model');
-            $this->load->model('ManageChat_model');
-            $this->load->model('ManageHotline_model');
+        $this->load->model('Send_message_detail_model');
+        $this->load->model('ManageChat_model');
+        $this->load->model('ManageHotline_model');
+        $this->load->model('Contact_model');
+        $this->load->model('Milis_member_model');
+        $this->load->model('Hotline_model');
+
         $this->load->library('form_validation');
         $this->load->library('datatables');
+
         $this->config->load('apiwha');
         $this->load->model('Inbox_model');
         
         $this->apiToken     = "";
         $this->url          = $this->config->item('APIWeb');
         $this->client       = new GuzzleHttp\Client();
-        $this->load->model('Milis_member_model');
-        $this->load->model('Hotline_model');
+        
         $this->startRes = time();
 
         $this->load->library('wablas');
@@ -66,6 +70,7 @@ class ManageChat extends CI_Controller
             'updated' => set_value(''),
             'updatedby' => set_value(''),
             'hotline' => $id,
+            'generateLink' => base_url().'API/DirectLink/file/'
         );
         $this->template->load('template','ManageChat/ManageChat_list_member', $data);
     }
@@ -112,7 +117,7 @@ class ManageChat extends CI_Controller
             'hotline.group_hotline'     => $hotline,
         );
         
-        $datas =  $this->ManageHotline_model->detail_list($whereArr, $start);
+        $datas =  array_reverse($this->ManageHotline_model->detail_list($whereArr, $start));
         $count =  $this->ManageHotline_model->count_all($whereArr);
         foreach ($datas as $key => $value) {
             if (!empty($value->image_name)) {
@@ -172,7 +177,32 @@ class ManageChat extends CI_Controller
             ]);
         }
         die();
+    }
 
+    public function saveContact(){
+        $dataContact = [
+            "name_wa"       => "",
+            "name_replace"  => $this->input->post('name',TRUE),
+            "phone"         => $this->input->post('phone',TRUE),
+            'group_hotline' => $this->input->post('hotline',TRUE),
+            'created'       => date("Y-m-d H:i:s"),
+            'createdby'     => $this->session->userdata('email'),
+            'updated'       => date("Y-m-d H:i:s"),
+            'updatedby'     => $this->session->userdata('email'),
+        ];
+
+        $customer_name  = $this->Contact_model->insert_update_web($dataContact);
+        if($customer_name){
+            echo json_encode([
+                "code"      => "success",
+                "value"   => $customer_name,
+            ]);
+        }else{
+            echo json_encode([
+                "code"      => "failed",
+                "value"   => $this->input->post('phone',TRUE)
+            ]);
+        }
     }
 
     public function manufacturer_list()
