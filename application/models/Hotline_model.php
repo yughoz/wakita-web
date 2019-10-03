@@ -27,13 +27,13 @@ class Hotline_model extends CI_Model
 
     // datatables
     function group_json($where = []) {
-        $this->db->select('max(vw_group_milis.id),vw_group_milis.id,customer_phone,SUBSTR(message, 1, 30) as message,flag_status,vw_group_milis.created,vw_group_milis.createdby,vw_group_milis.group_hotline,image_name,name_replace as username_title,SUBSTR(name_replace, 1, 14) as username_title_sort');  
+        $this->db->select('max(vw_group_milis.id),vw_group_milis.id,customer_phone,SUBSTR(message, 1, 30) as message,flag_status,vw_group_milis.created,vw_group_milis.createdby,vw_group_milis.group_hotline,image_name,name_replace as customer_title,SUBSTR(name_replace, 1, 14) as username_title_sort');  
         // $this->db->from('hotline');
         $this->db->where($where);
         $this->db->group_by('customer_phone');
         $this->db->order_by('vw_group_milis.id', 'DESC'); 
         // $this->db->order_by('flag_status', 'ASC'); 
-        $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
+        // $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
         return $this->db->get('vw_group_milis')->result();
     } 
 

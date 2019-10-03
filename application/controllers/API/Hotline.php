@@ -33,14 +33,14 @@ class Hotline extends CI_Controller
         $strLengtMsg    =   30  ;
 
         foreach ($datas as $key => $value) {
-            if (empty($value->username_title) ) {
-                $value->username_title      = "+".$value->customer_phone;
+            if (empty($value->customer_title) ) {
+                $value->customer_title      = "+".$value->customer_phone;
                 $value->username_title_sort = "+".$value->customer_phone;
                 $value->username_num        = "";
                 // $dataTemp[$countTemp]->username = "312";
             } else {
-                $value->full_name       = $value->username_title;
-                $moreStr = strlen($value->username_title) > $strLengtLabel ? "..." : ""; 
+                $value->full_name       = $value->customer_title;
+                $moreStr = strlen($value->customer_title) > $strLengtLabel ? "..." : ""; 
                 // $value->username_title_sort  = substr($value->username_title, 0, $strLengtLabel ).$moreStr; 
                 $value->username_title_sort  = $value->username_title_sort.$moreStr; 
                 $value->username_num    = "+".$value->customer_phone;
@@ -106,6 +106,27 @@ class Hotline extends CI_Controller
         }
         
         return 'yesterday';
+        
+    }
+
+    function getDevices($group_hotline)
+    {
+        $dataTemp = $this->Milis_model->get_all_where(["phone_number" => $group_hotline]);
+        // print_r($dataTemp);
+        if ($dataTemp) {
+            echo json_encode([
+                "code" => "success",
+                "data"  => [
+                            "device_name" => $dataTemp[0]->device_name
+                            ],
+                "message" => "",
+            ]);die();
+        } else {
+            echo json_encode([
+                "code" => "error",
+                "message" => "Record Not Found",
+            ]);die();
+        }
         
     }
 
@@ -255,6 +276,7 @@ class Hotline extends CI_Controller
             $row = [];
             foreach ($dataHotline as $key => $value) {
                 $dataTemp = $this->Milis_model->get_by_id($value->milis_id);
+                $dataTemp->hotline_name = $dataTemp->device_name ;
                 $dataTemp->group_hotline = $dataTemp->phone_number ;
                 $row[] = $dataTemp;
             }
