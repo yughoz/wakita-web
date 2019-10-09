@@ -14,6 +14,8 @@
         <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#myModal">Add Data</button>
         <button type="button" class="btn btn-danger btn-sm" id="refersh">Refersh</button>
         </div>
+        <div class="box-body table-responsive no-padding">
+        
         <table class="table table-bordered table-striped" id="mytable">
             <thead>
                 <tr>
@@ -30,6 +32,7 @@
             </thead>
 	    
         </table>
+        </div>
         </div>
                     </div>
             </div>

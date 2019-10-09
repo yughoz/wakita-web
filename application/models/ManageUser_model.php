@@ -13,6 +13,10 @@ class ManageUser_model extends CI_Model
     function __construct()
     {
         parent::__construct();
+        $this->dbServer = $this->load->database('server_admin', TRUE);
+        $this->load->library('wakitalib');
+        $this->config->load('companyProfile');
+
     }
 
     // datatables
@@ -106,6 +110,33 @@ class ManageUser_model extends CI_Model
         $this->db->insert($this->table, $data);
     }
 
+    // check data
+    function check_insert($param)
+    {
+        $pid = $this->wakitalib->get_pid_id('tbl_user',"MSUser",'id_users',1);
+        $data = [
+                'pid' => $pid,
+                'id_user_local' => $param['pid'],
+                'email' => $param['email'],
+                'phone' => $param['phone'],
+                'company_id'    => $this->config->item('company_id'),
+            ];
+        $this->dbServer->where('email', $param['email']);
+        $this->dbServer->or_where('phone', $param['phone']);
+        if (!empty($this->dbServer->get('ms_users')->row())) {
+            return false;
+        }
+        return $this->dbServer->insert("ms_users", $data);
+    }
+
+    function getMSuser($pid)
+    {
+        $this->dbServer->where('id_user_local', $pid);
+        // $this->dbServer->or_where('phone', $where['phone']);
+        return $this->dbServer->get('ms_users')->row();
+    }
+
+
     // update data
     function update($id, $data)
     {
@@ -113,11 +144,49 @@ class ManageUser_model extends CI_Model
         $this->db->update($this->table, $data);
     }
 
+
+    // update data
+    function updateMST($pid, $param,$oldData)
+    {
+        // $pid = $this->wakitalib->get_pid_id('tbl_user',"MSUser",'id_users',1);
+        $data = [
+                'email' => $param['email'],
+                'phone' => $param['phone'],
+            ];
+        $this->dbServer->where('email', $param['email']);
+        $this->dbServer->or_where('phone', $param['phone']);
+        $checkData = $this->dbServer->get('ms_users')->row();
+        if (!empty($checkData)) {
+            if ($checkData->pid == $oldData->pid) {
+                $return = true;
+            } else {
+                $return = false;
+            }
+        } else {
+            $return = true;
+        }
+
+        if ($return === true) {
+            $this->dbServer->where('pid', $pid);
+            $this->dbServer->update('ms_users', $data);
+                // echo print_r($checkData);die();
+        }
+
+        return $return;
+
+
+    }
+
     // delete data
-    function delete($id)
+    function delete($id,$pid = "")
     {
         $this->db->where($this->id, $id);
         $this->db->delete($this->table);
+        if (!empty($pid)) {
+            // die("123123");
+            $this->dbServer->where('id_user_local', $pid);
+            $this->dbServer->delete('ms_users');
+        }
     }
 
 }

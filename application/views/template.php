@@ -101,7 +101,7 @@
                                     <!-- Menu Footer-->
                                     <li class="user-footer">
                                         <div class="pull-left">
-                                            <?php echo anchor('user/profile', 'Profile', array('class' => 'btn btn-default btn-flat')); ?>
+                                            <?php echo anchor('ManageUser/profile', 'Profile', array('class' => 'btn btn-default btn-flat')); ?>
                                             <!--<a href="#" class="btn btn-default btn-flat">Profile</a>-->
                                         </div>
                                         <div class="pull-right">

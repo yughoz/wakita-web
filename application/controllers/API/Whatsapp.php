@@ -91,8 +91,10 @@ class Whatsapp extends CI_Controller
 
         // $ext = pathinfo($path, PATHINFO_EXTENSION);
 
-        if ($this->input->post('groupId',TRUE) != "62") {
-            exit();
+        if (!empty($this->input->post('groupId',TRUE) )) {
+            if ($this->input->post('groupId',TRUE) != "62") {
+                exit();
+            }
         }
 
         $this->Inbox_model->insert($data);

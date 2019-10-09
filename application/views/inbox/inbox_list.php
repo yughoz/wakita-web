@@ -5,28 +5,31 @@
                 <div class="box box-warning box-solid">
     
                     <div class="box-header">
-                        <h3 class="box-title">KELOLA DATA INBOX</h3>
+                        <h3 class="box-title">Inbox</h3>
                     </div>
         
         <div class="box-body">
         <div style="padding-bottom: 10px;">
         <button type="button" class="btn btn-danger btn-sm" id="refersh">Refersh</button>
         </div>
-        <table class="table table-bordered table-striped" id="mytable">
-            <thead>
+        <div class="box-body table-responsive no-padding">
+          <table class="table table-bordered table-striped" id="mytable">
+              <thead>
                 <tr>
-                    <th width="30px">No</th>
-		    <th>Message Id</th>
-		    <th>FromMe</th>
-		    <th>PushName</th>
-		    <th>Phone</th>
-		    <th>Message</th>
-		    <th>Timestamp</th>
-		    <th>Receiver</th>
-		    <th>GroupId</th>
-		        </thead>
-	    
-        </table>
+                <th width="30px">No</th>
+        		    <th>Message Id</th>
+        		    <th>FromMe</th>
+        		    <th>PushName</th>
+        		    <th>Phone</th>
+        		    <th>Message</th>
+        		    <th>Timestamp</th>
+        		    <th>Receiver</th>
+        		    <th>GroupId</th>
+                </tr>
+  		        </thead>
+  	    
+          </table>
+        </div>
         </div>
                     </div>
             </div>
