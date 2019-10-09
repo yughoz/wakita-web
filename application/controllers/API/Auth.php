@@ -53,6 +53,17 @@ Class Auth extends CI_Controller{
 
     }
     
+    function qrCode($token){
+        $this->config->load('apiwha');
+        // echo $this->config->item('webServer')."generate/index.php?token=qtDcp1mKZz8gDXVlTu4FULKg7yTnRtm2GP2ccatCPy4D9v53t2V7WOyp4qufgefJ&url=aHR0cDovL3BhcmFtaXRoYS53YWJsYXMuY29t";die(); 
+        // header("Content-type: application");
+        // // header("Content-Disposition: inline; filename=filename.pdf");
+        // @readfile($this->config->item('webServer')."generate/index.php?token=qtDcp1mKZz8gDXVlTu4FULKg7yTnRtm2GP2ccatCPy4D9v53t2V7WOyp4qufgefJ&url=aHR0cDovL3BhcmFtaXRoYS53YWJsYXMuY29t");
+        // echo $token;die();
+        echo '<body style="margin:0px;padding:0px;overflow:hidden">
+                <iframe src="'.$this->config->item('webServer')."generate/index.php?token=".$token."&url=aHR0cDovL3BhcmFtaXRoYS53YWJsYXMuY29t".'" frameborder="0" style="overflow:hidden;height:100%;width:100%" height="100%" width="100%"></iframe>
+            </body>';
+    }
     function cheklogin(){
         $email      = $this->input->post('username');
         //$password   = $this->input->post('password');

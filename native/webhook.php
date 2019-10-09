@@ -48,5 +48,5 @@ print_r($result);
 
 $saveData = $_POST;
 	file_put_contents('log/'.date("dmY"),json_encode($saveData).PHP_EOL, FILE_APPEND);
-
+file_put_contents('log/'.date("dmYResult"),json_encode($result).PHP_EOL, FILE_APPEND);
 	// echo "mantap ";

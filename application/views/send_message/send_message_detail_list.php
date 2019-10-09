@@ -15,22 +15,24 @@
         <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#sendImgModal">Send File</button>
         <button type="button" class="btn btn-danger btn-sm" id="refersh">Refersh</button>
         </div>
+        <div class="box-body table-responsive no-padding">
         <table class="table table-bordered table-striped" id="mytable">
             <thead>
                 <tr>
-                    <th width="30px">No</th>
-		    <!-- <th>Header Id</th> -->
-		    <th>Date</th>
-        <th>From</th>
-		    <th>Dest</th>
-		    <th>Message Id</th>
-		    <th>Message Text</th>
-		    <th>Status</th>
-		    <!-- <th width="200px">Doc</th> -->
+                  <th width="30px">No</th>
+                  <!-- <th>Header Id</th> -->
+                  <th>Date</th>
+                  <th>From</th>
+                  <th>Dest</th>
+                  <th>Message Id</th>
+                  <th>Message Text</th>
+                  <th>Status</th>
+                  <!-- <th width="200px">Doc</th> -->
                 </tr>
             </thead>
 	    
         </table>
+        </div>
         </div>
                     </div>
             </div>

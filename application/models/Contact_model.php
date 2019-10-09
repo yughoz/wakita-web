@@ -54,9 +54,7 @@ class Contact_model extends CI_Model
         $this->db->where($where);//you can use another field
         $dataContact = $this->db->get($this->table)->row();
         if (!$dataContact) {
-            if ($data['name_wa'] != "❌") {
-              $query = $this->db->insert($this->table, $data);//insert data
-            }
+            $query = $this->db->insert($this->table, $data);//insert data
         } elseif ($data['name_wa'] != $dataContact->name_wa) {
             $dataContat = [
                 "name_wa"       => $data['name_wa'],
@@ -68,7 +66,7 @@ class Contact_model extends CI_Model
             return $dataContact->name_replace;
         }
 
-        return $data['name_replace'];
+        return $dataContact->name_replace;
     }
 
     function insert_update_web($data)
