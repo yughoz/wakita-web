@@ -70,7 +70,8 @@ class ManageChat extends CI_Controller
             'updated' => set_value(''),
             'updatedby' => set_value(''),
             'hotline' => $id,
-            'generateLink' => base_url().'API/DirectLink/file/'
+            'generateLink' => base_url().'API/DirectLink/file/',
+            'userSession'   => $this->session->userdata('phone'),
         );
         $this->template->load('template','ManageChat/ManageChat_list_member', $data);
     }
@@ -97,6 +98,8 @@ class ManageChat extends CI_Controller
             $result['data'][$key] = array(
                'id' => $value->id,
                 'customer_phone' => $value->customer_phone,
+                'name_wa' => $value->name_wa,
+                'name_replace' => $value->name_replace,
                 'message' => $value->message,
                 'flag_status' => $value->flag_status,
                 'created' => $value->created,
@@ -109,30 +112,50 @@ class ManageChat extends CI_Controller
         echo json_encode($result);
     }
 
-    public function detail_json($hotline, $customer, $start) {
+    public function detail_json($hotline, $customer, $start, $private) {
 
         header('Content-Type: application/json');
          $whereArr = array(
-            'customer_phone'    => $customer,
-            'hotline.group_hotline'     => $hotline,
+            'customer_phone'        => $customer,
+            'hotline.group_hotline' => $hotline,
         );
-        
-        $datas =  array_reverse($this->ManageHotline_model->detail_list($whereArr, $start));
-        $count =  $this->ManageHotline_model->count_all($whereArr);
+        if($private == 'private'){
+            $table = 'hotline_private';
+        }else{
+            $table = 'hotline';
+        }
+        $startFrom  = $start;
+        $datas      = array_reverse($this->Hotline_model->detail_list($whereArr, $startFrom, $table));
+        $count      = $this->Hotline_model->count_all($whereArr,$table);
         foreach ($datas as $key => $value) {
             if (!empty($value->image_name)) {
-            	$datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
+                // $datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
+                $datas[$key]->image	= base_url("API/DirectLink/file/")."image/".$value->image_name;
             }
             if ($value->createdby == "API_WABLAS") {
-                $datas[$key]->username = "Customer";
+                $datas[$key]->username = "Customer - ".$value->username_title;
                 if (!empty($value->image_name)) {
-                    $datas[$key]->image = "https://simo.wablas.com/image/".$value->image_name;
+                    $datas[$key]->image 		= base_url("API/DirectLink/file/")."image/".$value->image_name;
+                    $datas[$key]->extension 	= pathinfo($value->image_name, PATHINFO_EXTENSION);
                     // /$datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
                 }
+
+                if (!empty($value->video_name)) {
+                    $datas[$key]->video 		= base_url("API/DirectLink/file/")."video/".$value->video_name;
+                    $datas[$key]->extension 	= pathinfo($value->video_name, PATHINFO_EXTENSION);
+                    // /$datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
+                }
+
+                if (!empty($value->document_name)) {
+                    $datas[$key]->document_name = base_url("API/DirectLink/file/")."document/".$value->document_name;
+                    $datas[$key]->extension 	= pathinfo($value->document_name, PATHINFO_EXTENSION);
+                    // /$datas[$key]->image 	= base_url('assets/foto_wa')."/".$value->image_name;
+                }
+
             }
             $datas[$key]->_idUser = $value->user_phone ?? $value->customer_phone;
          }
-        echo json_encode(["data" => $datas,"counter" =>$count,"startFrom" => $start]);
+        echo json_encode(["data" => $datas,"counter" =>$count,"startFrom" => $startFrom]);
 
     }
 
