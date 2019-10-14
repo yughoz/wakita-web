@@ -16,7 +16,7 @@ class ManageMenu extends CI_Controller
     public function index()
     {
         $data['setting'] = $this->db->get_where('tbl_setting',array('id_setting'=>1))->row_array();
-        $this->template->load('template','managemenu/managemenu_list',$data);
+        $this->template->load('template','ManageMenu/ManageMenu_list',$data);
     }
     
     function simpan_setting(){
@@ -43,7 +43,7 @@ class ManageMenu extends CI_Controller
                 'is_main_menu' => $row->is_main_menu,
                 'is_aktif' => $row->is_aktif,
             );
-            $this->template->load('template','managemenu/managemenu_read', $data);
+            $this->template->load('template','ManageMenu/ManageMenu_read', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
             redirect(site_url('ManageMenu'));
@@ -62,7 +62,7 @@ class ManageMenu extends CI_Controller
             'is_main_menu' => set_value('is_main_menu'),
             'is_aktif' => set_value('is_aktif'),
 	    );
-        $this->template->load('template','managemenu/managemenu_form', $data);
+        $this->template->load('template','ManageMenu/ManageMenu_form', $data);
     }
     
     public function create_action() 
@@ -101,11 +101,36 @@ class ManageMenu extends CI_Controller
                 'is_main_menu' => set_value('is_main_menu', $row->is_main_menu),
                 'is_aktif' => set_value('is_aktif', $row->is_aktif),
 	    );
-            $this->template->load('template','managemenu/managemenu_form', $data);
+            $this->template->load('template','ManageMenu/ManageMenu_form', $data);
         } else {
             $this->session->set_flashdata('message', 'Record Not Found');
             redirect(site_url('ManageMenu'));
         }
+    }
+
+    public function changePassword(){
+        $row = $this->ManageMenu_model->get_by_id($id);
+
+        if ($row) {
+            $data = array(
+                'button' => 'Update',
+                'action' => site_url('ManageMenu/update_action'),
+                'id_menu' => set_value('id_menu', $row->id_menu),
+                'title' => set_value('title', $row->title),
+                'url' => set_value('url', $row->url),
+                'icon' => set_value('icon', $row->icon),
+                'is_main_menu' => set_value('is_main_menu', $row->is_main_menu),
+                'is_aktif' => set_value('is_aktif', $row->is_aktif),
+	    );
+            $this->template->load('template','ManageMenu/ManageMenu_form', $data);
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('ManageMenu'));
+        }
+    }
+
+    public function resetPassword(){
+
     }
     
     public function update_action() 
@@ -211,7 +236,7 @@ class ManageMenu extends CI_Controller
             'start' => 0
         );
         
-        $this->load->view('managemenu/managemenu_doc',$data);
+        $this->load->view('ManageMenu/ManageMenu_doc',$data);
     }
 
 }

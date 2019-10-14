@@ -23,7 +23,7 @@ class Wablas
      */
     const sendgrid_host         = 'smtp.sendgrid.net';
     const sendgrid_port         = 587; //25, 456 , 587
-    const wablas_url            = 'https://simo.wablas.com/';
+    const wablas_url            = 'http://paramitha.wablas.com/';
     const wablas_url_qrcode     = self::wablas_url.'generate/qr.php?url=aHR0cHM6Ly9zaW1vLndhYmxhcy5jb20&';
     const wablas_url_message    = self::wablas_url.'api/send-message';
     const wablas_url_image      = self::wablas_url.'api/send-image';
@@ -264,9 +264,9 @@ class Wablas
         $data = array(
             'created'           => date("Y-m-d H:i:s"),
             'createdby'         => $array['session_email'],
-            'user_send_phone'   => "6281299898515",	//<-- user yang kirim  bisa customer / cs/admin
-            'user_send_title'   => "fafa",		//<-- user yang kirim  bisa customer / cs/admin
-            'user_send_username'=> "baba",		//<-- user yang kirim  bisa customer / cs/admin klo customer ditambah customer di depan
+            'user_send_phone'   => $array['session_userphone'],	//<-- user yang kirim  bisa customer / cs/admin
+            'user_send_title'   => $array['session_username'],		//<-- user yang kirim  bisa customer / cs/admin
+            'user_send_username'=> $array['session_username'],		//<-- user yang kirim  bisa customer / cs/admin klo customer ditambah customer di depan
             'customer_phone'    => $array['phone'],
             'customer_title'    => "",		        //<-- customer title
             'customer_username' => "",		        //<-- customer title ditambah customer di depan
@@ -281,7 +281,7 @@ class Wablas
             'message_id'        => $value ['id'],
             'username_phone'    => $array['session_userphone'],
             'username_user'     => $array['session_username'],	//<-- username yang login
-            'username_title'    => 'Reza',
+            'username_title'    => $array['session_username'],
             'video'             => $value ['video'] ?? "",
             'videoUrl'          => !empty($value ['video']) ? base_url().'API/DirectLink/file/video/'.$value ['video'] :"",
             'destination'       => 'outbox',

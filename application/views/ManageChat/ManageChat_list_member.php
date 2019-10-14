@@ -42,7 +42,7 @@ table.reza-fat tr th{
                             <span data-toggle="tooltip" title="" class="badge bg-light-blue" data-original-title="3 New Messages">3</span>
                             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
                             </button>
-                            <button type="button" id="private" class="btn btn-box-tool switch" data-toggle="tooltip" title="" data-widget="chat-pane-toggle" data-original-title="Private Message">
+                            <button onclick="setPrivate()" type="button" id="private" class="btn btn-box-tool switch" data-toggle="tooltip" title="" data-widget="chat-pane-toggle" data-original-title="Private Message">
                             <i class="fa fa-comments"></i></button>
                             <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
                         </div>
@@ -112,6 +112,7 @@ table.reza-fat tr th{
                         'transports'            : ['websocket'],
                     });
 
+    var private         = 0;
     var status_message  = 0;
     var start           = 0;
     var DataMsg         = [];
@@ -135,12 +136,7 @@ table.reza-fat tr th{
             
         });
         $("#container_msg").scroll(function (event) {
-            // console.log(event)
             var scroll = $("#container_msg").scrollTop();
-            //console.log('scrollTop',$("#container_msg").scrollTop())
-            //console.log('mesgs_cont',$("#mesgs_cont").height())
-            //console.log('height',$("#container_msg").height())
-            //console.log(scroll)
         });
 
         $("#sendMsgForm").on('submit',(function(e) {
@@ -195,6 +191,16 @@ table.reza-fat tr th{
     $("#profile-img").change(function(){
         readURL(this);
     });
+
+    function setPrivate(){
+        if(private == 0){
+            private = 1;
+            loadPersonalChatContact(to);
+
+        }else{
+            private = 0;    
+        }
+    }
 
     function sendMsg(noPhone){
         var data = {
@@ -266,7 +272,7 @@ table.reza-fat tr th{
         let html                    = "";
         var detail                  = [];
         detail["user_send_phone"]   = value.customer_phone;
-        detail["username_phone"]    = value.user_send_phone;
+        detail["username_phone"]    = <?php echo $userSession; ?>;
         detail["name"]              = value.user_send_title;
         detail["created"]           = value.created;
         detail["image"]             = value.image;
@@ -281,13 +287,27 @@ table.reza-fat tr th{
         $("#container_msg").html(tempDetail);
     }
 
-    function loadPersonalContact(to, getStart){
+    function loadPersonalContact(to, name, getStart){
+
+        // $("#noPhoneFrom").val(from);
+        $("#customer_number").html(name+" ( "+to+" )");
+        $("#noPhone").val(to);
+        $(".item").removeClass("active_chat");
+        $("#item_"+to).addClass("active_chat");
+        // $("#private").attr('onclick', 'detail_private('+to+',0)');
 
         socket.removeListener('get_session');
         socket.removeListener('get_key');
 
+        start       = getStart;
+        tempDetail  = "";
+
+        loadPersonalChatContact(to);
+
+        console.log('ok')
+
         socket.on('get_session', function (data) {
-            // console.log(data);
+            console.log(data);
             socket_session=data.session;
 
             socket.emit('get_id', { 
@@ -295,27 +315,25 @@ table.reza-fat tr th{
                 id_account      : to
             });
         });
-        start = getStart;
-
-        // $("#noPhoneFrom").val(from);
-        $("#customer_number").html(to);
-        $("#noPhone").val(to);
-        $(".item").removeClass("active_chat");
-        $("#item_"+to).addClass("active_chat");
-        // $("#private").attr('onclick', 'detail_private('+to+',0)');
-
-        loadPersonalChatContact(to);
 
         socket.on('get_key', function(data) {
             const value = JSON.parse(data.datas)
+            console.log(value)
             appendDetailChatSocket(value);
+            $("#container_msg").animate({ scrollTop: 60000000 }, "slow");
         });
         $("#container_msg").animate({ scrollTop: 60000000 }, "slow");
     }
 
     function loadPersonalChatContact(to) {
         
-        $.get( "<?php echo base_url();?>ManageChat/detail_json/<?php echo $hotline; ?>/"+to+"/"+start, 
+        var url = "";
+        if(private == 0){
+            url = '<?php echo base_url();?>ManageChat/detail_json/<?php echo $hotline; ?>/"+to+"/"+start';
+        }else{
+            url = 'sss';
+        }
+        $.get( url, 
             function( data ) {
                 // $( ".result" ).html( data );
                 // console.log(data)
@@ -337,9 +355,9 @@ table.reza-fat tr th{
                 $.each(DataMsg, function( index, value ) {
                     // console.log(value);
                     var detail = [];
-                    detail["user_send_phone"]   = from;
-                    detail["username_phone"]    = value._idUser;
-                    detail["name"]              = value._idUser;
+                    detail["user_send_phone"]   = value.user_phone;
+                    detail["username_phone"]    = <?php echo $userSession; ?>;
+                    detail["name"]              = value.username;
                     detail["created"]           = value.created;
                     detail["image"]             = value.image_name;
                     detail["video"]             = value.video_name;
@@ -355,6 +373,7 @@ table.reza-fat tr th{
                     tempDetail = html + tempDetail;
                 }   
                 $("#container_msg").append(tempDetail);
+                $("#container_msg_private").append(tempDetail);
             }
         );
     }
@@ -362,25 +381,26 @@ table.reza-fat tr th{
     function getDetailChat(chat){
         let html = "";
 
-        if (chat.user_send_phone == chat.username_phone) {
-                html += '<div class="direct-chat-msg">'
-                html += '<div class="direct-chat-info clearfix">'
-                html += '<span class="direct-chat-name pull-left">'+chat.name+'</span>'
-                html += '<span class="direct-chat-timestamp pull-right">'+chat.created+'</span>'
-            }else{
+        if (chat.username_phone == chat.user_send_phone) {
                 html += '<div class="direct-chat-msg right">'
                 html += '<div class="direct-chat-info clearfix">'
                 html += '<span class="direct-chat-name pull-right">'+chat.name+'</span>'
                 html += '<span class="ddirect-chat-timestamp pull-left">'+chat.created+'</span>'
+                
+            }else{
+                html += '<div class="direct-chat-msg">'
+                html += '<div class="direct-chat-info clearfix">'
+                html += '<span class="direct-chat-name pull-left">'+chat.name+'</span>'
+                html += '<span class="direct-chat-timestamp pull-right">'+chat.created+'</span>'
             }
                 html += '</div>'
                 html += '<img class="direct-chat-img" src="'+icon_user+'" alt="Message User Image">'
             
             if(chat.image || chat.video|| chat.document){
-                if (chat.user_send_phone == chat.username_phone) {
-                html += '<div class="direct-chat-text col-lg-6 pull-left">'
+                if (chat.username_phone == chat.user_send_phone) {
+                html += '<div class="direct-chat-text col-lg-6 pull-right">'
                 }else{
-                html += '<div class="direct-chat-text col-lg-6 pull-right ">'
+                html += '<div class="direct-chat-text col-lg-6 pull-left">'
                 }
                     html += '<ul class="mailbox-attachments clearfix">'
                     html += '<li>'
@@ -412,10 +432,10 @@ table.reza-fat tr th{
                 
                 html += '</div>'
             }else{
-                if (chat.user_send_phone == chat.username_phone) {
-                    html += '<div class="direct-chat-text col-lg-10 pull-left">'
-                }else{
+                if (chat.username_phone == chat.user_send_phone) {
                     html += '<div class="direct-chat-text col-lg-10 pull-right">'
+                }else{
+                    html += '<div class="direct-chat-text col-lg-10 pull-left">'
                 }
                 if (chat.message) {
                     html += chat.message
@@ -483,20 +503,27 @@ table.reza-fat tr th{
                     }else{
                         name = data[i].customer_phone;
                     }
-                    console.log(data[i].name_replace);
-                    html += '<div class="item" id="item_'+data[i].customer_phone+'" onclick="loadPersonalContact('+data[i].customer_phone+', 0);">'+
-                                '<img src="'+icon_user+'" alt="user image" class="offline">'+
-                                '<p class="message">'+
-                                '<span class="name">'+
-                                    '<small class="text-muted pull-right"><i class="fa fa-clock-o"></i> '+data[i].created+'</small>'+
-                                    '<span onclick="saveContact('+data[i].customer_phone+', 0);" id="contact_'+data[i].customer_phone+'">'+name+'</span>'+
-                                '</span>'+data[i].message+
-                                '<span data-toggle="tooltip" title="" class="badge bg-light-blue pull-right" data-original-title="3 New Messages">3</span>'+
-                                '</p>'+
-                            '</div>';
+                    // console.log(data[i].name_replace);
+                    var phone_num="'"+data[i].customer_phone+"'";
+                    var phone_name="'"+name+"'";
+                    html += '<div class="item" id="item_'+data[i].customer_phone+'" onclick="loadPersonalContact('+phone_num+', '+phone_name+', 0);">'
+                    html += '<img src="'+icon_user+'" alt="user image" class="offline">'
+                    html += '<p class="message">'
+                    html += '<span class="name">'
+                    html += '<small class="text-muted pull-right"><i class="fa fa-clock-o"></i> '+data[i].created+'</small>'
+                    html += '<span onclick="saveContact('+data[i].customer_phone+', 0)" id="contact_'+data[i].customer_phone+'">'+name+'</span>'
+                    html += '</span>'+data[i].message
+                    if(data[i].createdby == 'API_WABLAS'){
+                        html += '<span data-toggle="tooltip" title="" class="pull-right" data-original-title=""><i class="fa fa-fw fa-circle-o"></i></span>'
+                    }else{
+                        html += '<span data-toggle="tooltip" title="" class="pull-right" data-original-title=""><i class="fa fa-fw fa-check"></i></span>'
+                    }
+                    
+                    html += '</p>'
+                    html += '</div>'
                 }
                 $("#showdata").append(html);
-                loadPersonalContact(firstdata, 0);
+                loadPersonalContact(firstdata, name, 0);
             },
             error: function(){
                 alert('Could not load the data');

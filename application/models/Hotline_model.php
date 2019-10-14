@@ -50,8 +50,8 @@ class Hotline_model extends CI_Model
     // }
     // datatables
     
-    function detail_list($where,$start) {
-        $this->db->select($this->table.".*,tbl_user.full_name as username,name_replace as username_title");
+    function detail_list($where, $start, $table) {
+        $this->db->select($table.".*,tbl_user.full_name as username,name_replace as username_title");
         // $this->db->from('hotline');
         $this->db->join('tbl_user', $this->table.'.createdby = email',"LEFT");
         $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
@@ -59,15 +59,15 @@ class Hotline_model extends CI_Model
         $this->db->order_by('created', 'DESC');
         $this->db->limit(10,$start);
 
-        return $this->db->get($this->table)->result();
+        return $this->db->get($table)->result();
     }
-    function count_all($where) {
+    function count_all($where, $table) {
         // $this->db->select($this->table.".*,tbl_user.full_name as username");
         // $this->db->from('hotline');
         // $this->db->join('tbl_user', $this->table.'.createdby = email',"LEFT");
         // $this->db->count_all_results('my_table'); 
         $this->db->where($where);
-        $this->db->from($this->table);
+        $this->db->from($table);
         return $this->db->count_all_results();
     }
 
