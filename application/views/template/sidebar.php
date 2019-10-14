@@ -1,8 +1,6 @@
 <section class="sidebar">
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree">
-       
-        
         <?php
         // chek settingan tampilan menu
         $setting = $this->db->get_where('tbl_setting',array('id_setting'=>1))->row_array();

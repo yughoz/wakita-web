@@ -32,12 +32,12 @@ class ManageUser_model extends CI_Model
     }
 
     // datatables
-    function jsonMember($milis_arr) {
+    function jsonMember($user_arr) {
         $this->datatables->select('id_users,full_name,email,phone');
         $this->datatables->from('tbl_user');
-        // $this->datatables->where_not_in('id_users',$milis_arr);
-        if (!empty($milis_arr)) {
-            $this->datatables->where_not_in('id_users',$milis_arr);
+        // $this->datatables->where_not_in('id_users',$user_arr);
+        if (!empty($user_arr)) {
+            $this->datatables->where_not_in('id_users',$user_arr);
         }
         $this->datatables->add_column('selecting', '<a href="#" class="btn btn-danger btn-sm" onclick="selectingFunc($1);return false;"><i class="fa fa-check-circle" aria-hidden="true"></i> </a>', 'id_users');
         // $this->datatables->where('user_id',NULL);

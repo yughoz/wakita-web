@@ -11,6 +11,7 @@ class ManageHotlineMember extends CI_Controller
         is_login();
         date_default_timezone_set('Asia/Jakarta');
         $this->load->model('ManageUser_model');
+        $this->load->model('ManageHotline_model');
         $this->load->model('ManageHotlineMember_model');
         $this->load->library('form_validation');
 	    $this->load->library('datatables');
@@ -33,6 +34,7 @@ class ManageHotlineMember extends CI_Controller
     } 
     public function member($id)
     {
+        $hotlineData = $this->ManageHotline_model->get_by_where(['device_id' => $id]);
         $data = array(
             'button' => 'Create',
             'action' => site_url('ManageHotlineMember/create_action'),
@@ -44,26 +46,29 @@ class ManageHotlineMember extends CI_Controller
             'updated' => set_value(''),
             'updatedby' => set_value(''),
             'member' => $id,
+            'hotlineData'   => $hotlineData,
         );
+
+        // echo print_r($hotlineData);die();
         $this->template->load('template','ManageHotlineMember/ManageHotlineMember_list', $data);
     } 
     
-    public function json($milis_id = "") {
+    public function json($device_id = "") {
         header('Content-Type: application/json');
-        echo $this->ManageHotlineMember_model->json($milis_id);
+        echo $this->ManageHotlineMember_model->json($device_id);
     }
 
 
-    public function user($milis_id) {
+    public function user($device_id) {
         header('Content-Type: application/json');
-        $dataMilis = $this->getUserMilis($milis_id);
+        $dataMilis = $this->getUserMilis($device_id);
         // echo print_r($dataMilis);
         // die;
         echo $this->ManageUser_model->jsonMember($dataMilis);
     }
 
-    function getUserMilis($milis_id){
-        $dataMilis = $this->ManageHotlineMember_model->get_all(["milis_id" => $milis_id]);
+    function getUserMilis($device_id){
+        $dataMilis = $this->ManageHotlineMember_model->get_all(["device_id" => $device_id]);
         $dataTemp = [];
         foreach ($dataMilis as $key => $value) {
             $dataTemp[] = $value->user_id;
@@ -117,7 +122,7 @@ class ManageHotlineMember extends CI_Controller
         ]);die();
         }
     }
-    public function add_member($member_id,$user_id) 
+    public function add_member($device_id,$user_id) 
     {
         $this->_rules();
 
@@ -129,7 +134,7 @@ class ManageHotlineMember extends CI_Controller
         //     ]);die();
         // } else {
             $data = array(
-                'milis_id'  => $member_id,
+                'device_id'  => $device_id,
                 'user_id'   => $user_id,
                 'created'   => date("Y-m-d H:i:s"),
                 'createdby' => $this->session->userdata('email'),

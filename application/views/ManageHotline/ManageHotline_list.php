@@ -11,11 +11,10 @@
         <div class="box-body">
         <div style="padding-bottom: 10px;">
         
-        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#myModal">Add Data</button>
         <button type="button" class="btn btn-danger btn-sm" id="refersh">Refersh</button>
         </div>
         <div class="box-body table-responsive no-padding">
-        
+
         <table class="table table-bordered table-striped" id="mytable">
             <thead>
                 <tr>
@@ -24,8 +23,8 @@
                     <th>Hotline</th>
                     <th>Device ID</th>
                     <th>Device Name</th>
-                    <th>Domain API</th>
-                    <th>Token</th>
+                    <!-- <th>Domain API</th> -->
+                    <th>Status</th>
                     <th>Phone Number</th>
                     <th width="200px">Action</th>
                 </tr>
@@ -347,15 +346,15 @@
                     ajax: {"url": '<?php echo base_url("ManageHotline/json") ?>', "type": "POST"},
                     columns: [
                         {
-                            "data": "id",
+                            "data": "pid",
                             "orderable": false
                         },
                         {"data": "package_name"},
                         {"data": "name"},
                         {"data": "device_id"},
                         {"data": "device_name"},
-                        {"data": "domain_api"},
-                        {"data": "token"},
+                        // {"data": "domain_api"},
+                        {"data": "wa_status"},
                         {"data": "phone_number"},
                         {
                             "data" : "action",

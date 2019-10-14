@@ -65,6 +65,25 @@ function is_login(){
     }
 }
 
+
+function checking_akses($modul){
+    $ci = get_instance();
+    // $modul = $ci->uri->segment(1);
+        
+    $id_user_level = $ci->session->userdata('id_user_level');
+    // dapatkan id menu berdasarkan nama controller
+    $menu = $ci->db->get_where('tbl_menu',array('url'=>$modul))->row_array();
+    $id_menu = $menu['id_menu'];
+    // chek apakah user ini boleh mengakses modul ini
+    $hak_akses = $ci->db->get_where('tbl_hak_akses',array('id_menu'=>$id_menu,'id_user_level'=>$id_user_level));
+    if($hak_akses->num_rows()<1 && !in_array($ci->session->userdata('id_users'), $ci->config->item('superadmin_id'))){
+        return false;
+    }
+
+    return true;
+}
+
+
 function alert($class,$title,$description){
     return '<div class="alert '.$class.' alert-dismissible">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>

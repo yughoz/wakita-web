@@ -47,7 +47,7 @@
                     <tr><td width='200'>Foto Profile <?php echo form_error('images') ?></td><td> <input type="file" name="images"></td></tr>
                     <tr><td></td><td><input type="hidden" name="id_users" value="<?php echo $id_users; ?>" /> 
                             <button type="submit" class="btn btn-danger"><i class="fa fa-floppy-o"></i> <?php echo $button ?></button> 
-                            <a href="<?php echo site_url('manageuser') ?>" class="btn btn-info"><i class="fa fa-sign-out"></i> Kembali</a></td></tr>
+                            <a href="<?php echo site_url('ManageUser') ?>" class="btn btn-info"><i class="fa fa-sign-out"></i> Kembali</a></td></tr>
                 </table>
            </form>        
         </div>
