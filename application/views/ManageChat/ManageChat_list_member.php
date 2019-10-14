@@ -42,7 +42,7 @@ table.reza-fat tr th{
                             <span data-toggle="tooltip" title="" class="badge bg-light-blue" data-original-title="3 New Messages">3</span>
                             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
                             </button>
-                            <button onclick="setPrivate()" type="button" id="private" class="btn btn-box-tool switch" data-toggle="tooltip" title="" data-widget="chat-pane-toggle" data-original-title="Private Message">
+                            <button type="button" id="private" class="btn btn-box-tool switch" data-toggle="tooltip" title="" data-widget="chat-pane-toggle" data-original-title="Private Message">
                             <i class="fa fa-comments"></i></button>
                             <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
                         </div>
@@ -74,8 +74,8 @@ table.reza-fat tr th{
                   <label>Textarea</label>
                   <textarea id="lala" class="form-control" rows="3" placeholder="Enter ..."></textarea>
                 </div> -->
-                        <div class="input-group">
-                            <input type="text" id="message" placeholder="Type Message ..." class="form-control">
+                        <div class="input-group" style="position:relative">
+                            <input type="text" id="message" placeholder="Type Message ..." class="form-control" style="padding-left:45px">
                             
                             <div class="input-group-btn">
                                 <div class="btn btn-default btn-file">
@@ -112,13 +112,22 @@ table.reza-fat tr th{
                         'transports'            : ['websocket'],
                     });
 
-    var private         = 0;
-    var status_message  = 0;
-    var start           = 0;
-    var DataMsg         = [];
-    var tempDetail      = "";
-    var generateLink    = "<?php echo $generateLink; ?>";
-    var fileTypes = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mpeg', 'doc', 'docx', 'pdf', 'odt', 'csv', 'ppt', 'pptx', 'xls', 'xlsx', 'mp3', 'ogg'];
+    var hotline             = "<?php echo $hotline; ?>";
+    var base_url            = "<?php echo base_url(); ?>";
+    var generateLink        = "<?php echo $generateLink; ?>";
+    var urlGetContacts      = base_url+"ManageChat/list_hotline_member_json/"+hotline;
+    var urlEditContact      = base_url+"ManageChat/saveContact";
+    var urlSendWA           = base_url+"ManageChat/send_whatsapp";
+    var urlDetailChat       = base_url+"ManageChat/detail_json/"+hotline;
+    var cutomerPhone        = "";
+    var customerName        = "";
+    var private             = 0;
+    var start               = 0;
+    var startPrivate        = 0;
+    var DataMsg             = [];
+    var tempDetail          = "";
+    var tempDetailPrivate   = "";
+    var fileTypes           = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mpeg', 'doc', 'docx', 'pdf', 'odt', 'csv', 'ppt', 'pptx', 'xls', 'xlsx', 'mp3', 'ogg'];
     
     $( document ).ready(function() {
         
@@ -128,12 +137,11 @@ table.reza-fat tr th{
         });
 
         $(".switch").click(function(){
-            if(status_message==0){
-                status_message=1;
-            }else if(status_message==1){
-                status_message=0;
+            if(private == 0){
+                private = 1;
+            }else if(private == 1){
+                private = 0;
             }
-            
         });
         $("#container_msg").scroll(function (event) {
             var scroll = $("#container_msg").scrollTop();
@@ -143,11 +151,12 @@ table.reza-fat tr th{
             e.preventDefault();
             //console.log($("#profile-img").val());
             var data = new FormData();
-            data.append("noPhone", $("#noPhone").val());
-            data.append("message", $("#message").val());
-            data.append("noPhoneFrom", $("#noPhoneFrom").val());
-            data.append("fileupload", $("#profile-img").prop('files')[0]);
-            data.append("type", $("#type").val());
+            data.append("noPhone",      $("#noPhone").val());
+            data.append("message",      $("#message").val());
+            data.append("noPhoneFrom",  $("#noPhoneFrom").val());
+            data.append("fileupload",   $("#profile-img").prop('files')[0]);
+            data.append("type",         $("#type").val());
+            data.append("private",      private);
 
             var today = new Date();
             var h     = today.getHours();
@@ -157,50 +166,38 @@ table.reza-fat tr th{
             m         = checkTime(m);
             s         = checkTime(s);
             
-            if(status_message == 0){
-                $.ajax({
-                    url         : "<?php echo base_url('ManageChat/send_whatsapp') ?>",
-                    type        : "POST",
-                    // data: new FormData(this),
-                    data        : data,
-                    contentType : false,
-                    cache       : false,
-                    dataType    : "json",
-                    processData : false,
-                    success     : function(resp)
-                    {
-                        try {
-                            $("#container_msg").html(tempDetail);
-                            if(resp.code == "success"){
-                                document.getElementById("sendMsgForm").reset();
-                            } else{
-                                document.getElementById("sendMsgForm").reset();
-                            }
-                        } catch(e) {
-                            console.log(e);
+            $.ajax({
+                url         : urlSendWA,
+                type        : "POST",
+                // data: new FormData(this),
+                data        : data,
+                contentType : false,
+                cache       : false,
+                dataType    : "json",
+                processData : false,
+                success     : function(resp)
+                {
+                    try {
+                        $("#container_msg").html(tempDetail);
+                        if(resp.code == "success"){
+                            document.getElementById("sendMsgForm").reset();
+                        } else{
+                            document.getElementById("sendMsgForm").reset();
                         }
-                    },
-                    error: function (data) {
-                        console.log('Error:', data);
+                    } catch(e) {
+                        console.log(e);
                     }
-                });
-            }
+                },
+                error: function (data) {
+                    console.log('Error:', data);
+                }
+            });
         }));
     });
 
     $("#profile-img").change(function(){
         readURL(this);
     });
-
-    function setPrivate(){
-        if(private == 0){
-            private = 1;
-            loadPersonalChatContact(to);
-
-        }else{
-            private = 0;    
-        }
-    }
 
     function sendMsg(noPhone){
         var data = {
@@ -287,24 +284,24 @@ table.reza-fat tr th{
         $("#container_msg").html(tempDetail);
     }
 
-    function loadPersonalContact(to, name, getStart){
-
-        // $("#noPhoneFrom").val(from);
-        $("#customer_number").html(name+" ( "+to+" )");
-        $("#noPhone").val(to);
+    function selectPersonalContact(array){
+        
+        $("#customer_number").html(array[0]+" ( "+array[1]+" )");
+        $("#noPhone").val(array[1]);
         $(".item").removeClass("active_chat");
-        $("#item_"+to).addClass("active_chat");
-        // $("#private").attr('onclick', 'detail_private('+to+',0)');
+        $("#item_"+array[1]).addClass("active_chat");
+
+        start               = 0;
+        startPrivate        = 0;
+        customerName        = array[0];
+        customerPhone       = array[1];
+        tempDetail          = "";
+        tempDetailPrivate   = "";
 
         socket.removeListener('get_session');
         socket.removeListener('get_key');
 
-        start       = getStart;
-        tempDetail  = "";
-
-        loadPersonalChatContact(to);
-
-        console.log('ok')
+        // console.log(to)
 
         socket.on('get_session', function (data) {
             console.log(data);
@@ -312,27 +309,32 @@ table.reza-fat tr th{
 
             socket.emit('get_id', { 
                 socket_session  : socket_session,
-                id_account      : to
+                id_account      : array[1]
             });
         });
 
         socket.on('get_key', function(data) {
             const value = JSON.parse(data.datas)
-            console.log(value)
+            // console.log(value)
             appendDetailChatSocket(value);
             $("#container_msg").animate({ scrollTop: 60000000 }, "slow");
         });
-        $("#container_msg").animate({ scrollTop: 60000000 }, "slow");
+
+        if(start == 0){ 
+            loadPersonalChatContact(0, start);
+            loadPersonalChatContact(1, startPrivate)
+        }
     }
 
-    function loadPersonalChatContact(to) {
-        
+    function loadPersonalChatContact(private, startFrom) {
+
         var url = "";
         if(private == 0){
-            url = '<?php echo base_url();?>ManageChat/detail_json/<?php echo $hotline; ?>/"+to+"/"+start';
+            url = urlDetailChat+"/"+customerPhone+"/"+startFrom+"/0";
         }else{
-            url = 'sss';
+            url = urlDetailChat+"/"+customerPhone+"/"+startFrom+"/1";
         }
+        // console.log(url);
         $.get( url, 
             function( data ) {
                 // $( ".result" ).html( data );
@@ -347,9 +349,15 @@ table.reza-fat tr th{
                 status_message  = 0;
 
                 if(DataMsg.length >= 10){
-                    var zhtml = '<button type="button" onclick="loadPersonalChatContact('+to+', '+start+');" class="btn btn-block btn-primary btn-xs">Load More</button>';
-                    $("#container_msg").html(zhtml);
-                    // html += '<button type="button" onclick="loadPersonalChatContact('+to+', '+start+');" class="btn btn-block btn-primary btn-xs">Load More</button>'
+                    if(private == 0){
+                        start = startFrom + 10;
+                        var zhtml = '<button type="button" onclick="loadPersonalChatContact(0, '+start+');" class="btn btn-block btn-primary btn-xs">Load More</button>';
+                        $("#container_msg").html(zhtml);
+                    }else{
+                        startPrivate = startFrom + 10;
+                        var zhtml = '<button type="button" onclick="loadPersonalChatContact(1, '+startPrivate+');" class="btn btn-block btn-primary btn-xs">Load More</button>';
+                        $("#container_msg_private").html(zhtml);
+                    }
                 }
                 $(".switch").remove("direct-chat-contacts-open");
                 $.each(DataMsg, function( index, value ) {
@@ -364,16 +372,31 @@ table.reza-fat tr th{
                     detail["document"]          = value.document_name;
                     detail["message"]           = value.message;
                     detail["type"]              = "";
-                    var xhtml = getDetailChat(detail);
+                    var xhtml                   = getDetailChat(detail);
                     html += xhtml;
                 });
-                if(start == 0){
-                    tempDetail = html;
+
+                if(private == 0){
+                    if(start == 0){
+                        tempDetail = html;
+                        $("#container_msg").append(tempDetail);
+                        $("#container_msg").animate({ scrollTop: 60000000 }, "slow");
+                    }else{
+                        tempDetail = html + tempDetail;
+                        $("#container_msg").append(tempDetail);
+                        $("#container_msg").animate({ scrollTop: 60000000 }, "slow");
+                    }
                 }else{
-                    tempDetail = html + tempDetail;
-                }   
-                $("#container_msg").append(tempDetail);
-                $("#container_msg_private").append(tempDetail);
+                    if(startPrivate == 0){
+                        tempDetailPrivate = html;
+                        $("#container_msg_private").append(tempDetailPrivate);
+                        $("#container_msg_private").animate({ scrollTop: 60000000 }, "slow");
+                    }else{
+                        tempDetailPrivate = html + tempDetailPrivate;
+                        $("#container_msg_private").append(tempDetailPrivate);
+                        $("#container_msg_private").animate({ scrollTop: 60000000 }, "slow");
+                    }
+                }
             }
         );
     }
@@ -458,7 +481,7 @@ table.reza-fat tr th{
             data.append("hotline", $("#noPhoneFrom").val());
             
             $.ajax({
-                url         : "<?php echo base_url('ManageChat/saveContact') ?>",
+                url         : urlEditContact,
                 type        : "POST",
                 // data: new FormData(this),
                 data        : data,
@@ -483,47 +506,53 @@ table.reza-fat tr th{
     
     function showContacts(){
         $.ajax({
-            url : '<?php echo base_url(); ?>ManageChat/list_hotline_member_json/<?php echo $hotline; ?>', 
+            url : urlGetContacts, 
             type: 'POST',
             data: '',
             // dataType: 'json',
-            success: function(reza){
-                var data        = reza.data;
-                var html        = '';
-                var firstdata   = '';
+            success: function(results){
+                var data            = results.data;
+                var html            = "";
+                var firstdata       = "";
+
                 for(i=0; i<data.length; i++){
-                    var name = '';
-                    if(i==0){
-                        firstdata=data[i].customer_phone; 
-                    }
+
+                    var contactArray    = new Array();
+                    var customerName    = "";
+                    var customerPhone   = data[i].customer_phone;
+                    
                     if(data[i].name_replace){
-                        name = data[i].name_replace;
+                        customerName    = data[i].name_replace;
                     }else if(data[i].name_wa){
-                        name = data[i].name_wa;
+                        customerName    = data[i].name_wa;
                     }else{
-                        name = data[i].customer_phone;
+                        customerName    = data[i].customer_phone;
+                    }
+
+                    if(i==0){
+                        firstdata   = [customerName,customerPhone]
                     }
                     // console.log(data[i].name_replace);
-                    var phone_num="'"+data[i].customer_phone+"'";
-                    var phone_name="'"+name+"'";
-                    html += '<div class="item" id="item_'+data[i].customer_phone+'" onclick="loadPersonalContact('+phone_num+', '+phone_name+', 0);">'
+                    var phone_num   = "'"+customerPhone+"'";
+                    var phone_name  = "'"+customerName+"'";
+                    var phone_array='['+phone_name+','+phone_num+']';
+                    html += '<div class="item" id="item_'+customerPhone+'" onclick="selectPersonalContact('+phone_array+');">'
                     html += '<img src="'+icon_user+'" alt="user image" class="offline">'
                     html += '<p class="message">'
                     html += '<span class="name">'
                     html += '<small class="text-muted pull-right"><i class="fa fa-clock-o"></i> '+data[i].created+'</small>'
-                    html += '<span onclick="saveContact('+data[i].customer_phone+', 0)" id="contact_'+data[i].customer_phone+'">'+name+'</span>'
+                    html += '<span onclick="saveContact('+customerPhone+', 0)" id="contact_'+customerPhone+'">'+customerName+'</span>'
                     html += '</span>'+data[i].message
                     if(data[i].createdby == 'API_WABLAS'){
                         html += '<span data-toggle="tooltip" title="" class="pull-right" data-original-title=""><i class="fa fa-fw fa-circle-o"></i></span>'
                     }else{
                         html += '<span data-toggle="tooltip" title="" class="pull-right" data-original-title=""><i class="fa fa-fw fa-check"></i></span>'
                     }
-                    
                     html += '</p>'
                     html += '</div>'
                 }
                 $("#showdata").append(html);
-                loadPersonalContact(firstdata, name, 0);
+                selectPersonalContact(firstdata);
             },
             error: function(){
                 alert('Could not load the data');

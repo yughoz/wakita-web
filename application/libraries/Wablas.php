@@ -120,81 +120,94 @@ class Wablas
 
     public function _sendWablas($array)
     {
-        try {
-            $response = "";
-            switch ($array['type']){
-                case "text":
-                    $response = $this->client->request( 'POST', self::wablas_url_message,
-                        [   
-                            'headers'       => ['Accept' => 'application/json','Authorization' => $array['token']],
-                            'form_params'   => [
-                                'phone'         => $array['phone'], 
-                                'message'       => $array['caption']
+        if($array['private'] == 0){
+            try {
+                $response = "";
+                switch ($array['type']){
+                    case "text":
+                        $response = $this->client->request( 'POST', self::wablas_url_message,
+                            [   
+                                'headers'       => ['Accept' => 'application/json','Authorization' => $array['token']],
+                                'form_params'   => [
+                                    'phone'         => $array['phone'], 
+                                    'message'       => $array['caption']
+                                ]
                             ]
-                        ]
-                    );
-                    break;
-                case "image":
-                    $response = $this->client->request( 'POST', self::wablas_url_image,
-                        [   
-                            'headers'       => ['Accept' => 'application/json','Authorization' => $array['token']],
-                            'form_params'   => [
-                                'phone'         => $array['phone'], 
-                                'caption'       => $array['caption'],
-                                'image'         => base_url().self::path_image.$array['file']
+                        );
+                        break;
+                    case "image":
+                        $response = $this->client->request( 'POST', self::wablas_url_image,
+                            [   
+                                'headers'       => ['Accept' => 'application/json','Authorization' => $array['token']],
+                                'form_params'   => [
+                                    'phone'         => $array['phone'], 
+                                    'caption'       => $array['caption'],
+                                    'image'         => base_url().self::path_image.$array['file']
+                                ]
                             ]
-                        ]
-                    );
-                    break;
-                case "video":
-                    $response = $this->client->request( 'POST', self::wablas_url_video,
-                        [   
-                            'headers'       => ['Accept' => 'application/json','Authorization' => $array['token']],
-                            'form_params'   => [
-                                'phone'         => $array['phone'], 
-                                'caption'       => $array['caption'],
-                                'video'         => base_url().self::path_image.$array['file']
+                        );
+                        break;
+                    case "video":
+                        $response = $this->client->request( 'POST', self::wablas_url_video,
+                            [   
+                                'headers'       => ['Accept' => 'application/json','Authorization' => $array['token']],
+                                'form_params'   => [
+                                    'phone'         => $array['phone'], 
+                                    'caption'       => $array['caption'],
+                                    'video'         => base_url().self::path_image.$array['file']
+                                ]
                             ]
-                        ]
-                    );
-                    break;
-                case "document":
-                    $response = $this->client->request( 'POST', self::wablas_url_document,
-                        [   
-                            'headers'       => ['Accept' => 'application/json','Authorization' => $array['token']],
-                            'form_params'   => [
-                                'phone'         => $array['phone'], 
-                                'caption'       => $array['caption'],
-                                'document'      => base_url().self::path_image.$array['file']
+                        );
+                        break;
+                    case "document":
+                        $response = $this->client->request( 'POST', self::wablas_url_document,
+                            [   
+                                'headers'       => ['Accept' => 'application/json','Authorization' => $array['token']],
+                                'form_params'   => [
+                                    'phone'         => $array['phone'], 
+                                    'caption'       => $array['caption'],
+                                    'document'      => base_url().self::path_image.$array['file']
+                                ]
                             ]
-                        ]
-                    );
-                    break;
-            }
-            
-            $status_code    = $response->getStatusCode(); // 200
-            $body           =  json_decode($response->getBody(),true);
-            // print_r($body);
-            // die();
-
-            $get_id     = $this->insert_header_message_detail($array, $body, $status_code);
-            $this->update_hotline($array, $body, $get_id);
-            $status1    = $this->update_message_detail($array, $body);
-            $status2    = $this->sendSocket($array, $body);
-            $status3    = $this->sendFCM($array, $body);
-
-            if($status1 == true && $status2 == true && $status3 == true){
-                return true;
-            }else{
+                        );
+                        break;
+                }
+                
+                $status_code    = $response->getStatusCode(); // 200
+                $body           =  json_decode($response->getBody(),true);
+                // print_r($body);
+                // die();
+    
+                $get_id     = $this->insert_header_message_detail($array, $body, $status_code);
+                $this->update_hotline($array, $body, $get_id);
+                $status1    = $this->update_message_detail($array, $body);
+                $status2    = $this->sendSocket($array, $body);
+                $status3    = $this->sendFCM($array, $body);
+    
+                if($status1 == true && $status2 == true && $status3 == true){
+                    return true;
+                }else{
+                    return false;
+                }
+            } catch (GuzzleHttp\Exception\BadResponseException $e) {
+                $response               = $e->getResponse();
+                $responseBodyAsString   = $response->getBody()->getContents();
+                // print_r($responseBodyAsString);
+                //print_r($e);
                 return false;
             }
-        } catch (GuzzleHttp\Exception\BadResponseException $e) {
-            $response               = $e->getResponse();
-            $responseBodyAsString   = $response->getBody()->getContents();
-            // print_r($responseBodyAsString);
-            //print_r($e);
-            return false;
+        }else{
+                $status1    = $this->update_message_detail_private($array);
+                // $status2    = $this->sendSocket($array, $body);
+                // $status3    = $this->sendFCM($array, $body);
+    
+                if($status1 == true){
+                    return true;
+                }else{
+                    return false;
+                }
         }
+        
     }
 
     private function insert_header_message_detail($array, $body, $status_code ){
@@ -251,6 +264,30 @@ class Wablas
                 'flag_status'       => "4",
             );
             $this->_ci->Inbox_model->insertHotline($data);
+            return true;
+        }catch(Exception $e){
+            //print_r("umd => ".$e);
+            return false;
+        }
+    }
+
+    private function update_message_detail_private($array){
+
+        try{
+            $data = array(
+                'created'           => date("Y-m-d H:i:s"),
+                'createdby'         => $array['session_email'],
+                'customer_phone'    => $array['phone'],
+                'user_phone'        => $array['session_userphone'],
+                'message'           => $array['caption'],
+                // 'image_name'        => $value ['image'] ?? "",
+                // 'video_name'        => $value ['video'] ?? "",
+                // 'document_name'     => $value ['document'] ?? "", 
+                // 'message_id'	    => $value ['id'] ?? "", 
+                'group_hotline'	    => $array['hotline'],
+                'flag_status'       => "4",
+            );
+            $this->_ci->Inbox_model->insertHotlinePrivate($data);
             return true;
         }catch(Exception $e){
             //print_r("umd => ".$e);

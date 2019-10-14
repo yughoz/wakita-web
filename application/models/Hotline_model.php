@@ -50,24 +50,25 @@ class Hotline_model extends CI_Model
     // }
     // datatables
     
-    function detail_list($where, $start, $table) {
-        $this->db->select($table.".*,tbl_user.full_name as username,name_replace as username_title");
-        // $this->db->from('hotline');
-        $this->db->join('tbl_user', $this->table.'.createdby = email',"LEFT");
-        $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
+    function detail_list($where,$start, $tables) {
+       
+        $this->db->select($tables.".*,tbl_user.full_name as username,name_replace as username_title");
+        $this->db->from($tables);
+        $this->db->join('tbl_user', $tables.'.createdby = email',"LEFT");
+        $this->db->join('mst_contact', 'mst_contact.phone = '.$tables.'.customer_phone',"LEFT");
         $this->db->where($where);
         $this->db->order_by('created', 'DESC');
         $this->db->limit(10,$start);
 
-        return $this->db->get($table)->result();
+        return $this->db->get()->result();
     }
-    function count_all($where, $table) {
+    function count_all($where, $tables) {
         // $this->db->select($this->table.".*,tbl_user.full_name as username");
         // $this->db->from('hotline');
         // $this->db->join('tbl_user', $this->table.'.createdby = email',"LEFT");
         // $this->db->count_all_results('my_table'); 
         $this->db->where($where);
-        $this->db->from($table);
+        $this->db->from($tables);
         return $this->db->count_all_results();
     }
 

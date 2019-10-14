@@ -115,17 +115,22 @@ class ManageChat extends CI_Controller
     public function detail_json($hotline, $customer, $start, $private) {
 
         header('Content-Type: application/json');
-         $whereArr = array(
-            'customer_phone'        => $customer,
-            'hotline.group_hotline' => $hotline,
-        );
-        if($private == 'private'){
+         
+        if($private == 1){
             $table = 'hotline_private';
-        }else{
+        }else if($private == 0){
             $table = 'hotline';
         }
+        $whereArr = array(
+            $table.'.customer_phone'        => $customer,
+            // 'hotline.group_hotline' => $hotline,
+        );
+        // echo $table;
+        // exit();
         $startFrom  = $start;
         $datas      = array_reverse($this->Hotline_model->detail_list($whereArr, $startFrom, $table));
+        // echo var_dump($datas);
+        // exit();
         $count      = $this->Hotline_model->count_all($whereArr,$table);
         foreach ($datas as $key => $value) {
             if (!empty($value->image_name)) {
@@ -161,7 +166,7 @@ class ManageChat extends CI_Controller
 
     public function send_whatsapp() 
     {
-        $type = $this->input->post('type',TRUE);
+        $type       = $this->input->post('type',TRUE);
 
         $this->apiToken  = $this->ManageChat_model->get_token($this->input->post('noPhoneFrom',TRUE));
         if($type != 'text'){
@@ -169,6 +174,7 @@ class ManageChat extends CI_Controller
         }
         
         $data = array(
+            'private'           => $this->input->post('private', TRUE),
             'token'             => $this->apiToken,
             'type'              => $this->input->post('type',TRUE),
             'phone'             => $this->input->post('noPhone',TRUE),
