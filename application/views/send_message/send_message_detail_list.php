@@ -10,9 +10,11 @@
         
         <div class="box-body">
         <div style="padding-bottom: 10px;">
-        
-        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#myModal">Send WA</button>
-        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#sendImgModal">Send File</button>
+        <?php if (checking_akses("send_message_add")): ?>
+          <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#myModal">Send WA</button>
+          <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#sendImgModal">Send File</button>
+          
+        <?php endif ?>
         <button type="button" class="btn btn-danger btn-sm" id="refersh">Refersh</button>
         </div>
         <div class="box-body table-responsive no-padding">

@@ -13,15 +13,16 @@ class ManageHotlineMember_model extends CI_Model
     function __construct()
     {
         parent::__construct();
+        $this->dbServer = $this->load->database('server_admin', TRUE);
     }
 
     // datatables
-    function json($milis_id="") {
-        $this->datatables->select('milis_member.*,milis_member.id,milis.name as milis_name,tbl_user.full_name as username');
+    function json($device_id="") {
+        $this->datatables->select('milis_member.*,milis_member.id,tbl_user.full_name as username');
         $this->datatables->from('milis_member');
         //add this line for join
-        $this->datatables->where('milis.id',$milis_id);
-        $this->datatables->join('milis', 'milis_id = milis.id');
+        $this->datatables->where('milis_member.device_id',$device_id);
+        // $this->datatables->join('milis', 'milis_id = milis.id');
         $this->datatables->join('tbl_user', 'user_id = id_users');
         $this->datatables->add_column('action', ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf($1);return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', 'id');
 
@@ -74,13 +75,13 @@ class ManageHotlineMember_model extends CI_Model
     // get total rows
     function total_rows($q = NULL) {
         $this->db->like('id', $q);
-	$this->db->or_like('milis_id', $q);
-	$this->db->or_like('user_id', $q);
-	$this->db->or_like('created', $q);
-	$this->db->or_like('createdby', $q);
-	$this->db->or_like('updated', $q);
-	$this->db->or_like('updatedby', $q);
-	$this->db->from($this->table);
+    	$this->db->or_like('milis_id', $q);
+    	$this->db->or_like('user_id', $q);
+    	$this->db->or_like('created', $q);
+    	$this->db->or_like('createdby', $q);
+    	$this->db->or_like('updated', $q);
+    	$this->db->or_like('updatedby', $q);
+    	$this->db->from($this->table);
         return $this->db->count_all_results();
     }
 

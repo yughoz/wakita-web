@@ -26,6 +26,7 @@ if ($export_pdf == '1') {
     $string .= "\n\t\t<?php echo anchor(site_url('".$c_url."/pdf'), 'PDF', 'class=\"btn btn-primary\"'); ?>";
 }
 $string.="</div>
+        <div class=\"box-body table-responsive no-padding\">
         <table class=\"table table-bordered table-striped\" id=\"mytable\">
             <thead>
                 <tr>
@@ -50,6 +51,7 @@ $col_non_pk = implode(',', $column_non_pk);
 
 $string .= "\n\t    
         </table>
+        </div>
         </div>
                     </div>
             </div>

@@ -60,6 +60,7 @@
   }
 </style>
 <div class="content-wrapper">
+
     <section class="content">
         <div class="row">
             <div class="col-xs-12">
@@ -75,11 +76,24 @@
         <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#addMemberModal">Add Data</button>
         <button type="button" class="btn btn-danger btn-sm" id="refersh" name="refersh">Refersh</button>
         </div>
+        
+        <div class="alert alert-info alert-dismissible">
+          <h4> <?php echo $hotlineData->device_name ?></h4>
+          <h4> <?php echo $hotlineData->device_id ?></h4>
+          <?php if ($hotlineData->wa_status == "connected"): ?>
+          <h4><span class="label label-success"> <?php echo $hotlineData->wa_status ?></span></h4>
+          
+          <?php else: ?>
+          <h4><span class="label label-danger"> <?php echo $hotlineData->wa_status ?></span></h4>
+
+          <?php endif ?>
+          
+        </div>
         <table class="table table-bordered table-striped" id="mytable">
             <thead>
                 <tr>
                     <th width="30px">No</th>
-                    <th>Hotline Name</th>
+                    <!-- <th>Hotline Name</th> -->
                     <th>User</th>
                     <th width="200px">Action</th>
                 </tr>
@@ -176,7 +190,7 @@
                         {
                             "data": "id",
                             "orderable": false
-                        },{"data": "milis_name"},{"data": "username"},
+                        },{"data": "username"},
                         {
                             "data" : "action",
                             "orderable": false,

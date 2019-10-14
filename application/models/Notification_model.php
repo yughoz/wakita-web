@@ -3,15 +3,12 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class ManageHotline_model extends CI_Model
+class Notification_model extends CI_Model
 {
 
-    public $table = 'milis';
-    public $table2 = 'tbl_invoice';
-    public $table3 = 'hotline';
-    public $table_server = 'ms_hotline';
-    public $id = 'id';
-    public $order = 'DESC';
+    public $table   = 'notifications';
+    public $id      = 'id';
+    public $order   = 'DESC';
 
     function __construct()
     {
@@ -20,15 +17,6 @@ class ManageHotline_model extends CI_Model
         $this->dbServer = $this->load->database('server_admin', TRUE);
     }
 
-    // datatables
-    function jsonBU() {
-        $this->datatables->select('a.id,b.package_name,a.name,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
-        $this->datatables->from('milis as a');
-        //add this line for join
-        $this->datatables->join('tbl_package as b', 'a.package_id = b.package_id');
-        $this->datatables->add_column('action', '<a href="#" class="btn btn-danger btn-sm" onclick="editModal($1);return false;"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> </a> '.' <a href="'.base_url().'ManageHotlineMember/member/$1" class="btn btn-danger btn-sm" ><i class="fa fa-eye" aria-hidden="true"></i> </a>'. ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf($1);return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', 'id');
-        return $this->datatables->generate();
-    }
     // datatables
     function json() { 
         $this->datatables->set_database("server_admin");

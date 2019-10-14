@@ -33,15 +33,15 @@ class Outbox extends CI_Controller
     {
         echo "43312";
     } 
-    public function getToken()
+    public function getToken($token)
     {
-        $token = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";
+        // $token = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";
         $encode = $this->base64url_encode($token);
         $decode = $this->base64url_decode($encode);
         echo "token ori \n".$token;
         echo "<br>\n";
         echo "token encode : ".$encode;
-        echo "<br>\n";
+        echo "\n<br>";
         echo "token decode\n".$decode;
 
     } 
