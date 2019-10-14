@@ -87,6 +87,11 @@ class Inbox_model extends CI_Model
     {
         $this->db->insert('hotline', $data);
     }
+
+    function insertHotlinePrivate($data)
+    {
+        $this->db->insert('hotline_private', $data);
+    }
     // get data by id
     function get_hotline($phone)
     {
