@@ -1,8 +1,10 @@
 # Wakita Doc
 
-[API]()
+[1.0]()
 
-  * [1.0](API/1.0.md)
+	
+  * [WA](API/1.0/sendWA.md)
+  * [SMS](API/1.0/sendSMS.md)
 
 
 <!-- counter pixel for counting visitors -->

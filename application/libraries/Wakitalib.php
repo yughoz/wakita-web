@@ -34,6 +34,21 @@ class Wakitalib {
     	return $path;
     }
 
+    
+    function base64url_encode($data) {
+      return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+    }
+
+    function base64url_decode($data) {
+      $decode =  base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
+
+      if (!preg_match('/^[\w.-]+$/', $decode)) {
+          return false;
+      } else {
+        return $decode;
+      }
+    }
+
     // $pid=$this->get_pid_id('ms_settlement_voucher',$table_code,'id_settlement_voucher',1);
     public function get_pid_id($table,$table_code,$id_table_name,$for)
     {

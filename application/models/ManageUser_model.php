@@ -115,11 +115,15 @@ class ManageUser_model extends CI_Model
     {
         $pid = $this->wakitalib->get_pid_id('tbl_user',"MSUser",'id_users',1);
         $data = [
-                'pid' => $pid,
+                'pid'           => $pid,
                 'id_user_local' => $param['pid'],
-                'email' => $param['email'],
-                'phone' => $param['phone'],
+                'email'         => $param['email'],
+                'phone'         => $param['phone'],
                 'company_id'    => $this->config->item('company_id'),
+                'created'       => date("Y-m-d H:i:s"),
+                'createdby'     => $this->session->userdata('email'),
+                'updated'       => date("Y-m-d H:i:s"),
+                'updatedby'     => $this->session->userdata('email'),
             ];
         $this->dbServer->where('email', $param['email']);
         $this->dbServer->or_where('phone', $param['phone']);

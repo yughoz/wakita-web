@@ -79,7 +79,8 @@
         
         <div class="alert alert-info alert-dismissible">
           <h4> <?php echo $hotlineData->device_name ?></h4>
-          <h4> <?php echo $hotlineData->device_id ?></h4>
+          <h4> <?php echo $hotlineData->phone_number ?></h4>
+          <h4> <span class="label label-warning"><?php echo $token ?></span></h4>
           <?php if ($hotlineData->wa_status == "connected"): ?>
           <h4><span class="label label-success"> <?php echo $hotlineData->wa_status ?></span></h4>
           
@@ -188,7 +189,7 @@
                     ajax: {"url": '<?php echo base_url("ManageHotlineMember/json/").$member ?>', "type": "POST"},
                     columns: [
                         {
-                            "data": "id",
+                            "data": "pid",
                             "orderable": false
                         },{"data": "username"},
                         {

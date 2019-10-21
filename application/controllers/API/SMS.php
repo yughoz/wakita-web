@@ -3,7 +3,7 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Outbox extends CI_Controller
+class SMS extends CI_Controller
 {
     function __construct()
     {
@@ -134,14 +134,15 @@ class Outbox extends CI_Controller
 
 
     public function sendMessageApi($number,$message, $from_num) {
-       $this->Loging("api_outbox_response_wablas" , [
+       $this->Loging("api_sms_response_wablas" , [
                                                         "number"=>$number,
                                                         "message"=>$message,
+                                                        "url"  => $this->url."/sms/send",
                                                     ]);
        
        try {
             $response = $this->client->request( 'POST', 
-                                           $this->url."/send-message", 
+                                           $this->url."/sms/send", 
 
                                           [ 
                                             'headers' => [
@@ -162,47 +163,48 @@ class Outbox extends CI_Controller
             // $response = $response->getReasonPhrase(); // OK
             // echo $response->getProtocolVersion(); // 1.1
             $body =  json_decode($response->getBody(),true);
-
-            $dataInsert = [
-                'status' => $body['status'],
-                'message' => $body['message'],
-                'quota'    => $body['data']['quota'],
-                'status_code' => $status_code,
-                // 'response' => $response,
-                'created' => date("Y-m-d H:i:s"),
-                'createdby' => $this->session->userdata('email'),
-            ];
-            // echo print_r($dataInsert);die();
-            $id = $this->Send_message_detail_model->insert_header($dataInsert);
-            $this->Loging("api_whatsapp_response_wablas" , ['body' => $body,'status_code' => $status_code]);
+            // echo "3132";
+            // echo $body;die();
+            // $dataInsert = [
+            //     'status' => $body['status'],
+            //     'message' => $body['message'],
+            //     'quota'    => $body['data']['quota'],
+            //     'status_code' => $status_code,
+            //     // 'response' => $response,
+            //     'created' => date("Y-m-d H:i:s"),
+            //     'createdby' => $this->session->userdata('email'),
+            // ];
+            // // echo print_r($dataInsert);die();
+            // $id = $this->Send_message_detail_model->insert_header($dataInsert);
+            $this->Loging("api_sms_response_wablas" , ['body' => $body,'status_code' => $status_code]);
             
-            foreach ($body['data']['message'] as $key => $value) {
-                $data = array(
-                'header_id' => $id,
-                'from_num' => $from_num,
-                'dest_num' => $value['phone'],
-                'message_id' => $value['id'],
-                'message_text' => $value['text'],
-                'status' =>     $value['status'],
-                'created' => date("Y-m-d H:i:s"),
-                'createdby' => "API_Outbox",
-                'updated' => date("Y-m-d H:i:s"),
-                'updatedby' => "API_Outbox",
-                );
-                $this->Send_message_detail_model->insert($data);
-                if ($this->input->post('save_hotline',TRUE) == "1" || $this->input->post('save_hotline',TRUE) == "Y") {
-                    $insHotline = array(
-                        'customer_phone' => $value['phone'],
-                        'message'       => $value['text'],
-                        'created'       => date("Y-m-d H:i:s"),
-                        'message_id'    => $value['id'],
-                        'group_hotline' => $from_num,
-                        'createdby'     => "API_OUTBOX",
-                        'flag_status'   => "5",
-                    );
-                    $this->Inbox_model->insertHotline($insHotline);
-                }
-            }
+            // foreach ($body['data']['message'] as $key => $value) {
+            //     $data = array(
+            //     'header_id' => $id,
+            //     'from_num' => $from_num,
+            //     'dest_num' => $value['phone'],
+            //     'message_id' => $value['id'],
+            //     'message_text' => $value['text'],
+            //     'status' =>     $value['status'],
+            //     'created' => date("Y-m-d H:i:s"),
+            //     'createdby' => "API_Outbox",
+            //     'updated' => date("Y-m-d H:i:s"),
+            //     'updatedby' => "API_Outbox",
+            //     );
+            //     $this->Send_message_detail_model->insert($data);
+            //     if ($this->input->post('save_hotline',TRUE) == "1" || $this->input->post('save_hotline',TRUE) == "Y") {
+            //         $insHotline = array(
+            //             'customer_phone' => $value['phone'],
+            //             'message'       => $value['text'],
+            //             'created'       => date("Y-m-d H:i:s"),
+            //             'message_id'    => $value['id'],
+            //             'group_hotline' => $from_num,
+            //             'createdby'     => "API_OUTBOX",
+            //             'flag_status'   => "5",
+            //         );
+            //         $this->Inbox_model->insertHotline($insHotline);
+            //     }
+            // }
             // echo json_encode($body);
             return $body;
           } catch (GuzzleHttp\Exception\BadResponseException $e) {

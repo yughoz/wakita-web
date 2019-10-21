@@ -32,12 +32,12 @@ class ManageHotline_model extends CI_Model
     // datatables
     function json() { 
         $this->datatables->set_database("server_admin");
-        $this->datatables->select('a.pid,a.name,package_name,a.wa_status,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
+        $this->datatables->select('a.pid,a.name,package_name,a.wa_status,phone_number,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
         $this->datatables->from($this->table_server.' as a');
         $this->datatables->where("company_id",$this->config->item('company_id'));
         //add this line for join
         $this->datatables->join('tbl_package as b', 'a.package_id = b.package_id');
-        $this->datatables->add_column('action', ' <a href="'.base_url().'ManageHotlineMember/member/$1" class="btn btn-danger btn-sm" ><i class="fa fa-eye" aria-hidden="true"></i> </a>', 'device_id');
+        $this->datatables->add_column('action', '<a href="#" onclick="barcodeModal(\'$2\');return false;"  class="btn btn-info btn-sm" ><i class="fa fa-qrcode" aria-hidden="true"></i> </a> <a href="'.base_url().'ManageHotlineMember/member/$1" class="btn btn-danger btn-sm" ><i class="fa fa-eye" aria-hidden="true"></i> </a> ', 'phone_number,token');
         return $this->datatables->generate();
     }
 
@@ -61,6 +61,13 @@ class ManageHotline_model extends CI_Model
         return $this->dbServer->get($this->table_server)->row();
     }
 
+    function get_all_where($where)
+    {
+        $this->db->order_by($this->id, 'asc');
+        $this->db->where($where);
+        return $this->db->get($this->table)->result();
+    }
+
     function detail_list($where,$start) {
         $this->db->select($this->table3.".*,tbl_user.full_name as username,name_replace as username_title");
         // $this->db->from('hotline');
@@ -72,6 +79,7 @@ class ManageHotline_model extends CI_Model
 
         return $this->db->get($this->table3)->result();
     }
+    
     function count_all($where) {
         // $this->db->select($this->table.".*,tbl_user.full_name as username");
         // $this->db->from('hotline');
@@ -146,8 +154,8 @@ class ManageHotline_model extends CI_Model
     // get token
     function get_token($number)
     {
-        $this->db->where("phone_number", $number);
-        $data =  $this->db->get($this->table)->row();
+        $this->dbServer->where("phone_number", $number);
+        $data =  $this->dbServer->get($this->table_server)->row();
         if ($data) {
             return $data->token;
         }

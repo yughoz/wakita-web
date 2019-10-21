@@ -22,6 +22,7 @@ class Whatsapp extends CI_Controller
         $this->config->load('companyProfile');
         $this->load->model('Inbox_model');
         $this->load->model('Milis_model');
+        $this->load->model('ManageHotline_model');
 
         // $this->apiToken     = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";
         // $this->wablasClient = new WablasClient($apiToken);
@@ -63,6 +64,7 @@ class Whatsapp extends CI_Controller
     }
     public function webhook() 
     {
+        $this->Loging("webhook_start" , $_POST);
         $data = array(
             'message_id'    => $this->input->post('id',TRUE),
             'fromMe'        => $this->input->post('fromMe',TRUE),
@@ -131,7 +133,7 @@ class Whatsapp extends CI_Controller
                 // 
                 $dataMilis = $this->parsingNum($data['receiver']);
                 $dataMsg   = $this->parsingMsg($data['phone']);
-                $this->apiToken  = $this->Milis_model->get_token($data['receiver']);
+                $this->apiToken  = $this->ManageHotline_model->get_token($data['receiver']);
                 $this->sendMessage($dataMilis,$dataMsg);
 
 
@@ -308,7 +310,7 @@ class Whatsapp extends CI_Controller
     }
     function parsingNum($id){
         $dataMilis = $this->Milis_member_model->getAllCustomWebhook($id);
-        $resultArr = "";
+        $resultArr = [];
         foreach ($dataMilis as $key => $value) {
             $resultArr[] = $value->phone;
         }
@@ -401,7 +403,7 @@ class Whatsapp extends CI_Controller
 
         // $customer_name  = $this->Contact_model->insert_update($dataContat);
 
-        $this->apiToken  = $this->Milis_model->get_token($this->input->post('group_hotline',TRUE));
+        $this->apiToken  = $this->ManageHotline_model->get_token($this->input->post('group_hotline',TRUE));
         if ($dataResult = $this->sendMessage($data['dest_num'],$data['message_text'])) {
              $this->Loging("api_whatsapp_send_wa_milis_message" , [
                                                     "dataResult"=>$dataResult,
@@ -468,7 +470,7 @@ class Whatsapp extends CI_Controller
         $data['imageUrl'] = base_url('assets/foto_wa')."/".$resultUpload['file_name'];
         $data['doc_name'] = $resultUpload['file_name'];
 
-        $this->apiToken  = $this->Milis_model->get_token($this->input->post('group_hotline',TRUE));
+        $this->apiToken  = $this->ManageHotline_model->get_token($this->input->post('group_hotline',TRUE));
         // $this->sendImg($data);
 
         if ($dataResult = $this->sendImg($data)) {

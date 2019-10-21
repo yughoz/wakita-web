@@ -66,7 +66,7 @@ class Contact_model extends CI_Model
             return $dataContact->name_replace;
         }
 
-        return $dataContact->name_replace;
+        return $dataContact->name_replace ?? "";
     }
 
     function insert_update_web($data)
