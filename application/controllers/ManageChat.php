@@ -152,7 +152,7 @@ class ManageChat extends CI_Controller
                 }
 
                 if (!empty($value->document_name)) {
-                    $datas[$key]->document_name = base_url("API/DirectLink/file/")."document/".$value->document_name;
+                    $datas[$key]->document      = base_url("API/DirectLink/file/")."document/".$value->document_name;
                     $datas[$key]->extension 	= pathinfo($value->document_name, PATHINFO_EXTENSION);
                     // /$datas[$key]->image 	= base_url('assets/foto_wa')."/".$value->image_name;
                 }

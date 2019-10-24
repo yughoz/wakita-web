@@ -3,10 +3,10 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class ManageUser_model extends CI_Model
+class ManageCustomer_model extends CI_Model
 {
 
-    public $table = 'tbl_user';
+    public $table = 'tbl_customer';
     public $id = 'id_users';
     public $order = 'DESC';
 
@@ -17,6 +17,12 @@ class ManageUser_model extends CI_Model
         $this->load->library('wakitalib');
         $this->config->load('companyProfile');
 
+    }
+
+    function get_verification($q = NULL) {
+        $this->db->order_by($this->id, $this->order);
+        $this->db->like('verification', $q);
+        return $this->db->get($this->table)->result();
     }
 
     // datatables
@@ -115,6 +121,7 @@ class ManageUser_model extends CI_Model
     function insert($data)
     {
         $this->db->insert($this->table, $data);
+        return true;
     }
 
     // check data
@@ -122,15 +129,11 @@ class ManageUser_model extends CI_Model
     {
         $pid = $this->wakitalib->get_pid_id('tbl_user',"MSUser",'id_users',1);
         $data = [
-                'pid'           => $pid,
+                'pid' => $pid,
                 'id_user_local' => $param['pid'],
-                'email'         => $param['email'],
-                'phone'         => $param['phone'],
+                'email' => $param['email'],
+                'phone' => $param['phone'],
                 'company_id'    => $this->config->item('company_id'),
-                'created'       => date("Y-m-d H:i:s"),
-                'createdby'     => $this->session->userdata('email'),
-                'updated'       => date("Y-m-d H:i:s"),
-                'updatedby'     => $this->session->userdata('email'),
             ];
         $this->dbServer->where('email', $param['email']);
         $this->dbServer->or_where('phone', $param['phone']);

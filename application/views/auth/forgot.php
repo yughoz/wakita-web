@@ -34,7 +34,16 @@
   </div>
 
   <div class="register-box-body">
-    <p class="login-box-msg">Please Input Registered Email or Phone Number</p>
+  
+    <?php
+    $status_login = $this->session->userdata('status_login');
+    if (empty($status_login)) {
+        $message = $title;
+    } else {
+        $message = $status_login;
+    }
+    ?>
+    <p class="login-box-msg"><?php echo $message; ?></p>
 
     <?php echo form_open('auth/chekForgot'); ?>
         <div class="form-group has-feedback">
@@ -54,7 +63,7 @@
             </div>
             <!-- /.col -->
             <div class="col-xs-4">
-            <button type="submit" class="btn btn-primary btn-block btn-flat">Send</button>
+            <button type="submit" class="btn btn-primary btn-block btn-flat"><?php echo $button; ?></button>
             </div>
             <!-- /.col -->
         </div>

@@ -2,6 +2,7 @@
     "require": {
         "wablas/wablas-client-php": "^1.0",
         "kreait/firebase-php": "^4.29",
-        "wisembly/elephant.io": "^3.3"
+        "wisembly/elephant.io": "^3.3",
+        "sendgrid/sendgrid": "~7"
     }
 }

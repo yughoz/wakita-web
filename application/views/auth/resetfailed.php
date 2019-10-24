@@ -35,35 +35,18 @@
             <!-- /.login-logo -->
             <div class="login-box-body">
                 <?php
-                $status_login = $this->session->userdata('message');
-                // echo $status_login;
-                if (empty($status_login)) {
-                    $message = $title;
-                } else {
-                    $message = $status_login;
-                }
+                $status_login = $this->session->userdata('status_login');
+                echo $status_login;
+                // if (empty($status_login)) {
+                //     $message = "Silahkan login untuk masuk ke aplikasi";
+                // } else {
+                //     $message = $status_login;
+                // }
                 ?>
-                <p class="login-box-msg"><?php echo $message; ?></p>
+                <p class="login-box-msg"><?php //echo $message; ?></p>
+                <p class="login-box-msg"><?php //echo $title; ?></p>
 
-                <?php echo form_open($action); ?>
-                <input type="hidden" name="id" value='<?php echo $id; ?>'/>
-                <input type="hidden" name="forgot" value='<?php echo $forgot; ?>'/>
-                <div class="form-group has-feedback">
-                    <input type="password" class="form-control" name="newpassword" placeholder="New Password">
-                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-                </div>
-                <div class="form-group has-feedback">
-                    <input type="password" class="form-control" name="renewpassword" placeholder="Renew Password">
-                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-                </div>
-                <div class="row">
-                    <div class="col-xs-12">
-                        <button type="submit" class="btn btn-danger btn-block btn-flat"><i class="fa fa-sign-in" aria-hidden="true"></i> Reset Password</button>
-                    </div>
-                </div>
-                <!-- /.col -->
-
-                </form>
+                
 
             </div>
             <!-- /.login-box-body -->
