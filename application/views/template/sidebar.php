@@ -39,12 +39,12 @@
             }else{
                 // display main menu
                 echo "<li>";
-                echo anchor($menu->url,"<i class='".$menu->icon."'></i> ".strtoupper($menu->title));
+                echo anchor($menu->url,"<i class='".$menu->icon."'></i> <span>".strtoupper($menu->title)."</span>");
                 echo "</li>";
             }
         }
         ?>
-        <li><?php echo anchor('auth/logout',"<i class='fa fa-sign-out'></i> LOGOUT");?></li>
+        <li><?php echo anchor('auth/logout',"<i class='fa fa-sign-out'></i><span> LOGOUT</span>");?></li>
     </ul>
 </section>
 <!-- /.sidebar -->

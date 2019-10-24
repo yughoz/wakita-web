@@ -34,7 +34,7 @@ class ManageHotlineMember extends CI_Controller
     } 
     public function member($id)
     {
-        $hotlineData = $this->ManageHotline_model->get_by_where(['device_id' => $id]);
+        $hotlineData = $this->ManageHotline_model->get_by_where(['phone_number' => $id]);
         $data = array(
             'button' => 'Create',
             'action' => site_url('ManageHotlineMember/create_action'),
@@ -46,6 +46,7 @@ class ManageHotlineMember extends CI_Controller
             'updated' => set_value(''),
             'updatedby' => set_value(''),
             'member' => $id,
+            'token' => $this->wakitalib->base64url_encode($hotlineData->token),
             'hotlineData'   => $hotlineData,
         );
 
@@ -53,22 +54,22 @@ class ManageHotlineMember extends CI_Controller
         $this->template->load('template','ManageHotlineMember/ManageHotlineMember_list', $data);
     } 
     
-    public function json($device_id = "") {
+    public function json($phone_number = "") {
         header('Content-Type: application/json');
-        echo $this->ManageHotlineMember_model->json($device_id);
+        echo $this->ManageHotlineMember_model->json($phone_number);
     }
 
 
-    public function user($device_id) {
+    public function user($group_number) {
         header('Content-Type: application/json');
-        $dataMilis = $this->getUserMilis($device_id);
+        $dataMilis = $this->getUserMilis($group_number);
         // echo print_r($dataMilis);
         // die;
         echo $this->ManageUser_model->jsonMember($dataMilis);
     }
 
-    function getUserMilis($device_id){
-        $dataMilis = $this->ManageHotlineMember_model->get_all(["device_id" => $device_id]);
+    function getUserMilis($group_number){
+        $dataMilis = $this->ManageHotlineMember_model->get_all(["group_number" => $group_number]);
         $dataTemp = [];
         foreach ($dataMilis as $key => $value) {
             $dataTemp[] = $value->user_id;
@@ -122,7 +123,7 @@ class ManageHotlineMember extends CI_Controller
         ]);die();
         }
     }
-    public function add_member($device_id,$user_id) 
+    public function add_member($group_number,$user_id) 
     {
         $this->_rules();
 
@@ -134,7 +135,8 @@ class ManageHotlineMember extends CI_Controller
         //     ]);die();
         // } else {
             $data = array(
-                'device_id'  => $device_id,
+                'pid'       => $this->wakitalib->get_pid_id('hotline_member',"HM",'pid',1),
+                'group_number'  => $group_number,
                 'user_id'   => $user_id,
                 'created'   => date("Y-m-d H:i:s"),
                 'createdby' => $this->session->userdata('email'),

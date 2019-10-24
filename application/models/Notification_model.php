@@ -7,7 +7,7 @@ class Notification_model extends CI_Model
 {
 
     public $table   = 'notifications';
-    public $id      = 'id';
+    public $id      = 'pid';
     public $order   = 'DESC';
 
     function __construct()
@@ -19,12 +19,12 @@ class Notification_model extends CI_Model
 
     // datatables
     function json() { 
-        $this->datatables->set_database("server_admin");
-        $this->datatables->select('a.pid,a.name,package_name,a.wa_status,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
-        $this->datatables->from($this->table_server.' as a');
-        $this->datatables->where("company_id",$this->config->item('company_id'));
+        // $this->datatables->set_database("server_admin");
+        $this->datatables->select('*');
+        $this->datatables->from($this->table.' as a');
+        // $this->datatables->where("company_id",$this->config->item('company_id'));
         //add this line for join
-        $this->datatables->join('tbl_package as b', 'a.package_id = b.package_id');
+        // $this->datatables->join('tbl_package as b', 'a.package_id = b.package_id');
         $this->datatables->add_column('action', ' <a href="'.base_url().'ManageHotlineMember/member/$1" class="btn btn-danger btn-sm" ><i class="fa fa-eye" aria-hidden="true"></i> </a>', 'device_id');
         return $this->datatables->generate();
     }
@@ -33,6 +33,14 @@ class Notification_model extends CI_Model
     function get_all()
     {
         $this->db->order_by($this->id, $this->order);
+        return $this->db->get($this->table)->result();
+    }
+
+    // get all
+    function get_all_where($where)
+    {
+        $this->db->order_by($this->id, $this->order);
+        $this->db->where($where);
         return $this->db->get($this->table)->result();
     }
 
@@ -46,7 +54,7 @@ class Notification_model extends CI_Model
     function get_by_where($where)
     {
         $this->dbServer->where($where);
-        return $this->dbServer->get($this->table_server)->row();
+        return $this->dbServer->get($this->table)->row();
     }
 
     function detail_list($where,$start) {

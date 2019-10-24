@@ -6,8 +6,9 @@ Class Auth extends CI_Controller{
         parent::__construct();
         // is_login();
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('Milis_member_model');
+        $this->load->model('ManageHotlineMember_model');
         $this->load->model('Milis_model');
+        $this->load->model('ManageHotline_model');
         $this->load->model('ManageUser_model');
         $this->config->load('companyProfile');
         $this->config->load('mobile');
@@ -80,10 +81,10 @@ Class Auth extends CI_Controller{
             if(password_verify($password,$user['password'])){
                 // retrive user data to session
                 // $this->db->where('user_id',$email);
-                $dataHotline  = $this->Milis_member_model->get_all_where(['user_id' => $user['id_users']]);
-
+                $dataHotline  = $this->ManageHotlineMember_model->get_all_where(['user_id' => $user['id_users']]);
+                // echo print_r($dataHotline);die();
                 foreach ($dataHotline as $key => $value) {
-                    $dataHotlineDetail[] = $this->Milis_model->get_by_id($value->milis_id);
+                    $dataHotlineDetail[] = $this->ManageHotline_model->get_by_where(['phone_number' =>$value->group_number]);
                 }
 
                 $this->session->set_userdata($user);

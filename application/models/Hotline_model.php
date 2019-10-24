@@ -36,6 +36,19 @@ class Hotline_model extends CI_Model
         // $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
         return $this->db->get('vw_group_milis')->result();
     } 
+    // datatables
+    function group_json_search($where = [],$where_like = []) {
+        $this->db->select('hotline.id,customer_phone,SUBSTR(message, 1, 30) as message,flag_status,hotline.created,hotline.createdby,hotline.group_hotline,image_name,name_replace as customer_title,SUBSTR(name_replace, 1, 14) as username_title_sort');  
+        // $this->db->from('hotline');
+        $this->db->where($where);
+        $this->db->like($where_like);
+
+        // $this->db->group_by('customer_phone');
+        $this->db->order_by('hotline.id', 'DESC'); 
+        // $this->db->order_by('flag_status', 'ASC'); 
+        $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
+        return $this->db->get('hotline')->result();
+    } 
 
 
     // function group_json($where = []) {
@@ -49,20 +62,42 @@ class Hotline_model extends CI_Model
     //     return $this->db->get('vw_group_milis')->result();
     // }
     // datatables
+
+    function getQueryNumber($where,$id){
+        $this->db->select("*,(@cnt := @cnt + 1) AS rowNumber");
+        $this->db->where($where);
+        $this->db->join('(SELECT @cnt := 0) AS dummy','1=1');
+        $this->db->order_by('created', 'DESC');
+        $this->db->get('hotline')->result();
+
+        return $this->db->last_query();
+    }
+
+
+    function getRowNumber($limitQuery,$where_condition,$id){
+        $sql = "SELECT rowNumber from (  ".$limitQuery." ) as t where id= ".$id;
+        // $this->db->select("*");
+        // $this->db->where($where);
+        // $this->db->join('(SELECT @cnt := 0) AS dummy','1=1');
+        
+        // echo $sql;die();
+        return $this->db->query($sql, $where_condition)->row();;
+    }
     
-    function detail_list($where,$start, $tables) {
-       
-        $this->db->select($tables.".*,tbl_user.full_name as username,name_replace as username_title");
-        $this->db->from($tables);
-        $this->db->join('tbl_user', $tables.'.createdby = email',"LEFT");
-        $this->db->join('mst_contact', 'mst_contact.phone = '.$tables.'.customer_phone',"LEFT");
+	function detail_list($where, $start, $table = 'hotline',$limit = 10) {
+        $this->db->select($table.".*,tbl_user.full_name as username,name_replace as username_title,(@cnt := @cnt + 1) AS rowNumber");
+        // $this->db->from('hotline');
+        $this->db->join('tbl_user', $this->table.'.createdby = email',"LEFT");
+        $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
+        $this->db->join('(SELECT @cnt := 0) AS dummy','1=1');
         $this->db->where($where);
         $this->db->order_by('created', 'DESC');
-        $this->db->limit(10,$start);
+        $this->db->limit($limit,$start);
 
-        return $this->db->get()->result();
+        return $this->db->get($table)->result();
     }
-    function count_all($where, $tables) {
+
+    function count_all($where, $table = 'hotline') {
         // $this->db->select($this->table.".*,tbl_user.full_name as username");
         // $this->db->from('hotline');
         // $this->db->join('tbl_user', $this->table.'.createdby = email',"LEFT");

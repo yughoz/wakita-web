@@ -6,8 +6,8 @@ if (!defined('BASEPATH'))
 class ManageHotlineMember_model extends CI_Model
 {
 
-    public $table = 'milis_member';
-    public $id = 'id';
+    public $table = 'hotline_member';
+    public $id = 'pid';
     public $order = 'DESC';
 
     function __construct()
@@ -17,14 +17,14 @@ class ManageHotlineMember_model extends CI_Model
     }
 
     // datatables
-    function json($device_id="") {
-        $this->datatables->select('milis_member.*,milis_member.id,tbl_user.full_name as username');
-        $this->datatables->from('milis_member');
+    function json($group_number="") {
+        $this->datatables->select('hotline_member.*,hotline_member.pid,tbl_user.full_name as username');
+        $this->datatables->from('hotline_member');
         //add this line for join
-        $this->datatables->where('milis_member.device_id',$device_id);
+        $this->datatables->where('hotline_member.group_number',$group_number);
         // $this->datatables->join('milis', 'milis_id = milis.id');
         $this->datatables->join('tbl_user', 'user_id = id_users');
-        $this->datatables->add_column('action', ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf($1);return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', 'id');
+        $this->datatables->add_column('action', ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf($1);return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', $this->id);
 
         return $this->datatables->generate();
     }
@@ -41,7 +41,7 @@ class ManageHotlineMember_model extends CI_Model
     // get all
     function getAllCustom($milis_id)
     {
-        $this->datatables->select('milis_member.*,milis_member.id,tbl_user.full_name as username,phone');
+        $this->datatables->select('hotline_member.*,hotline_member.pid,tbl_user.full_name as username,phone');
         $this->db->order_by($this->id, $this->order);
         $this->db->where('milis_id',$milis_id);
         $this->datatables->join('tbl_user', 'user_id = id_users');
@@ -51,17 +51,17 @@ class ManageHotlineMember_model extends CI_Model
     // get all
     function getAllCustomWebhook($phone_number)
     {
-        $this->datatables->select('vw_milis_member.*,vw_milis_member.id,tbl_user.full_name as username,phone');
+        $this->datatables->select('vw_hotline_member.*,vw_hotline_member.pid,tbl_user.full_name as username,phone');
         $this->db->where('phone_number',$phone_number);
         $this->datatables->join('tbl_user', 'user_id = id_users');
-        return $this->db->get("vw_milis_member")->result();
+        return $this->db->get("vw_hotline_member")->result();
     }
 
     // get data by id
     function get_by_id($id)
     {
-        $this->db->where($this->id, $id);
-        return $this->db->get($this->table)->row();
+        $this->dbServer->where($this->id, $id);
+        return $this->dbServer->get($this->table)->row();
     }
     
     // get all
@@ -74,7 +74,7 @@ class ManageHotlineMember_model extends CI_Model
 
     // get total rows
     function total_rows($q = NULL) {
-        $this->db->like('id', $q);
+        $this->db->like($this->id, $q);
     	$this->db->or_like('milis_id', $q);
     	$this->db->or_like('user_id', $q);
     	$this->db->or_like('created', $q);
@@ -88,7 +88,7 @@ class ManageHotlineMember_model extends CI_Model
     // get data with limit and search
     function get_limit_data($limit, $start = 0, $q = NULL) {
         $this->db->order_by($this->id, $this->order);
-        $this->db->like('id', $q);
+        $this->db->like($this->id, $q);
     	$this->db->or_like('milis_id', $q);
     	$this->db->or_like('user_id', $q);
     	$this->db->or_like('created', $q);

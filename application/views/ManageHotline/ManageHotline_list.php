@@ -384,6 +384,11 @@
             $('#modalEdit').modal('show');
           }, "json" );
 
+        }        
+
+        function barcodeModal(token){
+           window.open("<?php echo base_url('API/Auth/qrCode/') ?>"+token, "_blank", "width=600,height=500");
+
         }
         function delete_conf(id){
           swal({
