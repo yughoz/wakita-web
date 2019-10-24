@@ -84,7 +84,7 @@ class Hotline_model extends CI_Model
         return $this->db->query($sql, $where_condition)->row();;
     }
     
-    function detail_list($where, $start, $table = 'hotline',$limit) {
+	function detail_list($where, $start, $table = 'hotline',$limit = 10) {
         $this->db->select($table.".*,tbl_user.full_name as username,name_replace as username_title,(@cnt := @cnt + 1) AS rowNumber");
         // $this->db->from('hotline');
         $this->db->join('tbl_user', $this->table.'.createdby = email',"LEFT");
@@ -96,13 +96,14 @@ class Hotline_model extends CI_Model
 
         return $this->db->get($table)->result();
     }
+
     function count_all($where, $table = 'hotline') {
         // $this->db->select($this->table.".*,tbl_user.full_name as username");
         // $this->db->from('hotline');
         // $this->db->join('tbl_user', $this->table.'.createdby = email',"LEFT");
         // $this->db->count_all_results('my_table'); 
         $this->db->where($where);
-        $this->db->from($table);
+        $this->db->from($tables);
         return $this->db->count_all_results();
     }
 
