@@ -39,12 +39,12 @@ table.reza-fat tr th{
                         <h3 id='customer_number' class="box-title">Customer Number</h3>
 
                         <div class="box-tools pull-right">
-                            <span data-toggle="tooltip" title="" class="badge bg-light-blue" data-original-title="3 New Messages">3</span>
-                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                            </button>
+                            <!-- <span data-toggle="tooltip" title="" class="badge bg-light-blue" data-original-title="3 New Messages">3</span> -->
+                            <!-- <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                            </button> -->
                             <button type="button" id="private" class="btn btn-box-tool switch" data-toggle="tooltip" title="" data-widget="chat-pane-toggle" data-original-title="Private Message">
                             <i class="fa fa-comments"></i></button>
-                            <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                            <!-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button> -->
                         </div>
                     </div>
                     <!-- /.box-header -->
@@ -77,7 +77,7 @@ table.reza-fat tr th{
                         <div class="input-group" style="position:relative">
                             <input type="text" id="message" placeholder="Type Message ..." class="form-control" style="padding-left:45px">
                             
-                            <div class="input-group-btn">
+                            <div class="input-group-btn" id="attachment">
                                 <div class="btn btn-default btn-file">
                                     <i class="fa fa-paperclip"></i> Attachment
                                     <input type="file" name="attachment" id="profile-img">
@@ -104,14 +104,17 @@ table.reza-fat tr th{
 <script type="text/javascript">
     const icon = '<?php echo base_url();?>assets/icon/';
     const icon_user = "https://www.eltis.org/sites/default/files/styles/adaptive/public/default_images/default_user_0.jpg?itok=oxLSK7Nx";
-    var socket = io.connect('http://149.129.222.185:8881',
+    var socketHotline = io.connect('http://149.129.222.185:8881',
                     {
                         'reconnection'          : true,
                         'reconnectionDelay'     : 500,
                         'reconnectionAttempts'  : Infinity, 
                         'transports'            : ['websocket'],
                     });
-
+    
+    var socketPersonal      = "";
+    var socketPersonal_conn = 0;
+    var firstLoad           = 0;
     var hotline             = "<?php echo $hotline; ?>";
     var base_url            = "<?php echo base_url(); ?>";
     var generateLink        = "<?php echo $generateLink; ?>";
@@ -127,10 +130,31 @@ table.reza-fat tr th{
     var DataMsg             = [];
     var tempDetail          = "";
     var tempDetailPrivate   = "";
+    var activeChat          = "";
     var fileTypes           = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mpeg', 'doc', 'docx', 'pdf', 'odt', 'csv', 'ppt', 'pptx', 'xls', 'xlsx', 'mp3', 'ogg'];
     
     $( document ).ready(function() {
-        
+        socketHotline.on('get_session', function (data) {
+            console.log(data);
+            socket_session = data.session;
+
+            socketHotline.emit('get_id', { 
+                socket_session  : socket_session,
+                id_account      : hotline
+            });
+        });
+
+        socketHotline.on('get_wa', function(data) {//buat ambil private message
+            const value = JSON.parse(data.datas);
+            if(value.group_hotline == hotline){
+                $("#showdata").empty();
+                showContacts()
+                $(".item").removeClass("active_chat");
+                $("#item_"+activeChat).addClass("active_chat");
+            }
+            // console.log("get hotline:", value)
+        });
+
         $("#message").emoji({
             place: 'after',button:'&#x1F642;',listCSS: { position:'absolute'},
             rowSize: 10
@@ -139,8 +163,10 @@ table.reza-fat tr th{
         $(".switch").click(function(){
             if(private == 0){
                 private = 1;
+                $("#attachment").hide();
             }else if(private == 1){
                 private = 0;
+                $("#attachment").show();
             }
         });
         $("#container_msg").scroll(function (event) {
@@ -264,33 +290,57 @@ table.reza-fat tr th{
     }
     
     function appendDetailChatSocket(value){
-        
+        // showContacts();
         // console.log(value);
         let html                    = "";
         var detail                  = [];
-        detail["user_send_phone"]   = value.customer_phone;
+        detail["user_send_phone"]   = value.user_send_phone;
         detail["username_phone"]    = <?php echo $userSession; ?>;
-        detail["name"]              = value.user_send_title;
+        detail["name"]              = value.customer_username;
         detail["created"]           = value.created;
         detail["image"]             = value.image;
         detail["video"]             = value.video;
-        detail["document"]          = value.document;
+        detail["document"]          = value.file;
         detail["message"]           = value.message;
         detail["type"]              = value.type;
         var xhtml                   = getDetailChat(detail);
         html        += xhtml;
-        tempDetail  += html; 
-        // $("#container_msg").append(html);
-        $("#container_msg").html(tempDetail);
+        if(value.private == true){
+            tempDetailPrivate  += html; 
+            // $("#container_msg").append(html);
+            $("#container_msg_private").html(tempDetailPrivate);
+            $("#container_msg_private").animate({ scrollTop: 60000000 }, "slow");
+        }else{
+            tempDetail  += html; 
+            // $("#container_msg").append(html);
+            $("#container_msg").html(tempDetail);
+            $("#container_msg").animate({ scrollTop: 60000000 }, "slow");
+        }
     }
 
+    
     function selectPersonalContact(array){
         
+        if(socketPersonal_conn==1){
+            socketPersonal.disconnect(); 
+        }else{
+            socketPersonal_conn=1; 
+        }
+        socketPersonal = io.connect('http://149.129.222.185:8881',
+        {
+            'reconnection'          : true,
+            'reconnectionDelay'     : 500,
+            'reconnectionAttempts'  : Infinity, 
+            'transports'            : ['websocket'],
+        });
         $("#customer_number").html(array[0]+" ( "+array[1]+" )");
         $("#noPhone").val(array[1]);
         $(".item").removeClass("active_chat");
         $("#item_"+array[1]).addClass("active_chat");
+        $("#container_msg_private").empty();
+        // $( ".box box-primary direct-chat direct-chat-primary" ).removeClass(" direct-chat-contacts-open")
 
+        activeChat          = array[1];
         start               = 0;
         startPrivate        = 0;
         customerName        = array[0];
@@ -298,26 +348,27 @@ table.reza-fat tr th{
         tempDetail          = "";
         tempDetailPrivate   = "";
 
-        socket.removeListener('get_session');
-        socket.removeListener('get_key');
+        socketPersonal.removeListener('get_key');
+        socketPersonal.removeListener('get_session');
 
-        // console.log(to)
-
-        socket.on('get_session', function (data) {
-            console.log(data);
+        socketPersonal.on('get_session', function (data) {
+            // console.log(data);
             socket_session=data.session;
 
-            socket.emit('get_id', { 
+            socketPersonal.emit('get_id', { 
                 socket_session  : socket_session,
                 id_account      : array[1]
             });
         });
 
-        socket.on('get_key', function(data) {
-            const value = JSON.parse(data.datas)
-            // console.log(value)
-            appendDetailChatSocket(value);
-            $("#container_msg").animate({ scrollTop: 60000000 }, "slow");
+        socketPersonal.on('get_key', function(data) {
+            const value = JSON.parse(data.datas);
+
+            console.log("socket Personal : ",data)
+            
+            if(value.customer_phone == array[1]){
+                appendDetailChatSocket(value);
+            }
         });
 
         if(start == 0){ 
@@ -334,7 +385,6 @@ table.reza-fat tr th{
         }else{
             url = urlDetailChat+"/"+customerPhone+"/"+startFrom+"/1";
         }
-        // console.log(url);
         $.get( url, 
             function( data ) {
                 // $( ".result" ).html( data );
@@ -344,7 +394,7 @@ table.reza-fat tr th{
                 let html        = "";
 
                 // console.log(parsed_data);
-                DataMsg         = parsed_data.data;//console.log(DataMsg.length)
+                DataMsg         = parsed_data.data;
                 start           = start + 10;
                 status_message  = 0;
 
@@ -536,7 +586,12 @@ table.reza-fat tr th{
                     var phone_num   = "'"+customerPhone+"'";
                     var phone_name  = "'"+customerName+"'";
                     var phone_array='['+phone_name+','+phone_num+']';
-                    html += '<div class="item" id="item_'+customerPhone+'" onclick="selectPersonalContact('+phone_array+');">'
+                    if(activeChat == customerPhone){
+                        html += '<div class="item active_chat" id="item_'+customerPhone+'" onclick="selectPersonalContact('+phone_array+');">'
+                    }else{
+                        html += '<div class="item" id="item_'+customerPhone+'" onclick="selectPersonalContact('+phone_array+');">'
+                    }
+                    // html += '<div class="item" id="item_'+customerPhone+'" onclick="selectPersonalContact('+phone_array+');">'
                     html += '<img src="'+icon_user+'" alt="user image" class="offline">'
                     html += '<p class="message">'
                     html += '<span class="name">'
@@ -550,9 +605,13 @@ table.reza-fat tr th{
                     }
                     html += '</p>'
                     html += '</div>'
+                    
                 }
                 $("#showdata").append(html);
-                selectPersonalContact(firstdata);
+                if(start == 0){
+                    selectPersonalContact(firstdata);
+                }
+                
             },
             error: function(){
                 alert('Could not load the data');

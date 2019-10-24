@@ -3,10 +3,10 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class ManageUser_model extends CI_Model
+class ManageCustomer_model extends CI_Model
 {
 
-    public $table = 'tbl_user';
+    public $table = 'tbl_customer';
     public $id = 'id_users';
     public $order = 'DESC';
 
@@ -17,6 +17,12 @@ class ManageUser_model extends CI_Model
         $this->load->library('wakitalib');
         $this->config->load('companyProfile');
 
+    }
+
+    function get_verification($q = NULL) {
+        $this->db->order_by($this->id, $this->order);
+        $this->db->like('verification', $q);
+        return $this->db->get($this->table)->result();
     }
 
     // datatables
@@ -115,6 +121,7 @@ class ManageUser_model extends CI_Model
     function insert($data)
     {
         $this->db->insert($this->table, $data);
+        return true;
     }
 
     // check data

@@ -198,10 +198,10 @@ class Wablas
             }
         }else{
                 $status1    = $this->update_message_detail_private($array);
-                // $status2    = $this->sendSocket($array, $body);
+                $status2    = $this->sendSocketPrivate($array);
                 // $status3    = $this->sendFCM($array, $body);
     
-                if($status1 == true){
+                if($status1 == true && $status2 == true){
                     return true;
                 }else{
                     return false;
@@ -299,6 +299,7 @@ class Wablas
         
         $value = $body['data']['message'][0];
         $data = array(
+            'private'           => false,
             'created'           => date("Y-m-d H:i:s"),
             'createdby'         => $array['session_email'],
             'user_send_phone'   => $array['session_userphone'],	//<-- user yang kirim  bisa customer / cs/admin
@@ -306,7 +307,7 @@ class Wablas
             'user_send_username'=> $array['session_username'],		//<-- user yang kirim  bisa customer / cs/admin klo customer ditambah customer di depan
             'customer_phone'    => $array['phone'],
             'customer_title'    => "",		        //<-- customer title
-            'customer_username' => "",		        //<-- customer title ditambah customer di depan
+            'customer_username' => $array['session_username'],		        //<-- customer title ditambah customer di depan
             'file'              => $value ['document'] ?? "",
             'fileUrl'           => !empty($value ['document']) ? base_url().'API/DirectLink/file/document/'.$value ['document'] :"",
             'flag_status'       => "4",
@@ -342,6 +343,62 @@ class Wablas
             $client = new Client(new Version1X(self::socket_url));
             $client->initialize();
             // send message to connected clients
+            $client->emit('post_key', 
+                                    [
+                                        'socket_session'    => '', 
+                                        'id_account'        => $data['customer_phone'], 
+                                        'datas'             => json_encode($data)
+                                    ]
+                            );
+            $client->emit('sendWA', 
+                                    [
+                                        'socket_session'    => '', 
+                                        'id_account'        => $data['group_hotline'], 
+                                        'datas'             => json_encode($data)]
+                            );
+            $client->close();
+            return true;
+        }catch(Exception $e){
+            //print_r("sendSocket => ".$e);
+            return false;
+        }
+    }
+
+    private function sendSocketPrivate($array){
+        
+        // $value = $body['data']['message'][0];
+        $data = array(
+            'private'           => true,
+            'created'           => date("Y-m-d H:i:s"),
+            'createdby'         => $array['session_email'],
+            'user_send_phone'   => $array['session_userphone'],	//<-- user yang kirim  bisa customer / cs/admin
+            'user_send_title'   => $array['session_username'],		//<-- user yang kirim  bisa customer / cs/admin
+            'user_send_username'=> $array['session_username'],		//<-- user yang kirim  bisa customer / cs/admin klo customer ditambah customer di depan
+            'customer_phone'    => $array['phone'],
+            'customer_title'    => "",		        //<-- customer title
+            'customer_username' => $array['session_username'],		        //<-- customer title ditambah customer di depan
+            'file'              => "",
+            'fileUrl'           => "",
+            'flag_status'       => "4",
+            'group_hotline'     => $array['hotline'],
+            'image'             => "",
+            'imageUrl'          => "",
+            'image_name'        => "",
+            'message'           => $array['caption'],
+            'message_id'        => "",
+            'username_phone'    => $array['session_userphone'],
+            'username_user'     => $array['session_username'],	//<-- username yang login
+            'username_title'    => $array['session_username'],
+            'video'             => "",
+            'videoUrl'          => "",
+            'destination'       => 'outbox',
+            'type'              => ""			//<--- type file gif|jpg|png|jpeg|mp4|mpeg|doc|docx|pdf|odt|csv|ppt|pptx|xls|xlsx|mp3|ogg|
+        );
+
+        try{
+            $client = new Client(new Version1X(self::socket_url));
+            $client->initialize();
+
             $client->emit('post_key', 
                                     [
                                         'socket_session'    => '', 
