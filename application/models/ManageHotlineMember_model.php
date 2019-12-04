@@ -24,7 +24,7 @@ class ManageHotlineMember_model extends CI_Model
         $this->datatables->where('hotline_member.group_number',$group_number);
         // $this->datatables->join('milis', 'milis_id = milis.id');
         $this->datatables->join('tbl_user', 'user_id = id_users');
-        $this->datatables->add_column('action', ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf($1);return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', $this->id);
+        $this->datatables->add_column('action', ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf(\'$1\');return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', $this->id);
 
         return $this->datatables->generate();
     }
@@ -60,8 +60,8 @@ class ManageHotlineMember_model extends CI_Model
     // get data by id
     function get_by_id($id)
     {
-        $this->dbServer->where($this->id, $id);
-        return $this->dbServer->get($this->table)->row();
+        $this->db->where($this->id, $id);
+        return $this->db->get($this->table)->row();
     }
     
     // get all

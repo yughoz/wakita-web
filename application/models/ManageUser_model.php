@@ -115,12 +115,13 @@ class ManageUser_model extends CI_Model
     function insert($data)
     {
         $this->db->insert($this->table, $data);
+        return $this->db->insert_id();
     }
 
     // check data
     function check_insert($param)
     {
-        $pid = $this->wakitalib->get_pid_id('tbl_user',"MSUser",'id_users',1);
+        $pid  = $this->wakitalib->get_pid_id('tbl_user',"MSUser",'id_users',1);
         $data = [
                 'pid'           => $pid,
                 'id_user_local' => $param['pid'],
@@ -133,7 +134,7 @@ class ManageUser_model extends CI_Model
                 'updatedby'     => $this->session->userdata('email'),
             ];
         $this->dbServer->where('email', $param['email']);
-        $this->dbServer->or_where('phone', $param['phone']);
+        // $this->dbServer->or_where('phone', $param['phone']);
         if (!empty($this->dbServer->get('ms_users')->row())) {
             return false;
         }

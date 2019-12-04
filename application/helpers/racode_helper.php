@@ -84,6 +84,21 @@ function checking_akses($modul){
 }
 
 
+
+function checking_login_api(){
+    $ci = get_instance();
+    if(!$ci->session->userdata('id_users')){
+        echo json_encode([
+                "code" => "session_expired",
+                "message" => "session expired \n ",
+            ]);die();
+    }else{
+        return false;
+    }
+}
+
+
+
 function alert($class,$title,$description){
     return '<div class="alert '.$class.' alert-dismissible">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>

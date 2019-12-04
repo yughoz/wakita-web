@@ -29,33 +29,40 @@ Class Contact extends CI_Controller{
     
     public function update_name(){
 
-        
-        $where = [
-            "group_hotline"      => $this->input->post('group_hotline',TRUE),
-            "phone"     => $this->input->post('customer_phone',TRUE),
-        ];
-        // $data = [
-        //     "name_replace" => $this->input->post('username',TRUE)
-        // ];
+        if (checking_akses('edit_contact')) {
+	        $where = [
+	            "group_hotline"      => $this->input->post('group_hotline',TRUE),
+	            "phone"     => $this->input->post('customer_phone',TRUE),
+	        ];
+	        // $data = [
+	        //     "name_replace" => $this->input->post('username',TRUE)
+	        // ];
 
 
-        $data = [
-            "name_wa"       => $this->input->post('customer_phone',TRUE),
-            "name_replace"  => $this->input->post('username',TRUE),
-            "phone"         => $this->input->post('customer_phone',TRUE),
-            'group_hotline' => $this->input->post('group_hotline',TRUE),
-            'created'       => date("Y-m-d H:i:s"),
-            'createdby'     => $this->session->userdata('email'),
-            'updated'       => date("Y-m-d H:i:s"),
-            'updatedby'     => $this->session->userdata('email'),
-        ];
+	        $data = [
+	            "name_wa"       => $this->input->post('customer_phone',TRUE),
+	            "name_replace"  => $this->input->post('username',TRUE),
+	            "phone"         => $this->input->post('customer_phone',TRUE),
+	            'group_hotline' => $this->input->post('group_hotline',TRUE),
+	            'created'       => date("Y-m-d H:i:s"),
+	            'createdby'     => $this->session->userdata('email'),
+	            'updated'       => date("Y-m-d H:i:s"),
+	            'updatedby'     => $this->session->userdata('email'),
+	        ];
 
-        $customer_name  = $this->Contact_model->updateWhere($where,$data);
-        
-        echo json_encode([
-            "code" => "success",
-            "message" => "Update Record Success",
-        ]);die();
+	        $customer_name  = $this->Contact_model->updateWhere($where,$data);
+	        
+	        echo json_encode([
+	            "code" => "success",
+	            "message" => "Update Record Success",
+	        ]);die();
+
+        } else {
+	        echo json_encode([
+	            "code" => "error",
+	            "message" => "Access denied",
+	        ]);die();
+        }
     }
 
 }

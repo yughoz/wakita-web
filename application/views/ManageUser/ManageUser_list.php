@@ -10,7 +10,10 @@
         
         <div class="box-body">
         <div style="padding-bottom: 10px;">
-        <?php echo anchor(site_url('ManageUser/create'), '<i class="fa fa-wpforms" aria-hidden="true"></i> Add Data', 'class="btn btn-danger btn-sm"'); ?></div>
+        <?php echo anchor(site_url('ManageUser/create'), '<i class="fa fa-wpforms" aria-hidden="true"></i> Add Data', 'class="btn btn-danger btn-sm"'); ?>
+        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#trialModal">Create User Trial</button>
+            
+        </div>
         <table class="table table-bordered table-striped" id="mytable">
             <thead>
                 <tr>
@@ -31,6 +34,85 @@
             </div>
     </section>
 </div>
+
+<div id="trialModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Create Trial User</h4>
+      </div>
+      <div class="modal-body"> 
+            <form action="#" method="post" id="form_create_trial" class="form-horizontal">
+            
+    
+      <div class="form-group">
+        <label class="col-md-4 control-label" for="textinput">Counter</label>  
+        <div class="col-md-8">
+        <input name="counter" id="counter" placeholder="Counter"  type="number" class="form-control input-md" value="1"  min="1" max="10">
+        <span class="text-danger" id="error_name"></span>
+        </div>
+      </div>   
+      <div class="form-group">
+        <label class="col-md-4 control-label" for="textinput">Prefix Email</label>  
+        <div class="col-md-8">
+        <input name="prefix" id="prefix"   type="text" class="form-control input-md" value="wakita">
+        <span class="text-danger" id="error_name"></span>
+        </div>
+      </div>   
+      <div class="form-group">
+        <label class="col-md-4 control-label" for="textinput">User level</label>  
+        <div class="col-md-8">
+         <?php echo cmb_dinamis('id_user_level', 'tbl_user_level', 'nama_level', 'id_user_level', '' ,'DESC') ?>
+        <span class="text-danger" id="error_name"></span>
+        </div>
+      </div>   
+      <div class="form-group">
+        <label class="col-md-4 control-label" for="textinput">Hotline </label>  
+        <div class="col-md-8">
+         <select name="group_number" class="form-control">
+            <?php foreach ($hotline as $key => $value): ?>
+                <option value="<?php echo $value->phone_number ?>"><?php echo $value->device_name ?> (<?php echo $value->phone_number ?>)</option>
+            <?php endforeach ?>
+        </select>        
+        <span class="text-danger" id="error_name"></span>
+        </div>        
+      </div>   
+        <div class="row ">
+            <div class="col-md-10" id="rowData">
+                
+
+                <!-- <div class="form-group col-md-10">
+                  <label>Text Disabled</label><br>
+                    <Text class="" >12admin@admin.com</Text>   
+                </div>
+
+                <div class="form-group col-md-10">
+                  <label>Text Disabled</label><br>
+                    <Text class="" >12admin@admin.com</Text>  
+                </div> -->
+                
+            </div>
+        </div>
+       
+        </div>
+      <div class="modal-footer">
+          <div class="form-group">
+              <label class="col-md-4 control-label" for="button1id"></label>
+              <div class="col-md-8">
+                <button id="button1id" name="button1id" class="btn btn-info">Save</button>
+                <button id="close" name="close" class="btn btn-danger" data-dismiss="modal">cancel</button>
+              </div>
+            </div>
+            </form>       
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- Modal -->
+
         <script src="<?php echo base_url('assets/js/jquery-1.11.2.min.js') ?>"></script>
         <script src="<?php echo base_url('assets/datatables/jquery.dataTables.js') ?>"></script>
         <script src="<?php echo base_url('assets/datatables/dataTables.bootstrap.js') ?>"></script>
@@ -59,6 +141,49 @@
                                         api.search(this.value).draw();
                             }
                         });
+
+
+                        $("#form_create_trial").on('submit',(function(e) {
+                            e.preventDefault();
+                            var apis = api
+                            $( "span.text-danger" ).each(function() {
+                              $( this ).html( "" );
+                            });
+                            $.ajax({
+                                url: "<?php echo base_url('ManageUser/create_trial_action') ?>",
+                                type: "POST",
+                                data: new FormData(this),
+                                contentType: false,
+                                cache: false,
+                                dataType: "json",
+                                processData:false,
+                                success: function(resp)
+                                {
+                                    try {
+                                        parseData = resp;
+                                        html = "";
+                                        $.each(parseData.data, function( index, value ) {
+                                            html += '<div class="form-group col-md-10">';
+                                            html += '   <label>'+value.email+'</label><br>';
+                                            html += '   <Text class="" >'+value.password+'</Text>';   
+                                            html += '</div>';
+                                          // alert( index + ": " + value );
+                                        });
+
+                                        $("#rowData").html(html);
+                                        console.log(parseData);
+                                        
+                                    } catch(e) {
+                                        console.log(e);
+                                    }
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+                            });
+                        }));
+
+
                     },
                     oLanguage: {
                         sProcessing: "loading..."

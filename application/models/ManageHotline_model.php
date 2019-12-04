@@ -63,9 +63,9 @@ class ManageHotline_model extends CI_Model
 
     function get_all_where($where)
     {
-        $this->db->order_by($this->id, 'asc');
-        $this->db->where($where);
-        return $this->db->get($this->table)->result();
+        $this->dbServer->order_by('pid', 'asc');
+        $this->dbServer->where($where);
+        return $this->dbServer->get($this->table_server)->result();
     }
 
     function detail_list($where,$start) {

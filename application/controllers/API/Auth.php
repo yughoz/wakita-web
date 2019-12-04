@@ -10,6 +10,7 @@ Class Auth extends CI_Controller{
         $this->load->model('Milis_model');
         $this->load->model('ManageHotline_model');
         $this->load->model('ManageUser_model');
+        $this->load->model('ManageUserLevel_model');
         $this->config->load('companyProfile');
         $this->config->load('mobile');
         $this->load->library('form_validation');        
@@ -71,8 +72,10 @@ Class Auth extends CI_Controller{
         $password   = $this->input->post('password',TRUE);
         $hashPass   = password_hash($password,PASSWORD_DEFAULT);
         $test       = password_verify($password, $hashPass);
+        $dataHotlineDetail = [];
         // query chek users
         $this->db->where('email',$email);
+        // id_user_level
         // $this->db->or_where('phone',$email);
         //$this->db->where('password',  $test);
         $users       = $this->db->get('tbl_user');
@@ -81,15 +84,21 @@ Class Auth extends CI_Controller{
             if(password_verify($password,$user['password'])){
                 // retrive user data to session
                 // $this->db->where('user_id',$email);
+                $datasLevel = $this->ManageUserLevel_model->get_by_id($user['id_user_level']);
+                // echo print_r($datasLevel);die();
                 $dataHotline  = $this->ManageHotlineMember_model->get_all_where(['user_id' => $user['id_users']]);
                 // echo print_r($dataHotline);die();
                 foreach ($dataHotline as $key => $value) {
                     $dataHotlineDetail[] = $this->ManageHotline_model->get_by_where(['phone_number' =>$value->group_number]);
                 }
 
+
+                $user['user_level'] = $datasLevel->nama_level;
+
                 $this->session->set_userdata($user);
-                $data['response']   = 'success';
+                $data['response']   =   'success';
                 $data['data']       =   $user ;
+                $data['data_level'] =   $this->ManageUserLevel_model->get_akses($user['id_user_level']) ;
                 // $data['data']['company_name'] = $this->config->item('wa_company_name');
                 // $data['data']['email_company_name'] = $this->config->item('email_company_name'). $this->config->item('domain');
                 // $data['data']['domain'] = $this->config->item('domain');

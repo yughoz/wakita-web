@@ -3,10 +3,10 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Hotline_model extends CI_Model
+class Hotline_private_model extends CI_Model
 {
 
-    public $table = 'hotline';
+    public $table = 'hotline_private';
     public $id = 'id';
     public $order = 'DESC';
 
@@ -18,7 +18,7 @@ class Hotline_model extends CI_Model
     // datatables
     function json() {
         $this->datatables->select('id,customer_phone,message,flag_status,created,createdby');
-        $this->datatables->from('hotline');
+        $this->datatables->from('hotline_private');
         //add this line for join
         //$this->datatables->join('table2', 'hotline.field = table2.field');
         $this->datatables->add_column('action', '<a href="#" class="btn btn-danger btn-sm" onclick="editModal($1);return false;"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> </a>'. ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf($1);return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', 'id');
@@ -84,9 +84,9 @@ class Hotline_model extends CI_Model
         return $this->db->query($sql, $where_condition)->row();;
     }
     
-	function detail_list($where, $start, $table = 'hotline',$limit = 10) {
+	function detail_list($where, $start, $table = 'hotline_private',$limit = 10) {
         $this->db->select($table.".*,tbl_user.full_name as username,name_replace as username_title,(@cnt := @cnt + 1) AS rowNumber");
-        // $this->db->from('hotline');
+        // $this->db->from('hotline_private');
         $this->db->join('tbl_user', $table.'.createdby = email',"LEFT");
         $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
         $this->db->join('(SELECT @cnt := 0) AS dummy','1=1');
@@ -97,7 +97,7 @@ class Hotline_model extends CI_Model
         return $this->db->get($table)->result();
     }
 
-    function count_all($where, $table = 'hotline') {
+    function count_all($where, $table = 'hotline_private') {
         // $this->db->select($this->table.".*,tbl_user.full_name as username");
         // $this->db->from('hotline');
         // $this->db->join('tbl_user', $this->table.'.createdby = email',"LEFT");

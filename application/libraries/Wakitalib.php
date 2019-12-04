@@ -3,9 +3,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Wakitalib {
 
+    private $ci;
+
     public function __construct()
     {
       $this->ci =& get_instance();
+    }
+
+    public function set_database($db_name)
+    {
+      $db_data = $this->ci->load->database($db_name, TRUE);
+      $this->ci->db = $db_data;
     }
 
  	var $urlTarget = "";
@@ -50,18 +58,18 @@ class Wakitalib {
     }
 
     // $pid=$this->get_pid_id('ms_settlement_voucher',$table_code,'id_settlement_voucher',1);
-    public function get_pid_id($table,$table_code,$id_table_name,$for)
+    public function get_pid_id($table,$table_code,$id_table_name = "pid",$for = 1)
     {
         $date=date('YmdHis');
         $var=$table_code.$date;
         /*get Last PID*/
-        $this->ci->db->order_by('pid', 'desc');
-        $this->ci->db->like('pid', $var, 'LEFT');
+        $this->ci->db->order_by($id_table_name, 'desc');
+        $this->ci->db->like($id_table_name, $var, 'LEFT');
         $dat_pid=$this->ci->db->get($table, 1);
 
         $last_pid='001';
         if ($dat_pid->num_rows()>0) {
-        $last_pid_full=$dat_pid->row()->pid;
+        $last_pid_full=$dat_pid->row_array()[$id_table_name];
         $last_pid=substr($last_pid_full, -3);
 
         $last_pid=intval($last_pid)+1;

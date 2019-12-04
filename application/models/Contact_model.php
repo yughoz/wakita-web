@@ -46,27 +46,32 @@ class Contact_model extends CI_Model
 
     function insert_update($data)
     {
-        $where = array(
-            "phone"         => $data["phone"],
-            "group_hotline" => $data["group_hotline"],
-        );
-        $this->db->select('*');
-        $this->db->where($where);//you can use another field
-        $dataContact = $this->db->get($this->table)->row();
-        if (!$dataContact) {
-            $query = $this->db->insert($this->table, $data);//insert data
-        } elseif ($data['name_wa'] != $dataContact->name_wa) {
-            $dataContat = [
-                "name_wa"       => $data['name_wa'],
-                'updated'       => date("Y-m-d H:i:s"),
-                'updatedby'     => "API_webhook",
-            ];
-            $this->db->where($where);
-            $this->db->update($this->table, $dataContat);
-            return $dataContact->name_replace;
-        }
+    	try {
+	        $where = array(
+	            "phone"         => $data["phone"],
+	            "group_hotline" => $data["group_hotline"],
+	        );
+	        $this->db->select('*');
+	        $this->db->where($where);//you can use another field
+	        $dataContact = $this->db->get($this->table)->row();
+	        if (!$dataContact) {
+	            $query = $this->db->insert($this->table, $data);//insert data
+	        } elseif ($data['name_wa'] != $dataContact->name_wa) {
+	            $dataContat = [
+	                "name_wa"       => $data['name_wa'],
+	                'updated'       => date("Y-m-d H:i:s"),
+	                'updatedby'     => "API_webhook",
+	            ];
+	            $this->db->where($where);
+	            $this->db->update($this->table, $dataContat);
+	            return $dataContact->name_replace;
+	        }
 
-        return $dataContact->name_replace ?? "";
+	        return $dataContact->name_replace ?? "";
+    		
+    	} catch (Exception $e) {
+    		return "";
+    	}
     }
 
     function insert_update_web($data)
