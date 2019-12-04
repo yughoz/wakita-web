@@ -1,23 +1,10 @@
 <section class="sidebar">
-    <!-- search form -->
-    <form action="#" method="get" class="sidebar-form">
-        <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="Search...">
-            <span class="input-group-btn">
-                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
-                </button>
-            </span>
-        </div>
-    </form>
-    <!-- /.search form -->
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree">
-       
-        
         <?php
         // chek settingan tampilan menu
         $setting = $this->db->get_where('tbl_setting',array('id_setting'=>1))->row_array();
-        if($setting['value']=='ya'){
+        if($setting['value']=='ya' && !in_array($this->session->userdata('id_users'), $this->config->item('superadmin_id'))){
             // cari level user
             $id_user_level = $this->session->userdata('id_user_level');
             $sql_menu = "SELECT * 
@@ -52,12 +39,12 @@
             }else{
                 // display main menu
                 echo "<li>";
-                echo anchor($menu->url,"<i class='".$menu->icon."'></i> ".strtoupper($menu->title));
+                echo anchor($menu->url,"<i class='".$menu->icon."'></i> <span>".strtoupper($menu->title)."</span>");
                 echo "</li>";
             }
         }
         ?>
-        <li><?php echo anchor('auth/logout',"<i class='fa fa-sign-out'></i> LOGOUT");?></li>
+        <li><?php echo anchor('auth/logout',"<i class='fa fa-sign-out'></i><span> LOGOUT</span>");?></li>
     </ul>
 </section>
 <!-- /.sidebar -->

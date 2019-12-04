@@ -48,12 +48,16 @@ class Milis_member_model extends CI_Model
     }
 
     // get all
-    function getAllCustomWebhook($phone_number)
+    function getAllCustomWebhook($device_id)
     {
-        $this->datatables->select('vw_milis_member.*,vw_milis_member.id,tbl_user.full_name as username,phone');
-        $this->db->where('phone_number',$phone_number);
-        $this->datatables->join('tbl_user', 'user_id = id_users');
-        return $this->db->get("vw_milis_member")->result();
+        // $this->datatables->select('vw_milis_member.*,vw_milis_member.id,tbl_user.full_name as username,phone');
+        // $this->db->where('device_id',$device_id);
+        // $this->datatables->join('tbl_user', 'user_id = id_users');
+        // return $this->db->get("vw_milis_member")->result();
+        $this->db->select($this->table.'.*,tbl_user.full_name as username,phone');
+        $this->db->where('device_id',$device_id);
+        $this->db->join('tbl_user', 'user_id = id_users');
+        return $this->db->get($this->table)->result();
     }
 
     // get data by id

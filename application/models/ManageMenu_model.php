@@ -22,8 +22,8 @@ class ManageMenu_Model extends CI_Model
         $this->datatables->add_column('is_aktif', '$1', 'rename_string_is_aktif(is_aktif)');
         //add this line for join
         //$this->datatables->join('table2', 'tbl_menu.field = table2.field');
-        $this->datatables->add_column('action',anchor(site_url('managemenu/update/$1'),'<i class="fa fa-pencil-square-o" aria-hidden="true"></i>', array('class' => 'btn btn-warning btn-sm'))." 
-                ".anchor(site_url('managemenu/delete/$1'),'<i class="fa fa-trash-o" aria-hidden="true"></i>','class="btn btn-danger btn-sm" onclick="javasciprt: return confirm(\'Are You Sure ?\')"'), 'id_menu');
+        $this->datatables->add_column('action',anchor(site_url('ManageMenu/update/$1'),'<i class="fa fa-pencil-square-o" aria-hidden="true"></i>', array('class' => 'btn btn-warning btn-sm'))." 
+                ".anchor(site_url('ManageMenu/delete/$1'),'<i class="fa fa-trash-o" aria-hidden="true"></i>','class="btn btn-danger btn-sm" onclick="javasciprt: return confirm(\'Are You Sure ?\')"'), 'id_menu');
         return $this->datatables->generate();
     }
 

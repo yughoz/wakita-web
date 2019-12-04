@@ -54,9 +54,7 @@ class Contact_model extends CI_Model
         $this->db->where($where);//you can use another field
         $dataContact = $this->db->get($this->table)->row();
         if (!$dataContact) {
-            if ($data['name_wa'] != "❌") {
-              $query = $this->db->insert($this->table, $data);//insert data
-            }
+            $query = $this->db->insert($this->table, $data);//insert data
         } elseif ($data['name_wa'] != $dataContact->name_wa) {
             $dataContat = [
                 "name_wa"       => $data['name_wa'],
@@ -66,6 +64,32 @@ class Contact_model extends CI_Model
             $this->db->where($where);
             $this->db->update($this->table, $dataContat);
             return $dataContact->name_replace;
+        }
+
+        return $dataContact->name_replace ?? "";
+    }
+
+    function insert_update_web($data)
+    {
+        $where = array(
+            "phone"         => $data["phone"],
+            "group_hotline" => $data["group_hotline"],
+        );
+        $this->db->select('*');
+        $this->db->where($where);//you can use another field
+        $dataContact = $this->db->get($this->table)->row();
+        if (!$dataContact) {
+            $query = $this->db->insert($this->table, $data);//insert data
+            echo $query;
+        } else {
+            $dataContact = [
+                "name_replace"       => $data['name_replace'],
+                'updated'       => date("Y-m-d H:i:s"),
+                'updatedby'     => "API_webhook",
+            ];
+            $this->db->where($where);
+            $this->db->update($this->table, $dataContact);
+            return $dataContact['name_replace'];
         }
 
         return $data['name_replace'];

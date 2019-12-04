@@ -44,7 +44,6 @@
                 ?>
                 <p class="login-box-msg"><?php echo $message; ?></p>
 
-                <!--<form action="<?php echo base_url(); ?>/adminlte/index2.html" method="post">-->
                 <?php echo form_open('auth/cheklogin'); ?>
                 <div class="form-group has-feedback">
                     <input type="email" class="form-control" name="email" placeholder="Email">
@@ -58,30 +57,10 @@
                     <div class="col-xs-4">
                         <button type="submit" class="btn btn-danger btn-block btn-flat"><i class="fa fa-sign-in" aria-hidden="true"></i> Login</button>
                     </div>
-                    <!-- <div class="col-xs-6">
-                        <?php echo anchor('#', '<i class="fa fa-eye-slash" aria-hidden="true"></i> Lupa Password', array('class' => 'btn btn-primary btn-block btn-flat')); ?>
-                    </div> -->
+                    
                 </div>
-                <!-- /.col -->
-
-
-                <!-- /.col -->
-<!--                 <div class="row" style="margin-top: 20px;">
-                    <div class="col-xs-12">
-                        <div class="callout callout-info">
-                            <h4>Level Super Admin</h4>
-
-                            <p><b>Email</b> : nuris.akbar@gmail.com</p>
-                            <p><b>Password</b> : password</p>
-                            <hr>
-                            <h4>Level Admin</h4>
-
-                            <p><b>Email</b> : hafid@gmail.com</p>
-                            <p><b>Password</b> : password</p>
-                        </div>
-                    </div>
-
-                </div> -->
+                <a href="<?php echo base_url()."auth/forgot" ?>" class="text-center">Forgot Password</a>
+                
                 </form>
 
 

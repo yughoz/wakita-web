@@ -14,8 +14,14 @@
  */
 // $this->startRes = time();
 
+$subUrl = str_replace(basename($_SERVER['SCRIPT_NAME']),"",$_SERVER['SCRIPT_NAME']);
+$subUrl = str_replace("native/", "", $subUrl);
+// echo $subUrl;
+
+// echo "http://".$_SERVER['HTTP_HOST'].$subUrl."API/Whatsapp/webhook";die();
+
 $curl = curl_init();
-$token = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";
+$token = "";
 if (!empty($_POST)) {
 	$data =$_POST;
 } else {
@@ -30,7 +36,7 @@ curl_setopt($curl, CURLOPT_HTTPHEADER,
 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-curl_setopt($curl, CURLOPT_URL, "http://127.0.0.1/wablas/API/Whatsapp/webhook");
+curl_setopt($curl, CURLOPT_URL, "http://".$_SERVER['HTTP_HOST'].$subUrl."API/Whatsapp/webhook");
 curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
 curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
 $result = curl_exec($curl);
@@ -42,5 +48,5 @@ print_r($result);
 
 $saveData = $_POST;
 	file_put_contents('log/'.date("dmY"),json_encode($saveData).PHP_EOL, FILE_APPEND);
-
+file_put_contents('log/'.date("dmYResult"),json_encode($result).PHP_EOL, FILE_APPEND);
 	// echo "mantap ";
