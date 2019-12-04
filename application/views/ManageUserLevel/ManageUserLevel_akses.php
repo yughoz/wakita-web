@@ -22,10 +22,10 @@
                                     $no = 1;
                                     foreach ($menu as $m) {
                                         echo "<tr>
-                        <td>$no</td>
-                        <td>$m->title</td>
-                        <td align='center'><input type='checkbox' ".  checked_akses($this->uri->segment(3), $m->id_menu)." onClick='kasi_akses($m->id_menu)'></td>
-                        </tr>";
+                                        <td>$no</td>
+                                        <td>$m->title</td>
+                                        <td align='center'><input type='checkbox' ".  checked_akses($this->uri->segment(3), $m->id_menu)." onClick='kasi_akses($m->id_menu)'></td>
+                                        </tr>";
                                         $no++;
                                     }
                                     ?>
