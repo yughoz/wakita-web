@@ -29,6 +29,8 @@ class Whatsapp extends CI_Controller
         // $this->apiToken     = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";
         // $this->wablasClient = new WablasClient($apiToken);
         $this->apiToken     = "";
+        $this->company_pid   = "";
+        $this->group_hotline   = "";
         $this->url          = $this->config->item('APIWeb');
         $this->client       = new GuzzleHttp\Client();
         $this->load->model('Milis_member_model');
@@ -68,10 +70,14 @@ class Whatsapp extends CI_Controller
     public function webhook() 
     {
         $this->Loging("webhook_start" , $_POST);
+        $this->company_pid = $this->input->post('company_pid',TRUE);
+        $this->group_hotline = $this->input->post('receiver',TRUE);
         $data = array(
+            'pid'           => $this->wakitalib->get_pid_id('inbox_'.$this->company_pid,"WAIN",'pid',1),
             'message_id'    => $this->input->post('id',TRUE),
             'fromMe'        => $this->input->post('fromMe',TRUE),
             'pushName'      => $this->input->post('pushName',TRUE),
+            'company_pid'   => $this->company_pid,
             'phone'         => $this->input->post('phone',TRUE),
             'message'       => $this->input->post('message',TRUE),
             'timestamp'     => $this->input->post('timestamp',TRUE),
@@ -101,10 +107,18 @@ class Whatsapp extends CI_Controller
                 exit();
             }
         }
-
+        if (!empty($this->company_pid)) {
+            $tableName = $this->Inbox_model->getTable();
+            $this->Inbox_model->setTable($tableName."_".$this->company_pid);
+            $tableName = $this->Hotline_model->getTable();
+            $tableName .= "_".$this->company_pid;
+            $this->Hotline_model->setTable($tableName);
+        
+        }
         $this->Inbox_model->insert($data);
         $customer_name  = $this->Contact_model->insert_update($dataContat);
-        $dataHotline    = $this->Inbox_model->get_hotline($data['phone']);
+        $dataHotline    = $this->Hotline_model->get_by_where(["customer_phone" =>$data['phone']]);
+        // echo print_r($dataHotline);die();
         if (!empty($dataHotline)) {
             if ($dataHotline->flag_status == 1) {   
             //     $messageArr = explode(" ", $this->input->post('message',TRUE));
@@ -124,15 +138,17 @@ class Whatsapp extends CI_Controller
 
             // } elseif ($dataHotline->flag_status == 2) {
                 $insHotline = array(
+                    'pid'           => $this->wakitalib->get_pid_id('hotline_'.$this->company_pid,"HOTIN",'pid',1),
                     'customer_phone' => $this->input->post('phone',TRUE),
                     'message'       => $this->input->post('message',TRUE),
+                    'company_pid'   => $this->company_pid,
                     'created'       => date("Y-m-d H:i:s"),
                     'message_id'	=> $data['message_id'],
                     'group_hotline'	=> $data['receiver'],
                     'createdby'     => "API_WABLAS",
                     'flag_status'   => "3",
                 );
-                $this->Inbox_model->insertHotline($insHotline);
+                $this->Inbox_model->insertHotlineCustom($insHotline,'hotline_'.$this->company_pid);
                 // 
                 $dataMilis = $this->parsingNum($data['receiver']);
                 $dataMsg   = $this->parsingMsg($data['phone']);
@@ -148,13 +164,16 @@ class Whatsapp extends CI_Controller
 
             } else{
             	$insHotline = array(
+                    'pid'           => $this->wakitalib->get_pid_id('hotline_'.$this->company_pid,"HOTIN",'pid',1),
                     'customer_phone' => $this->input->post('phone',TRUE),
                     'message'       => $this->input->post('message',TRUE),
+                    'company_pid'   => $this->company_pid,
                     'created'       => date("Y-m-d H:i:s"),
                     'message_id'	=> $data['message_id'],
                     'group_hotline'	=> $data['receiver'],
                     'createdby'     => "API_WABLAS",
                     'image_name'    => $this->input->post('image',TRUE),
+                    
                     // 'document_name' => $this->input->post('file',TRUE),
                     'flag_status'   => "4",
                 );
@@ -167,9 +186,13 @@ class Whatsapp extends CI_Controller
                         $insHotline['document_name']    = $this->input->post('file');
                     }
                 }
-                $this->Inbox_model->insertHotline($insHotline);
+                $this->Inbox_model->insertHotlineCustom($insHotline,'hotline_'.$this->company_pid);
+                // $this->Inbox_model->insertHotline($insHotline);
+                // $tableName = $this->Hotline_model->getTable();
+                // $tableName .= "_".$this->company_pid;
+                // $this->Hotline_model->setTable($tableName);
 
-                $dataHotline    = $this->Inbox_model->get_hotline($data['phone']);
+                $dataHotline                        = $this->Hotline_model->get_by_where(["customer_phone" => $data['phone']]);
                 $insHotline['customer_username']	= "Customer - " .  $customer_name;
                 $insHotline['customer_title']   	= $customer_name;
                 $insHotline['user_send_username']	= "Customer - " .  $customer_name;
@@ -222,13 +245,14 @@ class Whatsapp extends CI_Controller
                     $insHotline = array(
                         'customer_phone' => $this->input->post('phone',TRUE),
                         'message'       => $this->input->post('message',TRUE),
+                        'company_pid'   => $this->company_pid,
                         'created'       => date("Y-m-d H:i:s"),
                         'message_id'	=> $data['message_id'],
                         'group_hotline'	=> $data['receiver'],
                         'createdby'     => "API_WABLAS",
                         'flag_status'   => "1",
                     );
-                    $this->Inbox_model->insertHotline($insHotline);
+                    $this->Inbox_model->insertHotlineCustom($insHotline);
 
                     $timeStr = $this->parsingTime(date("H"));
                     echo $timeStr.", kami dari ".$this->config->item('wa_company_name')." \nAda yang bisa kami bantu ? ?";
@@ -247,6 +271,9 @@ class Whatsapp extends CI_Controller
     public function webhook_track() 
     {
         $this->Loging("webhook_track" , $_POST);
+
+        $this->company_pid = $this->input->post('company_pid',TRUE);
+        $this->group_hotline = $this->input->post('receiver',TRUE);
         $data = array(
             'status' => $this->input->post('status',TRUE),
             // 'device_id' => $this->input->post('device_id',TRUE),/
@@ -258,8 +285,12 @@ class Whatsapp extends CI_Controller
             'message_id' => $this->input->post('id',TRUE),
         ];
         
-        $this->Loging("webhook_track_end" , $data);
+        $tableName = $this->Send_message_detail_model->get_table();
+        $this->Send_message_detail_model->set_table($tableName."_".$this->company_pid);
         $this->Send_message_detail_model->updateWhere($data,$where);
+        // echo 'mantap 2'; 
+        $this->Loging("webhook_track_end" , $data);
+
         // $this->Inbox_model->insert($data);/
     }
 
@@ -372,10 +403,16 @@ class Whatsapp extends CI_Controller
         }
     }
 
+    function session(){
+        echo $this->input->post('company_pid',TRUE);
+    }
+
 
     public function send_wa_milis() 
     {
-         $this->Loging("send_wa_milis" , ["POST"=>$_POST]);
+        $this->Loging("send_wa_milis" , ["POST"=>$_POST]);
+        $this->group_hotline = $this->input->post('group_hotline',TRUE);
+        $this->company_pid = $this->session->userdata('company_pid');
         // $this->_rules();
         // if ($this->input->post('key',TRUE) != $this->config->item('keys')[0]['apikeys']) {
         //     echo json_encode([
@@ -394,6 +431,7 @@ class Whatsapp extends CI_Controller
         $data = array(
             // 'header_id' => $this->input->post('header_id',TRUE),
             'from_num' => $this->config->item('keys')[0]['numbers'],
+            'company_pid'   => $this->company_pid,
             'dest_num' => $this->input->post('noPhone',TRUE),
             'message_id' => $this->input->post('message_id',TRUE),
             'message_text' => $this->input->post('message',TRUE),
@@ -408,10 +446,12 @@ class Whatsapp extends CI_Controller
 
         $this->apiToken  = $this->ManageHotline_model->get_token($this->input->post('group_hotline',TRUE));
         if ($dataResult = $this->sendMessage($data['dest_num'],$data['message_text'])) {
-             $this->Loging("api_whatsapp_send_wa_milis_message" , [
+            $this->Loging("api_whatsapp_send_wa_milis_message" , [
                                                     "dataResult"=>$dataResult,
                                                 ]);
-        $insHotline = array(
+            $insHotline = array(
+                'pid'           => $this->wakitalib->get_pid("HTOUT"),               
+                'company_pid'   => $this->company_pid,
                 'customer_phone' => $this->input->post('noPhone',TRUE),
                 'message'       => $this->input->post('message',TRUE),
                 'created'       => date("Y-m-d H:i:s"),
@@ -421,7 +461,13 @@ class Whatsapp extends CI_Controller
                 'user_phone'    => $this->session->userdata('phone'),
                 'flag_status'   => "5",
             );
-            $this->Inbox_model->insertHotline($insHotline);
+
+            if (!empty($this->company_pid)) {
+                $tableName = $this->Inbox_model->getTable();
+                $this->Inbox_model->setTable($tableName."_".$this->company_pid);
+            }
+
+            $this->Inbox_model->insertHotlineCustom($insHotline,'hotline_'.$this->company_pid);
 
             $insHotline['customer_username']	= "";
             $insHotline['customer_title']   	= "";
@@ -453,7 +499,9 @@ class Whatsapp extends CI_Controller
 
     public function send_img_wa_milis() 
     {
-         $this->Loging("send_wa_milis" , ["POST"=>$_POST]);
+        $this->Loging("send_img_wa_milis" , ["POST"=>$_POST]);
+        $this->company_pid      = $this->session->userdata('company_pid');
+        $this->group_hotline    = $this->input->post('group_hotline',TRUE);
         
         $data = array(
             // 'header_id' => $this->input->post('header_id',TRUE),
@@ -481,6 +529,8 @@ class Whatsapp extends CI_Controller
         //                                             "dataResult"=>$dataResult,
         //                                         ]);
             $insHotline = array(
+                'pid'           => $this->wakitalib->get_pid("HTOUT"),   
+                'company_pid'   => $this->company_pid,
                 'customer_phone' => $this->input->post('noPhone',TRUE),
                 'message'       => $this->input->post('message',TRUE),
                 'created'       => date("Y-m-d H:i:s"),
@@ -491,7 +541,13 @@ class Whatsapp extends CI_Controller
                 'user_phone'    => $this->session->userdata('phone'),
                 'flag_status'   => "5",
             );
-            $this->Inbox_model->insertHotline($insHotline);
+
+            if (!empty($this->company_pid)) {
+                $tableName = $this->Inbox_model->getTable();
+                $this->Inbox_model->setTable($tableName."_".$this->company_pid);
+            }
+
+            $this->Inbox_model->insertHotlineCustom($insHotline,'hotline_'.$this->company_pid);
 
             $insHotline['username'] = $this->session->userdata('full_name');
             $this->sendSocket($insHotline);
@@ -539,9 +595,18 @@ class Whatsapp extends CI_Controller
             // echo $response->getBody();die(); // 1.1
             $res['body'] =  json_decode($response->getBody(),true);
             $this->Loging("response_wablas" , $res);
+
+            $tableHeaderName = $this->Send_message_detail_model->get_header_table();
+            $this->Send_message_detail_model->set_header_table($tableHeaderName."_".$this->company_pid);
+
+
+            // echo print_r($dataInsert);die();
+            $tableName = $this->Send_message_detail_model->get_table();
+            $this->Send_message_detail_model->set_table($tableName."_".$this->company_pid);
             // echo print_r($res['body']);die();
 
             $dataInsert = [
+                'pid'           => $this->wakitalib->get_pid("SMH"),
                 'status'        => $res['body']['status'],
                 'message'       => $res['body']['message'],
                 'quota'         => $res['body']['data']['quota'],
@@ -551,12 +616,17 @@ class Whatsapp extends CI_Controller
                 'createdby'     => $this->session->userdata('email'),
             ];
             // echo print_r($dataInsert);die();
-            $id = $this->Send_message_detail_model->insert_header($dataInsert);
+            // $id = $this->Send_message_detail_model->insert_header($dataInsert);
             
             foreach ($res['body']['data']['message'] as $key => $value) {
                 $data = array(
-                'header_id'     => $id,
-                'from_num'      => $this->config->item('keys')[0]['numbers'],
+                'pid'                  => $this->wakitalib->get_pid("SMD"),
+                'header_pid'           => $dataInsert['pid'],
+                'header_status'        => $res['body']['status'],
+                'header_message'       => $res['body']['message'],
+                'header_quota'         => $res['body']['data']['quota'],
+                'header_status_code'   => $res['status_code'],
+                'from_num'      => $this->group_hotline,
                 'dest_num'      => $value['phone'],
                 'message_id'    => $value['id'],
                 'message_text'  => $value['caption'] ?? "",
@@ -618,29 +688,49 @@ class Whatsapp extends CI_Controller
                                             ] 
                                           ]
                                         );
-            #guzzle repose for future use
-            $status_code = $response->getStatusCode(); // 200
+            
+            $res['status_code'] = $response->getStatusCode(); // 200
             // $response = $response->getReasonPhrase(); // OK
-            // echo $response->getProtocolVersion(); // 1.1
-            $body =  json_decode($response->getBody(),true);
+            // echo $response->getBody();die(); // 1.1
+            $res['body'] =  json_decode($response->getBody(),true);
+            $this->Loging("response_wablas" , $res);
 
-            $dataInsert = [
-                'status' => $body['status'],
-                'message' => $body['message'],
-                'quota'    => $body['data']['quota'],
-                'status_code' => $status_code,
+            $tableHeaderName = $this->Send_message_detail_model->get_header_table();
+            $this->Send_message_detail_model->set_header_table($tableHeaderName."_".$this->company_pid);
+
+
+            // echo print_r($dataInsert);die();
+            $tableName = $this->Send_message_detail_model->get_table();
+            $this->Send_message_detail_model->set_table($tableName."_".$this->company_pid);
+
+            $dataInsertHeader = [
+                'pid'    => $this->wakitalib->get_pid("SMH"),
+                'company_pid'   => $this->company_pid,
+                'status' => $res['body']['status'],
+                'message' => $res['body']['message'],
+                'quota'    => $res['body']['data']['quota'],
+                'status_code' => $res['status_code'],
                 // 'response' => $response,
                 'created' => date("Y-m-d H:i:s"),
                 'createdby' => $this->session->userdata('email'),
             ];
-            // echo print_r($dataInsert);die();
-            $id = $this->Send_message_detail_model->insert_header($dataInsert);
-            $this->Loging("api_whatsapp_response_wablas" , ['body' => $body,'status_code' => $status_code]);
+
+            // echo print_r($dataInsertHeader);die();
+
+
+            // $id = $this->Send_message_detail_model->insert_header($dataInsertHeader);
+            $this->Loging("api_whatsapp_response_wablas" , ['res' => $res]);
             
-            foreach ($body['data']['message'] as $key => $value) {
+            foreach ($res['body']['data']['message'] as $key => $value) {
                 $data = array(
-                'header_id' => $id,
-                'from_num' => $this->config->item('keys')[0]['numbers'],
+                'pid'    => $this->wakitalib->get_pid("SMD"),
+                'company_pid'   => $this->company_pid,
+                'header_pid'           => $dataInsertHeader['pid'],
+                'header_status'        => $res['body']['status'],
+                'header_message'       => $res['body']['message'],
+                'header_quota'         => $res['body']['data']['quota'],
+                'header_status_code'   => $res['status_code'],
+                'from_num' => $this->group_hotline,
                 'dest_num' => $value['phone'],
                 'message_id' => $value['id'],
                 'message_text' => $value['text'],
@@ -652,8 +742,8 @@ class Whatsapp extends CI_Controller
                 );
                 $this->Send_message_detail_model->insert($data);
             }
-            // echo json_encode($body);
-        	return $body;
+
+        	return $res['body'];
           } catch (GuzzleHttp\Exception\BadResponseException $e) {
             #guzzle repose for future use
             $response = $e->getResponse();

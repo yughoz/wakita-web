@@ -63,6 +63,7 @@ class Wablas
         $this->client       = new GuzzleHttp\Client();
         $this->startRes     = time();
         $this->timeNow      = date("Y-m-d H:i:s");
+        $this->company_pid  = $this->_ci->session->userdata('company_pid');
 
         // $this->_ci->config->load('apiwha');
         // $this->url          = $this->_ci->config->item('APIWeb');
@@ -178,8 +179,9 @@ class Wablas
                 // print_r($body);
                 // die();
     
-                $get_id     = $this->insert_header_message_detail($array, $body, $status_code);
-                $this->update_hotline($array, $body, $get_id);
+                // $get_id     = $this->insert_header_message_detail($array, $body, $status_code);
+                $get_id     = $this->_ci->wakitalib->get_pid("SMH");
+                $this->update_hotline($array, $body, $get_id, $status_code);
                 $status1    = $this->update_message_detail($array, $body);
                 $status2    = $this->sendSocket($array, $body);
                 $status3    = $this->sendFCM($array, $body);
@@ -212,6 +214,7 @@ class Wablas
 
     private function insert_header_message_detail($array, $body, $status_code ){
         $insert = [
+            'pid'           => $this->_ci->wakitalib->get_pid("SMH"),
             'status'        => $body['status'],
             'message'       => $body['message'],
             'quota'         => $body['data']['quota'],
@@ -220,14 +223,25 @@ class Wablas
             'created'       => date("Y-m-d H:i:s"),
             'createdby'     => $array['session_email'],
         ];
-       
-        return $this->_ci->Send_message_detail_model->insert_header($insert);
+
+
+        $tableHeaderName = $this->_ci->Send_message_detail_model->get_header_table();
+        $this->_ci->Send_message_detail_model->set_header_table($tableHeaderName."_".$this->_ci->session->userdata('company_pid'));
+        // echo "in here .".$tableHeaderName ." --- ";
+        $this->_ci->Send_message_detail_model->insert_header($insert);
+        return $insert['pid'];
     }
 
-    private function update_hotline($array, $body, $id){
+    private function update_hotline($array, $body, $id, $status_code = ""){
         foreach ($body['data']['message'] as $key => $value) {
             $data = array(
-                'header_id'     => $id,
+                'pid'           => $this->_ci->wakitalib->get_pid("SMDW"),               
+                'company_pid'   => $this->company_pid,
+                'header_pid'    => $id,
+                'header_status'        => $body['status'],
+                'header_message'       => $body['message'],
+                'header_quota'         => $body['data']['quota'],
+                'header_status_code'   => $status_code,
                 'from_num'      => $array['hotline'],
                 'dest_num'      => $value['phone'],
                 'message_id'    => $value['id'],
@@ -242,6 +256,11 @@ class Wablas
                 'updatedby'     => $array['session_email'],
             );
 
+
+            // echo print_r($dataInsert);die();
+            $tableName = $this->_ci->Send_message_detail_model->get_table();
+            $this->_ci->Send_message_detail_model->set_table($tableName."_".$this->company_pid);
+
             $this->_ci->Send_message_detail_model->insert($data);
         }
     }
@@ -251,6 +270,8 @@ class Wablas
         $value = $body['data']['message'][0];
         try{
             $data = array(
+                'pid'               => $this->_ci->wakitalib->get_pid("HTOUT"),               
+                'company_pid'       => $this->company_pid,
                 'created'           => date("Y-m-d H:i:s"),
                 'createdby'         => $array['session_email'],
                 'customer_phone'    => $array['phone'],
@@ -263,7 +284,11 @@ class Wablas
                 'group_hotline'	    => $array['hotline'],
                 'flag_status'       => "4",
             );
-            $this->_ci->Inbox_model->insertHotline($data);
+            // $this->_ci->Inbox_model->insertHotline($data);
+            $this->_ci->Inbox_model->insertHotlineCustom($data,'hotline_'.$this->company_pid);
+            // echo $this->company_pid;
+
+            // $this->Inbox_model->insertHotlineCustom($insHotline,'hotline_'.$this->company_pid);
             return true;
         }catch(Exception $e){
             //print_r("umd => ".$e);
@@ -275,6 +300,7 @@ class Wablas
 
         try{
             $data = array(
+                'pid'               => $this->_ci->wakitalib->get_pid("HTP"),               
                 'created'           => date("Y-m-d H:i:s"),
                 'createdby'         => $array['session_email'],
                 'customer_phone'    => $array['phone'],
@@ -287,6 +313,10 @@ class Wablas
                 'group_hotline'	    => $array['hotline'],
                 'flag_status'       => "4",
             );
+
+            $tableP = $this->_ci->Inbox_model->getTablePrivate();
+            $this->_ci->Hotline_model->setTable($tableP."_".$this->_ci->session->userdata('company_pid'));
+
             $this->_ci->Inbox_model->insertHotlinePrivate($data);
             return true;
         }catch(Exception $e){

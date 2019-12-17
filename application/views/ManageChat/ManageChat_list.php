@@ -258,7 +258,7 @@
                     ajax: {"url": '<?php echo base_url("ManageChat/list_hotline_json") ?>', "type": "GET"},
                     columns: [
                         {
-                            "data": "id",
+                            "data": "pid",
                             "orderable": false
                         },
                         {"data": "name"},

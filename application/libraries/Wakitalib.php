@@ -68,17 +68,18 @@ class Wakitalib {
         $dat_pid=$this->ci->db->get($table, 1);
 
         $last_pid='001';
+
         if ($dat_pid->num_rows()>0) {
-        $last_pid_full=$dat_pid->row_array()[$id_table_name];
-        $last_pid=substr($last_pid_full, -3);
+            $last_pid_full=$dat_pid->row_array()[$id_table_name];
+            $last_pid=substr($last_pid_full, -3);
 
-        $last_pid=intval($last_pid)+1;
+            $last_pid=intval($last_pid)+1;
 
-        if (strlen($last_pid)==1) {
-          $last_pid='00'.$last_pid;
-        }elseif (strlen($last_pid)==2) {
-          $last_pid='0'.$last_pid;
-        }
+            if (strlen($last_pid)==1) {
+              $last_pid='00'.$last_pid;
+            }elseif (strlen($last_pid)==2) {
+              $last_pid='0'.$last_pid;
+            }
         }
         $pid=$table_code.$date.$last_pid;
         // return $pid;
@@ -89,16 +90,16 @@ class Wakitalib {
             $this->ci->db->order_by($id_table_name, 'desc');
             $dat_id=$this->ci->db->get($table, 1);
             $last_id='001';
-        if ($dat_id->num_rows()>0) {
-            $last_id_full=$dat_id->row()->$id_table_name;
-            $last_id=substr($last_id_full, -3);
-            $last_id=intval($last_id)+1;
-            if (strlen($last_id)==1) {
-            $last_id='00'.$last_id;
-            }elseif (strlen($last_id)==2) {
-            $last_id='0'.$last_id;
+            if ($dat_id->num_rows()>0) {
+                $last_id_full=$dat_id->row()->$id_table_name;
+                $last_id=substr($last_id_full, -3);
+                $last_id=intval($last_id)+1;
+                if (strlen($last_id)==1) {
+                $last_id='00'.$last_id;
+                }elseif (strlen($last_id)==2) {
+                $last_id='0'.$last_id;
+                }
             }
-        }
             $id_table=$table_code.date('Ymd').$last_id;
         }
 
@@ -107,6 +108,17 @@ class Wakitalib {
         }else{
         return $id_table;
         }
+    }
+    public function get_pid($code=''){
+        //format datetime
+        $datetime = new DateTime();
+        $datetime = $datetime->format('Ymdhis');
+        // format milliseconds
+        $mt  = explode(' ', microtime());
+        $mls = ((int)$mt[1]) * 1000 + ((int)round($mt[0] * 1000));
+        $mls = substr($mls, -3);
+
+        return $code.$datetime.$mls;
     }
 }
 ?>

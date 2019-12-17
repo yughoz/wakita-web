@@ -31,6 +31,15 @@ class ManageUser_model extends CI_Model
         return $this->datatables->generate();
     }
 
+    // get data by id
+    function get_by_where_server($where)
+    { 
+        $this->dbServer->select('ms_users'.".*,ms_company.company_name,url_server,company_sort_name,address");
+        $this->dbServer->where($where);
+        $this->dbServer->join('ms_company', 'ms_users'.'.company_id = ms_company.pid');
+        return $this->dbServer->get('ms_users')->row();
+    }
+
     // datatables
     function jsonMember($user_arr) {
         $this->datatables->select('id_users,full_name,email,phone');

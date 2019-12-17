@@ -55,7 +55,9 @@ class ManageChat extends CI_Controller
 
     public function list_hotline_json() {
         header('Content-Type: application/json');
-        echo $this->ManageChat_model->list_json();
+        // echo print_r([['htln20191009164429001']]);
+        // echo print_r($this->session->userdata('pidHotlineArr'));
+        echo $this->ManageChat_model->list_json();   
     }
 
     public function hotline($id)
@@ -84,19 +86,23 @@ class ManageChat extends CI_Controller
         ];
         
         header('Content-Type: application/json');
-        
+        $company_id = $this->Hotline_model->getTableCompanyFromHotline($hotline) ;
+        $vw = $this->ManageChat_model->getView($hotline) ;
+        $this->ManageChat_model->setView($vw."_".$company_id) ;
+        // echo $vw;die();
         $result = array('data' => array());
 
         $data = $this->ManageChat_model->group_json($where);
         foreach ($data as $key => $value) {
             // //i assigned $buttons variable to hold my edit and delete btn to pass in my array.
             $buttons  = '
-            <button class="btn btn-primary" onclick="editData('.$value->id.')" data-toggle="modal" data-target="#myModal">Edit</button>
-            <button class="btn btn-danger" onclick="deleteData('.$value->id.')" data-toggle="modal" data-target="#deleteModal">Delete</button>
+            <button class="btn btn-primary" onclick="editData('.$value->pid.')" data-toggle="modal" data-target="#myModal">Edit</button>
+            <button class="btn btn-danger" onclick="deleteData('.$value->pid.')" data-toggle="modal" data-target="#deleteModal">Delete</button>
             ';
 
             $result['data'][$key] = array(
-               'id' => $value->id,
+               'pid' => $value->pid,
+               'id' => $value->pid,
                 'customer_phone' => $value->customer_phone,
                 'name_wa' => $value->name_wa,
                 'name_replace' => $value->name_replace,
@@ -117,17 +123,21 @@ class ManageChat extends CI_Controller
         header('Content-Type: application/json');
          
         if($private == 1){
-            $table = 'hotline_private';
+            $table = 'hotline_private'."_".$this->session->userdata('company_pid');
         }else if($private == 0){
-            $table = 'hotline';
+            $table = 'hotline'."_".$this->session->userdata('company_pid');
         }
         $whereArr = array(
             $table.'.customer_phone'        => $customer,
             // 'hotline.group_hotline' => $hotline,
         );
-        // echo $table;
         // exit();
         $startFrom  = $start;
+
+        $tableName = $this->Hotline_model->getTable();
+        $this->Hotline_model->setTable($tableName."_".$this->session->userdata('company_pid'));
+
+        // echo $table;die();
         $datas      = array_reverse($this->Hotline_model->detail_list($whereArr, $startFrom, $table));
         // echo var_dump($datas);
         // exit();

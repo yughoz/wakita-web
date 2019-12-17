@@ -160,6 +160,11 @@ Class Auth extends CI_Controller{
     }
     
     function cheklogin(){
+        $this->load->model('ManageUser_model');
+        $this->load->model('ManageUserLevel_model');
+        $this->load->model('ManageHotlineMember_model');
+        $this->load->model('ManageHotline_model');
+
         $email      = $this->input->post('email');
         //$password   = $this->input->post('password');
         $password = $this->input->post('password',TRUE);
@@ -169,11 +174,35 @@ Class Auth extends CI_Controller{
         $this->db->where('email',$email);
         //$this->db->where('password',  $test);
         $users       = $this->db->get('tbl_user');
+        $whereServer['ms_users.email'] = $email;
+        $dataUrlServer  = $this->ManageUser_model->get_by_where_server($whereServer);
+
         if($users->num_rows()>0){
             $user = $users->row_array();
             if(password_verify($password,$user['password'])){
                 // retrive user data to session
+                // $this->db->where('user_id',$email);
+                $datasLevel = $this->ManageUserLevel_model->get_by_id($user['id_user_level']);
+                // echo print_r($datasLevel);die();
+                $dataHotline  = $this->ManageHotlineMember_model->get_all_where(['user_id' => $user['id_users']]);
+                // echo print_r($dataHotline);die();
+                $pidHotlineArr = [];
+                foreach ($dataHotline as $key => $value) {
+                    // array_push($pidHotlineArr,$value->pid);
+                    $dataHotlineDetail = $this->ManageHotline_model->get_by_where(['phone_number' =>$value->group_number]);
+                    $pidHotlineArr[] = $dataHotlineDetail->pid;
+                    // $dataHotlineDetail[] = $dataHotlineDetail;
+                }
+
+
+                $user['user_level'] = $datasLevel->nama_level;
+                $user['company_pid'] = $dataUrlServer->company_id;
+                $user['pidHotlineArr'] = $pidHotlineArr;
+
+                // echo print_r($user);die();
+                // retrive user data to session
                 $this->session->set_userdata($user);
+
                 redirect('welcome');
             }else{
                 redirect('auth');

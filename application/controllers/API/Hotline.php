@@ -24,9 +24,11 @@ class Hotline extends CI_Controller
     {
         header('Content-Type: application/json');
         $where = [
-            "vw_group_milis.group_hotline" =>$this->input->post('group_hotline',TRUE),
+            "vw_group_milis_".$this->session->userdata('company_pid').".group_hotline" =>$this->input->post('group_hotline',TRUE),
             "flag_status >" => "2"
         ];
+        
+
         $datas          =   $this->Hotline_model->group_json($where);
         $dataNew        =   []  ;
         $dataTemp       =   []  ;
@@ -89,6 +91,10 @@ class Hotline extends CI_Controller
         echo json_encode(["data" => $dataTemp,"dataNew" => $dataNew ]);
     } 
 
+    function testView(){
+        echo $this->Hotline_model->vw_group_milis("vw_group_milis_".$this->session->userdata('company_pid'));
+    }
+
     function parsingTrialNumber($str)
     {
         $length = "********".substr($str,9);
@@ -100,7 +106,7 @@ class Hotline extends CI_Controller
     {
         header('Content-Type: application/json');
         $where = [
-            "hotline.group_hotline" =>$this->input->post('group_hotline',TRUE),
+            "vw_group_milis_".$this->session->userdata('company_pid').".group_hotline" =>$this->input->post('group_hotline',TRUE),
             "flag_status >" => "2",
         ];
         $where_like = [
@@ -214,9 +220,13 @@ class Hotline extends CI_Controller
     public function detail()
     {
         header('Content-Type: application/json');
-         $whereArr = array(
+
+        $tableName = $this->Hotline_model->getTable();
+        $tableName .= "_".$this->session->userdata('company_pid');
+        $this->Hotline_model->setTable($tableName);
+        $whereArr = array(
             'customer_phone'    => $this->input->post('customer_phone',TRUE),
-            'hotline.group_hotline'     => $this->input->post('group_hotline',TRUE),
+            $tableName.'.group_hotline'     => $this->input->post('group_hotline',TRUE),
         );
         $limit 		= $this->input->post('limit') ?? 10;
         $startFrom = 0;
@@ -231,6 +241,7 @@ class Hotline extends CI_Controller
                 // 'customer_phone'    => $this->input->post('customer_phone',TRUE),
                 // 'hotline.group_hotline'     => $this->input->post('group_hotline',TRUE),
                 'id'                  => $this->input->post('search_id',TRUE),
+
             ];
             $limitQuery = $this->Hotline_model->getQueryNumber($whereArr, $this->input->post('search_id',TRUE)); 
             // echo print_r($limitQuery);
@@ -241,8 +252,8 @@ class Hotline extends CI_Controller
             // echo print_r($limitSearchData);
             // die();
         }
-        $datas =  $this->Hotline_model->detail_list($whereArr,$startFrom,'hotline',$limit);
-        $count =  $this->Hotline_model->count_all($whereArr);
+        $datas =  $this->Hotline_model->detail_list($whereArr,$startFrom,'hotline_'.$this->session->userdata('company_pid'),$limit);
+        $count =  $this->Hotline_model->count_all($whereArr,$tableName);
         foreach ($datas as $key => $value) {
             if (!empty($value->image_name)) {
                 // $datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;

@@ -24,6 +24,7 @@ $curl = curl_init();
 $token = "";
 if (!empty($_POST)) {
 	$data =$_POST;
+	$data['company_pid'] = $_GET['company_pid'] ?: '';
 } else {
 	$data = [];
 }
@@ -48,5 +49,6 @@ print_r($result);
 
 $saveData = $_POST;
 	file_put_contents('log/'.date("dmY"),json_encode($saveData).PHP_EOL, FILE_APPEND);
-file_put_contents('log/'.date("dmYResult"),json_encode($result).PHP_EOL, FILE_APPEND);
+	file_put_contents('log/'.date("dmY")."_Result",json_encode($result).PHP_EOL, FILE_APPEND);
+	file_put_contents('log/'.date("dmY")."_GET",json_encode($_GET).PHP_EOL, FILE_APPEND);
 	// echo "mantap ";

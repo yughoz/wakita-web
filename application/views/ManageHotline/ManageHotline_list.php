@@ -19,7 +19,6 @@
             <thead>
                 <tr>
                     <th width="30px">No</th>
-                    <th>Name</th>
                     <th>Hotline</th>
                     <th>Device ID</th>
                     <th>Device Name</th>
@@ -349,7 +348,6 @@
                             "data": "pid",
                             "orderable": false
                         },
-                        {"data": "package_name"},
                         {"data": "name"},
                         {"data": "device_id"},
                         {"data": "device_name"},
