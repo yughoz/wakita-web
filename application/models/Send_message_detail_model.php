@@ -7,6 +7,7 @@ class Send_message_detail_model extends CI_Model
 {
 
     public $table = 'send_message_detail';
+    public $table_header = 'send_message_header';
     public $id = 'id';
     public $order = 'DESC';
 
@@ -17,8 +18,8 @@ class Send_message_detail_model extends CI_Model
 
     // datatables
     function json() {
-        $this->datatables->select('id,header_id,from_num,dest_num,message_id,message_text,status,created,createdby,updated,updatedby');
-        $this->datatables->from('send_message_detail');
+        $this->datatables->select('pid as id,pid,header_pid,from_num,dest_num,message_id,message_text,status,created,createdby,updated,updatedby');
+        $this->datatables->from($this->table);
         //add this line for join
         //$this->datatables->join('table2', 'send_message_detail.field = table2.field');
         $this->datatables->add_column('action', '<a href="#" class="btn btn-danger btn-sm" onclick="editModal($1);return false;"><i class="fa fa-eye" aria-hidden="true"></i> </a>', 'id');
@@ -49,17 +50,17 @@ class Send_message_detail_model extends CI_Model
     // get total rows
     function total_rows($q = NULL) {
         $this->db->like('id', $q);
-	$this->db->or_like('header_id', $q);
-	$this->db->or_like('from_num', $q);
-	$this->db->or_like('dest_num', $q);
-	$this->db->or_like('message_id', $q);
-	$this->db->or_like('message_text', $q);
-	$this->db->or_like('status', $q);
-	$this->db->or_like('created', $q);
-	$this->db->or_like('createdby', $q);
-	$this->db->or_like('updated', $q);
-	$this->db->or_like('updatedby', $q);
-	$this->db->from($this->table);
+    	$this->db->or_like('header_id', $q);
+    	$this->db->or_like('from_num', $q);
+    	$this->db->or_like('dest_num', $q);
+    	$this->db->or_like('message_id', $q);
+    	$this->db->or_like('message_text', $q);
+    	$this->db->or_like('status', $q);
+    	$this->db->or_like('created', $q);
+    	$this->db->or_like('createdby', $q);
+    	$this->db->or_like('updated', $q);
+    	$this->db->or_like('updatedby', $q);
+    	$this->db->from($this->table);
         return $this->db->count_all_results();
     }
 
@@ -67,17 +68,17 @@ class Send_message_detail_model extends CI_Model
     function get_limit_data($limit, $start = 0, $q = NULL) {
         $this->db->order_by($this->id, $this->order);
         $this->db->like('id', $q);
-	$this->db->or_like('header_id', $q);
-	$this->db->or_like('from_num', $q);
-	$this->db->or_like('dest_num', $q);
-	$this->db->or_like('message_id', $q);
-	$this->db->or_like('message_text', $q);
-	$this->db->or_like('status', $q);
-	$this->db->or_like('created', $q);
-	$this->db->or_like('createdby', $q);
-	$this->db->or_like('updated', $q);
-	$this->db->or_like('updatedby', $q);
-	$this->db->limit($limit, $start);
+    	$this->db->or_like('header_id', $q);
+    	$this->db->or_like('from_num', $q);
+    	$this->db->or_like('dest_num', $q);
+    	$this->db->or_like('message_id', $q);
+    	$this->db->or_like('message_text', $q);
+    	$this->db->or_like('status', $q);
+    	$this->db->or_like('created', $q);
+    	$this->db->or_like('createdby', $q);
+    	$this->db->or_like('updated', $q);
+    	$this->db->or_like('updatedby', $q);
+    	$this->db->limit($limit, $start);
         return $this->db->get($this->table)->result();
     }
 
@@ -88,10 +89,26 @@ class Send_message_detail_model extends CI_Model
         return $this->db->insert_id();
     }
 
+    function get_header_table(){
+        return $this->table_header;
+    }
+
+    function set_header_table($name){
+        $this->table_header = $name;
+    }
+
+    function get_table(){
+        return $this->table;
+    }
+
+    function set_table($name){
+        $this->table = $name;
+    }
+
     // insert data header
     function insert_header($data)
     {
-        $this->db->insert('send_message_header', $data);
+        $this->db->insert($this->table_header, $data);
         return $this->db->insert_id();
     }
 

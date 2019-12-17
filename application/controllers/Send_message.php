@@ -20,6 +20,7 @@ class Send_message extends CI_Controller
         $this->url          = $this->config->item('APIWeb');
         // $this->url          = 'https://wablas.com/api';
         $this->client       = new GuzzleHttp\Client();
+        $this->company_pid  = $this->session->userdata('company_pid');
         $this->startRes = time();
 
     }
@@ -47,6 +48,9 @@ class Send_message extends CI_Controller
     
     public function json() {
         header('Content-Type: application/json');
+
+        $tableName = $this->Send_message_detail_model->get_table();
+        $this->Send_message_detail_model->set_table($tableName."_".$this->company_pid);
         echo $this->Send_message_detail_model->json();
     }
 

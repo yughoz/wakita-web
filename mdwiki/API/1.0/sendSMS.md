@@ -31,7 +31,6 @@ Request parameters
 |--------|----------|-----|
 | phone  | Required |  Target phone number. You can use the country code prefix or not. Example: 081223xx|
 | message| Required | Text message to be sent. Format: UTF-8 or UTF-16 string. for single newline (\n), double newline (\n2) |
-| save_hotline| optional | Save message to hotline message |
 
 Example
 -----------------
@@ -43,7 +42,6 @@ $curl = curl_init();
 $param = http_build_query([
             "phone" => "08569*****",
             "message" => "hello",
-            "save_hotline" = "1",
         ]);
 
 curl_setopt_array($curl, array(

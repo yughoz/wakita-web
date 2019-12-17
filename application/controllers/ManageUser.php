@@ -13,11 +13,17 @@ class ManageUser extends CI_Controller
         $this->load->library('form_validation');        
 	    $this->load->library('datatables');
         $this->load->library('wakitalib');
+        $this->load->model('ManageUser_model');
+        $this->load->model('ManageHotline_model');
+        $this->load->model('ManageHotlineMember_model');
+        $this->startRes = time();
     }
 
     public function index()
     {
-        $this->template->load('template','ManageUser/ManageUser_list');
+        $data['hotline'] = $this->ManageHotline_model->get_all_where(['company_id'    => $this->config->item('company_id')]);
+        // echo print_r($data);die(); 
+        $this->template->load('template','ManageUser/ManageUser_list',$data);
     } 
     
     public function json() {
@@ -96,6 +102,93 @@ class ManageUser extends CI_Controller
                 redirect(site_url('ManageUser/create'));
             }
         }
+    }
+
+    public function create_trial_action() 
+    {
+        // $this->_rules();
+        $this->form_validation->set_rules('counter', 'counter', 'trim|required');
+        $foto = $this->upload_foto();
+        $random = [];
+        $prefix = "@".$this->input->post('prefix',TRUE);
+        $prefix .= ".trial.id";
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode([
+                "code" => "error",
+                "message" => validation_errors(),
+                "form_error" => $this->form_validation->error_array(),
+            ]);die();
+        } else {
+
+            for ($i=0; $i < $this->input->post('counter',TRUE); $i++) { 
+
+                $username   = date('M').rand(1000,9999);
+                $email      = $username.$prefix;
+                $password   = $this->randomPassword();
+
+
+                $options        = array("cost"=>4);
+                $hashPassword   = password_hash($password,PASSWORD_BCRYPT,$options);
+                
+                $data = array(
+                    'pid'           => $this->wakitalib->get_pid_id('tbl_user',"TRIAL",'id_users',1),
+                    'full_name'     => $username,
+                    'email'         => $email,
+                    'phone'         => "0812345".rand(100,999),
+                    'password'      => $hashPassword,
+                    'images'        => "",
+                    'id_user_level' => $this->input->post('id_user_level',TRUE),
+                    'is_aktif'      => "1",
+                );
+
+                if ($this->ManageUser_model->check_insert($data)) {
+                    $user_id = $this->ManageUser_model->insert($data);
+
+                    $dataHotlineMember = array(
+                        'pid'       => $this->wakitalib->get_pid_id('hotline_member',"HM",'pid',1),
+                        'group_number'  => $this->input->post('group_number',TRUE),
+                        'user_id'   => $user_id,
+                        'created'   => date("Y-m-d H:i:s"),
+                        'createdby' => $this->session->userdata('email'),
+                        'updated'   => date("Y-m-d H:i:s"),
+                        'updatedby' => $this->session->userdata('email'),
+                    );
+
+                    $this->ManageHotlineMember_model->insert($dataHotlineMember);
+                    // $this->session->set_flashdata('message', 'Create Record Success');
+                    // redirect(site_url('ManageUser'));
+                    
+
+                    $random[$i]['id_user']  =   $user_id;
+                    $random[$i]['email']    =   $email;
+                    $random[$i]['password'] =   $password;
+
+                }
+            }
+            
+            $this->Loging("ManageUser_create_trial_action" , $random);
+            echo json_encode([
+                "code" => "success",
+                "message" => "Create Record Success",
+                "data" => $random
+            ]);die();
+
+            // echo print_r($random);
+        }
+    }
+
+    function randomPassword( $length = 7 ) 
+    { 
+        // $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?"; 
+        $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; 
+        // $length = rand(10, 16); 
+        $password = substr( str_shuffle(sha1(rand() . time()) . $chars ), 0, $length );
+        // $password = str_shuffle(sha1(rand() . time()) . $chars );
+        // echo substr($password, 0,$length);
+        // echo "<br>\n";
+        // echo $password ;
+        // echo "<br>\n ".$length;
+        return $password;
     }
     
     public function update($id) 
@@ -246,16 +339,16 @@ class ManageUser extends CI_Controller
 
     public function _rules() 
     {
-	$this->form_validation->set_rules('full_name', 'full name', 'trim|required');
-	$this->form_validation->set_rules('email', 'email', 'trim|required');
-    $this->form_validation->set_rules('phone', 'phone', 'trim|required');
-	//$this->form_validation->set_rules('password', 'password', 'trim|required');
-	//$this->form_validation->set_rules('images', 'images', 'trim|required');
-	$this->form_validation->set_rules('id_user_level', 'id user level', 'trim|required');
-	$this->form_validation->set_rules('is_aktif', 'is aktif', 'trim|required');
+    	$this->form_validation->set_rules('full_name', 'full name', 'trim|required');
+    	$this->form_validation->set_rules('email', 'email', 'trim|required');
+        $this->form_validation->set_rules('phone', 'phone', 'trim|required');
+    	//$this->form_validation->set_rules('password', 'password', 'trim|required');
+    	//$this->form_validation->set_rules('images', 'images', 'trim|required');
+    	$this->form_validation->set_rules('id_user_level', 'id user level', 'trim|required');
+    	$this->form_validation->set_rules('is_aktif', 'is aktif', 'trim|required');
 
-	$this->form_validation->set_rules('id_users', 'id_users', 'trim');
-	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
+    	$this->form_validation->set_rules('id_users', 'id_users', 'trim');
+    	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
     }
     public function _rules_profile() 
     {
@@ -356,6 +449,22 @@ class ManageUser extends CI_Controller
             $this->session->set_flashdata('message', 'Record Not Found');
             redirect(site_url('ManageUser/ManageUser_profile'));
         }
+    }
+
+
+    function Loging($name,$param){
+
+        $fullpath=FCPATH.'Log/'.date('Y').'/'.date('m').'/'.date('d');
+        $filepath = $fullpath.'/'.$name.'.txt';
+        if (!is_dir($fullpath)) {
+            mkdir($fullpath, 0755, TRUE);
+        }
+        $saveData = [
+            "timeRes" => time() - $this->startRes,
+            "param" => $param
+        ];
+
+        file_put_contents($filepath,json_encode($saveData).PHP_EOL, FILE_APPEND);
     }
 
 }

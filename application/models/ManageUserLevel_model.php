@@ -58,6 +58,17 @@ class ManageUserLevel_model extends CI_Model
         return $this->db->get($this->table)->result();
     }
 
+    // get menus
+    function get_akses($id_user_level)
+    {
+        $sql_menu = "SELECT * 
+            FROM tbl_menu 
+            WHERE id_menu in(select id_menu from tbl_hak_akses where id_user_level=$id_user_level) and is_main_menu=0 and is_aktif='y'";
+        
+
+        return $this->db->query($sql_menu)->result();
+    }
+
     // insert data
     function insert($data)
     {

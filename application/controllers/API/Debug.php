@@ -36,6 +36,14 @@ class Debug extends CI_Controller
     } 
 
 
+    public function pid()
+    {
+      $this->wakitalib->set_database('server_admin');
+      $datas = $this->wakitalib->get_pid_id('tbl_subscription',"TSB",'subscription_id',1);  
+      
+      echo $datas;
+    }
+
     function Loging($name,$param){
 
       $fullpath=FCPATH.'Log/'.date('Y').'/'.date('m').'/'.date('d');

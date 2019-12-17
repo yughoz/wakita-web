@@ -3,33 +3,36 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Hotline extends CI_Controller
+
+use ElephantIO\Client;
+use ElephantIO\Engine\SocketIO\Version1X;
+
+class Hotline_private extends CI_Controller
 {
     function __construct()
     {
         parent::__construct();
         // is_login();
-        checking_login_api();
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('Hotline_model');
+        $this->load->model('Hotline_private_model');
         $this->load->library('form_validation');        
         $this->load->library('datatables');
         $this->load->model('Milis_member_model');
         $this->load->model('ManageHotlineMember_model');
         $this->load->model('ManageHotline_model');
+        $this->load->model('Inbox_model');
 
+        $this->client       = new GuzzleHttp\Client();
     }
 
     public function index()
     {
         header('Content-Type: application/json');
         $where = [
-            "vw_group_milis_".$this->session->userdata('company_pid').".group_hotline" =>$this->input->post('group_hotline',TRUE),
+            "vw_group_milis.group_hotline" =>$this->input->post('group_hotline',TRUE),
             "flag_status >" => "2"
         ];
-        
-
-        $datas          =   $this->Hotline_model->group_json($where);
+        $datas          =   $this->Hotline_private_model->group_json($where);
         $dataNew        =   []  ;
         $dataTemp       =   []  ;
         $countTemp      =   0   ;
@@ -91,10 +94,6 @@ class Hotline extends CI_Controller
         echo json_encode(["data" => $dataTemp,"dataNew" => $dataNew ]);
     } 
 
-    function testView(){
-        echo $this->Hotline_model->vw_group_milis("vw_group_milis_".$this->session->userdata('company_pid'));
-    }
-
     function parsingTrialNumber($str)
     {
         $length = "********".substr($str,9);
@@ -106,13 +105,13 @@ class Hotline extends CI_Controller
     {
         header('Content-Type: application/json');
         $where = [
-            "vw_group_milis_".$this->session->userdata('company_pid').".group_hotline" =>$this->input->post('group_hotline',TRUE),
+            "hotline_private.group_hotline" =>$this->input->post('group_hotline',TRUE),
             "flag_status >" => "2",
         ];
         $where_like = [
             "message" => $this->input->post('search',TRUE),
         ];
-        $datas          =   $this->Hotline_model->group_json_search($where,$where_like);
+        $datas          =   $this->Hotline_private_model->group_json_search($where,$where_like);
         $dataNew        =   []  ;
         $dataTemp       =   []  ;
         $countTemp      =   0   ;
@@ -220,13 +219,9 @@ class Hotline extends CI_Controller
     public function detail()
     {
         header('Content-Type: application/json');
-
-        $tableName = $this->Hotline_model->getTable();
-        $tableName .= "_".$this->session->userdata('company_pid');
-        $this->Hotline_model->setTable($tableName);
-        $whereArr = array(
+         $whereArr = array(
             'customer_phone'    => $this->input->post('customer_phone',TRUE),
-            $tableName.'.group_hotline'     => $this->input->post('group_hotline',TRUE),
+            'hotline_private.group_hotline'     => $this->input->post('group_hotline',TRUE),
         );
         $limit 		= $this->input->post('limit') ?? 10;
         $startFrom = 0;
@@ -241,19 +236,18 @@ class Hotline extends CI_Controller
                 // 'customer_phone'    => $this->input->post('customer_phone',TRUE),
                 // 'hotline.group_hotline'     => $this->input->post('group_hotline',TRUE),
                 'id'                  => $this->input->post('search_id',TRUE),
-
             ];
-            $limitQuery = $this->Hotline_model->getQueryNumber($whereArr, $this->input->post('search_id',TRUE)); 
+            $limitQuery = $this->Hotline_private_model->getQueryNumber($whereArr, $this->input->post('search_id',TRUE)); 
             // echo print_r($limitQuery);
-            $limitSearchData = $this->Hotline_model->getRowNumber($limitQuery,$whereGetId, $this->input->post('search_id',TRUE));
+            $limitSearchData = $this->Hotline_private_model->getRowNumber($limitQuery,$whereGetId, $this->input->post('search_id',TRUE));
             $limit = $limitSearchData->rowNumber + 3;
             $limitTemp = $limit-13 ;
             $startFrom = ($limitTemp >= 0) ? $limitTemp : 0;
             // echo print_r($limitSearchData);
             // die();
         }
-        $datas =  $this->Hotline_model->detail_list($whereArr,$startFrom,'hotline_'.$this->session->userdata('company_pid'),$limit);
-        $count =  $this->Hotline_model->count_all($whereArr,$tableName);
+        $datas =  $this->Hotline_private_model->detail_list($whereArr,$startFrom,'hotline_private',$limit);
+        $count =  $this->Hotline_private_model->count_all($whereArr);
         foreach ($datas as $key => $value) {
             if (!empty($value->image_name)) {
                 // $datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
@@ -285,14 +279,132 @@ class Hotline extends CI_Controller
         echo json_encode(["data" => $datas,"counter" =>$count,"startFrom" => $startFrom,"startNext" => $startFrom+$limit+1,"limit"=>$limit, "edit_contact" => checking_akses("edit_contact")]);
     } 
     
+
+    public function send_private() 
+    {
+        // $this->Loging("send_wa_milis" , ["POST"=>$_POST]);
+
+        $data = array(
+            // 'header_id' => $this->input->post('header_id',TRUE),
+            'from_num' => $this->config->item('keys')[0]['numbers'],
+            'dest_num' => $this->input->post('noPhone',TRUE),
+            'message_id' => $this->input->post('message_id',TRUE),
+            'message_text' => $this->input->post('message',TRUE),
+            'status' => $this->input->post('status',TRUE),
+            'created' => date("Y-m-d H:i:s"),
+            'createdby' => "API",
+            'updated' => date("Y-m-d H:i:s"),
+            'updatedby' => "API",
+        );
+
+        
+        // $insHotline = array(
+        //         'customer_phone' => $this->input->post('noPhone',TRUE),
+        //     'message'       => $this->input->post('message',TRUE),
+        //     'created'       => date("Y-m-d H:i:s"),
+        //     'message_id'    => "1",
+        //     'group_hotline' => $this->input->post('group_hotline',TRUE),
+        //     'createdby'     => $this->session->userdata('email'),
+        //     'user_phone'    => $this->session->userdata('phone'),
+        //     'flag_status'   => "5",
+        // );
+        // $this->Inbox_model->insertHotline($insHotline);
+
+        $insHotline = array(
+            'created'           => date("Y-m-d H:i:s"),
+            'createdby'         => $this->session->userdata('email'),
+            'customer_phone'    => $this->input->post('noPhone',TRUE),
+            'user_phone'        => $this->session->userdata('phone'),
+            'message'           => $this->input->post('message',TRUE),
+            'group_hotline'     => $this->input->post('group_hotline',TRUE),
+            'flag_status'       => "4",
+        );
+        $this->Inbox_model->insertHotlinePrivate($insHotline);
+
+        $insHotline['customer_username']    = "";
+        $insHotline['customer_title']       = "";
+        $insHotline['user_send_username']   = $this->session->userdata('full_name');
+        $insHotline['user_send_title']      = $this->session->userdata('full_name');
+        $insHotline['user_send_phone']      = $this->session->userdata('phone');
+        $insHotline['type']     = "";
+        $insHotline['image']    = "";
+        $insHotline['imageUrl'] = "";
+        $insHotline['file']     = "";
+        $insHotline['fileUrl']  = "";
+        $insHotline['video']    = "";
+        $insHotline['videoUrl'] = "";
+        
+        $insHotline['destination'] = "inbox";
+        // $insHotline['username'] = $this->session->userdata('full_name');
+        $this->sendSocket($insHotline);
+        $this->sendFCM($insHotline);
+
+        echo json_encode([
+            "code" => "success",
+            "message" => "Create Record Success",
+        ]);die();
+        // }
+    }
+
+
+    function sendFCM($data){
+        $data = json_encode([
+            // "to" => 'egVqgonXXHM:APA91bEPXbTBW2iW16UQHQOyXI0f-Yfb6HcRX6Q2_7BYs6vZ_Y7JBzUmH8JDPITPRSyQt-t0JKGKRK64dqgvBFAEuXjfw4hKekS6MDZmRFEPjC9AfwZZBg0ZfDJI-z3PWQ3N7JK8P6WJ',
+            // "to" => 'cYhsZSacooo:APA91bEWIS4j_C1SXLMx1uLQaw_0bzzE-SCiS6j2u7ruWnT-REQo20yNhy0pbqYUD76-KwBclQTB7K475SzgYxRyxRfqfjq3P7WEgPSmy0vDJ8wCVojBVvpZiZjwtZkHZXQ0LOGV9Pxo',
+            
+            'to'=>'/topics/'.$data['group_hotline'],
+            'priority'=>'high',
+            "notification" => [
+                "body" => $data['message'],
+                "title" => $data['customer_phone'],
+                "icon" => "ic_launcher"
+            ],
+            "data" => $data
+        ]);
+        //FCM API end-point
+        $url = 'https://fcm.googleapis.com/fcm/send';
+        //api_key in Firebase Console -> Project Settings -> CLOUD MESSAGING -> Server key
+        $server_key = 'AIzaSyC3rX7bePdEZnRLZJ_asuCdBEDqp6BrFUI';
+        //header with content_type api key
+        $headers = array(
+            'Content-Type:application/json',
+            'Authorization:key='.$server_key
+        );
+        //CURL request to route notification to FCM connection server (provided by Google)
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        $result = curl_exec($ch);
+        // if ($result === FALSE) {
+        //     die('Oops! FCM Send Error: ' . curl_error($ch));
+        // }
+        $this->Loging("send_fcm" , ["result"=>$result]);
+        curl_close($ch);
+    }
+    function sendSocket($data){
+        $client = new Client(new Version1X('http://149.129.222.185:8881'));
+        $client->initialize();
+
+        // send message to connected clients
+        $client->emit('post_key', ['socket_session' => '', 'id_account' => $data['customer_phone'], 'datas' => json_encode($data)]);
+        $client->emit('sendWA', ['socket_session' => '', 'id_account' => $data['group_hotline'], 'datas' => json_encode($data)]);
+        $client->close();
+    }
+    
+
     public function json() {
         header('Content-Type: application/json');
-        echo $this->Hotline_model->json();
+        echo $this->Hotline_private_model->json();
     }
 
     public function read($id) 
     {
-        $row = $this->Hotline_model->get_by_id($id);
+        $row = $this->Hotline_private_model->get_by_id($id);
         if ($row) {
             echo json_encode([
                 "code" => "success",
@@ -327,7 +439,7 @@ class Hotline extends CI_Controller
             'createdby' => $this->session->userdata('email'),
         );
 
-            $this->Hotline_model->insert($data);
+            $this->Hotline_private_model->insert($data);
             echo json_encode([
                 "code" => "success",
                 "message" => "Create Record Success",
@@ -356,7 +468,7 @@ class Hotline extends CI_Controller
             'createdby' => $this->input->post('createdby',TRUE),
         );
 
-            $this->Hotline_model->update($this->input->post('id', TRUE), $data);
+            $this->Hotline_private_model->update($this->input->post('id', TRUE), $data);
             echo json_encode([
                 "code" => "success",
                 "message" => "Update Record Success",
@@ -366,10 +478,10 @@ class Hotline extends CI_Controller
     
     public function delete_action($id) 
     {
-        $row = $this->Hotline_model->get_by_id($id);
+        $row = $this->Hotline_private_model->get_by_id($id);
 
         if ($row) {
-            $this->Hotline_model->delete($id);
+            $this->Hotline_private_model->delete($id);
             echo json_encode([
                 "code" => "success",
                 "message" => "Delete Record Success",

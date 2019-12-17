@@ -12,7 +12,8 @@ class Inbox extends CI_Controller
         date_default_timezone_set('Asia/Jakarta');
         $this->load->model('Inbox_model');
         $this->load->library('form_validation');        
-	$this->load->library('datatables');
+	    $this->load->library('datatables');
+        $this->company_pid  = $this->session->userdata('company_pid');
     }
 
     public function index()
@@ -35,6 +36,9 @@ class Inbox extends CI_Controller
     
     public function json() {
         header('Content-Type: application/json');
+
+        $tableName = $this->Inbox_model->get_table();
+        $this->Inbox_model->set_table($tableName."_".$this->company_pid);
         echo $this->Inbox_model->json();
     }
 

@@ -31,6 +31,15 @@ class ManageUser_model extends CI_Model
         return $this->datatables->generate();
     }
 
+    // get data by id
+    function get_by_where_server($where)
+    { 
+        $this->dbServer->select('ms_users'.".*,ms_company.company_name,url_server,company_sort_name,address");
+        $this->dbServer->where($where);
+        $this->dbServer->join('ms_company', 'ms_users'.'.company_id = ms_company.pid');
+        return $this->dbServer->get('ms_users')->row();
+    }
+
     // datatables
     function jsonMember($user_arr) {
         $this->datatables->select('id_users,full_name,email,phone');
@@ -115,12 +124,13 @@ class ManageUser_model extends CI_Model
     function insert($data)
     {
         $this->db->insert($this->table, $data);
+        return $this->db->insert_id();
     }
 
     // check data
     function check_insert($param)
     {
-        $pid = $this->wakitalib->get_pid_id('tbl_user',"MSUser",'id_users',1);
+        $pid  = $this->wakitalib->get_pid_id('tbl_user',"MSUser",'id_users',1);
         $data = [
                 'pid'           => $pid,
                 'id_user_local' => $param['pid'],
@@ -133,7 +143,7 @@ class ManageUser_model extends CI_Model
                 'updatedby'     => $this->session->userdata('email'),
             ];
         $this->dbServer->where('email', $param['email']);
-        $this->dbServer->or_where('phone', $param['phone']);
+        // $this->dbServer->or_where('phone', $param['phone']);
         if (!empty($this->dbServer->get('ms_users')->row())) {
             return false;
         }

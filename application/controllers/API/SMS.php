@@ -20,7 +20,7 @@ class SMS extends CI_Controller
         $this->config->load('apiwha');
         $this->config->load('companyProfile');
         header('Content-Type: application/json');    
-        $this->startRes = time();
+        $this->startRes 	= time();
         $this->apiToken     = "";
         $this->url          = $this->config->item('APIWeb');
         $this->client       = new GuzzleHttp\Client();

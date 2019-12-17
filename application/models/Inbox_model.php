@@ -6,9 +6,10 @@ if (!defined('BASEPATH'))
 class Inbox_model extends CI_Model
 {
 
-    public $table = 'inbox';
-    public $id = 'id';
-    public $order = 'DESC';
+    public $table   = 'inbox';
+    public $table_private   = 'hotline_private';
+    public $id      = 'id';
+    public $order   = 'DESC';
 
     function __construct()
     {
@@ -17,12 +18,22 @@ class Inbox_model extends CI_Model
 
     // datatables
     function json() {
-        $this->datatables->select('id,message_id,fromMe,pushName,phone,message,timestamp,receiver,groupId');
-        $this->datatables->from('inbox');
+        $this->datatables->select('pid as id,pid,message_id,fromMe,pushName,phone,message,timestamp,receiver,groupId');
+        $this->datatables->from($this->table);
         //add this line for join
         //$this->datatables->join('table2', 'inbox.field = table2.field');
         $this->datatables->add_column('action', '<a href="#" class="btn btn-danger btn-sm" onclick="editModal($1);return false;"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> </a>'. ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf($1);return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', 'id');
         return $this->datatables->generate();
+    }
+
+    function setTable($table)
+    {
+        // $this->table = $this->table."_".$table;
+        $this->table = $table;
+    }
+    function getTable()
+    {
+        return $this->table ;
     }
 
     // get all
@@ -77,6 +88,16 @@ class Inbox_model extends CI_Model
         return $this->db->get($this->table)->result();
     }
 
+    
+    function get_table(){
+        return $this->table;
+    }
+
+    function set_table($name){
+        $this->table = $name;
+    }
+
+
     // insert data
     function insert($data)
     {
@@ -88,9 +109,28 @@ class Inbox_model extends CI_Model
         $this->db->insert('hotline', $data);
     }
 
+    function insertHotlineCustom($data,$tblName)
+    {
+        $this->db->insert($tblName, $data);
+    }
+
+
+    function setTablePrivate($table_private)
+    {
+        $this->table_private = $table_private;
+        // echo $this->table_private." ___ ...";
+    }
+
+ 
+    function getTablePrivate()
+    {
+        return $this->table_private;
+    }
+
+
     function insertHotlinePrivate($data)
     {
-        $this->db->insert('hotline_private', $data);
+        $this->db->insert($this->table_private, $data);
     }
     // get data by id
     function get_hotline($phone)

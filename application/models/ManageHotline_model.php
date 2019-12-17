@@ -22,21 +22,19 @@ class ManageHotline_model extends CI_Model
 
     // datatables
     function jsonBU() {
-        $this->datatables->select('a.id,b.package_name,a.name,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
+        $this->datatables->select('a.id,a.name,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
         $this->datatables->from('milis as a');
         //add this line for join
-        $this->datatables->join('tbl_package as b', 'a.package_id = b.package_id');
         $this->datatables->add_column('action', '<a href="#" class="btn btn-danger btn-sm" onclick="editModal($1);return false;"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> </a> '.' <a href="'.base_url().'ManageHotlineMember/member/$1" class="btn btn-danger btn-sm" ><i class="fa fa-eye" aria-hidden="true"></i> </a>'. ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf($1);return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', 'id');
         return $this->datatables->generate();
     }
     // datatables
     function json() { 
         $this->datatables->set_database("server_admin");
-        $this->datatables->select('a.pid,a.name,package_name,a.wa_status,phone_number,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
+        $this->datatables->select('a.pid,a.name,a.wa_status,phone_number,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
         $this->datatables->from($this->table_server.' as a');
         $this->datatables->where("company_id",$this->config->item('company_id'));
         //add this line for join
-        $this->datatables->join('tbl_package as b', 'a.package_id = b.package_id');
         $this->datatables->add_column('action', '<a href="#" onclick="barcodeModal(\'$2\');return false;"  class="btn btn-info btn-sm" ><i class="fa fa-qrcode" aria-hidden="true"></i> </a> <a href="'.base_url().'ManageHotlineMember/member/$1" class="btn btn-danger btn-sm" ><i class="fa fa-eye" aria-hidden="true"></i> </a> ', 'phone_number,token');
         return $this->datatables->generate();
     }
@@ -61,11 +59,16 @@ class ManageHotline_model extends CI_Model
         return $this->dbServer->get($this->table_server)->row();
     }
 
+    function getTableCompanyFromHotline($hotline_num)
+    {
+        return $this->table;
+    }
+
     function get_all_where($where)
     {
-        $this->db->order_by($this->id, 'asc');
-        $this->db->where($where);
-        return $this->db->get($this->table)->result();
+        $this->dbServer->order_by('pid', 'asc');
+        $this->dbServer->where($where);
+        return $this->dbServer->get($this->table_server)->result();
     }
 
     function detail_list($where,$start) {

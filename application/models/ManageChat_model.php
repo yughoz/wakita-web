@@ -10,31 +10,47 @@ class ManageChat_model extends CI_Model
     public $table2 = 'tbl_invoice';
     public $id = 'id';
     public $order = 'DESC';
+    public $table_server = 'ms_hotline';
+    public $view = 'vw_group_milis';
 
     function __construct()
     {
         parent::__construct();
     }
 
+
+    function setView($view)
+    {
+        $this->view = $view;
+        // echo $this->view." ___ ...";
+    }
+
+ 
+    function getView()
+    {
+        return $this->view;
+    }
+
     // datatables
     function list_json() {
-        $this->datatables->select('a.id,b.package_name,a.name,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
-        $this->datatables->from('milis as a');
-        //add this line for join
-        $this->datatables->join('tbl_package as b', 'a.package_id = b.package_id');
+        $this->datatables->set_database("server_admin");
+        $this->datatables->select('a.pid,a.name,a.wa_status,phone_number,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
+        $this->datatables->from($this->table_server.' as a');
+        $this->datatables->where("company_id",$this->config->item('company_id'));
+        $this->datatables->where_in("a.pid",$this->session->userdata('pidHotlineArr'));
         $this->datatables->add_column('action',anchor(site_url('ManageChat/hotline/$1'),'<i class="fa fa-wechat" aria-hidden="true"></i>', array('class' => 'btn btn-warning btn-sm')), 'phone_number');
         return $this->datatables->generate();
     }
 
     function group_json($where = []) {
-        $this->db->select('max(id),id,name_wa,name_replace,customer_phone,message,flag_status,created,createdby,image_name,group_hotline'); 
+        $this->db->select('max(pid),pid,name_wa,name_replace,customer_phone,message,flag_status,created,createdby,image_name,group_hotline'); 
         // $this->db->from('hotline');
         $this->db->where($where);
         $this->db->group_by('customer_phone');
-        $this->db->order_by('id', 'DESC');
+        $this->db->order_by('pid', 'DESC');
         // $this->db->order_by('flag_status', 'ASC');
 
-        return $this->db->get('vw_group_milis')->result();
+        return $this->db->get($this->view)->result();
     }
 
     function detail_json($array){
