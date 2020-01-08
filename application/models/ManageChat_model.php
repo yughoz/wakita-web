@@ -16,6 +16,7 @@ class ManageChat_model extends CI_Model
     function __construct()
     {
         parent::__construct();
+        $this->dbServer = $this->load->database('server_admin', TRUE);
     }
 
 
@@ -36,7 +37,7 @@ class ManageChat_model extends CI_Model
         $this->datatables->set_database("server_admin");
         $this->datatables->select('a.pid,a.name,a.wa_status,phone_number,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
         $this->datatables->from($this->table_server.' as a');
-        $this->datatables->where("company_id",$this->config->item('company_id'));
+        $this->datatables->where("company_id",$this->session->userdata('company_pid'));
         $this->datatables->where_in("a.pid",$this->session->userdata('pidHotlineArr'));
         $this->datatables->add_column('action',anchor(site_url('ManageChat/hotline/$1'),'<i class="fa fa-wechat" aria-hidden="true"></i>', array('class' => 'btn btn-warning btn-sm')), 'phone_number');
         return $this->datatables->generate();
@@ -162,8 +163,8 @@ class ManageChat_model extends CI_Model
     // get token
     function get_token($number)
     {
-        $this->db->where("phone_number", $number);
-        $data =  $this->db->get($this->table)->row();
+        $this->dbServer->where("phone_number", $number);
+        $data =  $this->dbServer->get($this->table_server)->row();
         if ($data) {
             return $data->token;
         }

@@ -12,6 +12,7 @@ Class Auth extends CI_Controller{
         $this->load->model('ManageUser_model');
         $this->load->model('ManageUserLevel_model');
         $this->load->model('Hotline_model');
+        $this->load->model('User_model');
         $this->config->load('companyProfile');
         $this->config->load('mobile');
         $this->load->library('form_validation');        
@@ -75,22 +76,29 @@ Class Auth extends CI_Controller{
         $test       = password_verify($password, $hashPass);
         $dataHotlineDetail = [];
         // query chek users
-        $this->db->where('email',$email);
+        // $this->db->where('email',$email);
         // id_user_level
         // $this->db->or_where('phone',$email);
         //$this->db->where('password',  $test);
-        $users       = $this->db->get('tbl_user');
+        // $users       = $this->db->get('tbl_user');
+        // $whereServer['ms_users.email'] = $email;
+
+
+
+        
+        $users = $this->User_model->get_by_where(["email" =>$email]);
         $whereServer['ms_users.email'] = $email;
+
         $dataUrlServer  = $this->ManageUser_model->get_by_where_server($whereServer);
      
-        if($users->num_rows()>0){
-            $user = $users->row_array();
+        if($users){
+            $user = json_decode(json_encode($users),true);
             if(password_verify($password,$user['password'])){
                 // retrive user data to session
                 // $this->db->where('user_id',$email);
                 $datasLevel = $this->ManageUserLevel_model->get_by_id($user['id_user_level']);
                 // echo print_r($datasLevel);die();
-                $dataHotline  = $this->ManageHotlineMember_model->get_all_where(['user_id' => $user['id_users']]);
+                $dataHotline  = $this->ManageHotlineMember_model->get_all_where(['user_id' => $user['pid']]);
                 // echo print_r($dataHotline);die();
                 foreach ($dataHotline as $key => $value) {
                     $dataHotlineDetail[] = $this->ManageHotline_model->get_by_where(['phone_number' =>$value->group_number]);
@@ -109,7 +117,7 @@ Class Auth extends CI_Controller{
                 // $data['data']['email_company_name'] = $this->config->item('email_company_name'). $this->config->item('domain');
                 // $data['data']['domain'] = $this->config->item('domain');
                 $data['dataHotline']=   $dataHotlineDetail ;
-                $this->Hotline_model->vw_group_milis($this->session->userdata('company_pid'));
+                // $this->Hotline_model->vw_group_milis($this->session->userdata('company_pid'));
                 echo json_encode($data);
                 // redirect('welcome');
             }else{
@@ -129,6 +137,11 @@ Class Auth extends CI_Controller{
         }
     }
 
+
+
+    function getCompanyId (){
+        echo $this->session->userdata('company_pid');
+    }
     function getToken ($get){
         echo print_r($this->Milis_model->get_token($get));
     }

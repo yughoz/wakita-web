@@ -129,13 +129,14 @@ class Hotline_model extends CI_Model
     }
     
 	function detail_list($where, $start, $table = 'hotline',$limit = 10) {
-        $this->db->select($table.".*,tbl_user.full_name as username, ".$table.".pid as id,name_replace as username_title,(@cnt := @cnt + 1) AS rowNumber");
+        $this->db->select($table.".*, ".$table.".pid as id,name_replace as username_title,(@cnt := @cnt + 1) AS rowNumber");
         // $this->db->from('hotline');
-        $this->db->join('tbl_user', $table.'.createdby = email',"LEFT");
+        // $this->db->join('tbl_user', $table.'.createdby = email',"LEFT");
         $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
         $this->db->join('(SELECT @cnt := 0) AS dummy','1=1');
         $this->db->where($where);
         $this->db->order_by('created', 'DESC');
+        $this->db->group_by($table.'.pid');
         $this->db->limit($limit,$start);
 
         return $this->db->get($table)->result();
@@ -227,10 +228,12 @@ class Hotline_model extends CI_Model
     function vw_group_milis($company_pid){
         $vw_group_milis = "vw_group_milis_".$company_pid;
         $table = $this->table."_".$company_pid;
+        // echo $table;die();
         try {
             // if (!($this->db->get($table)->result() )){
 
-                $this->db->query("CREATE OR REPLACE VIEW  ".$vw_group_milis." AS 
+                // $this->db->query("CREATE OR REPLACE VIEW  ".$vw_group_milis." AS 
+                $this->db->query("CREATE  ".$vw_group_milis." AS 
                 SELECT
                             `t`.`pid`,
                             `t`.`image_name` AS `image_name`,

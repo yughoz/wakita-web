@@ -87,7 +87,7 @@ function checking_akses($modul){
 
 function checking_login_api(){
     $ci = get_instance();
-    if(!$ci->session->userdata('id_users')){
+    if(!$ci->session->userdata('pid')){
         echo json_encode([
                 "code" => "session_expired",
                 "message" => "session expired \n ",

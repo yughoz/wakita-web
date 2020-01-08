@@ -20,6 +20,7 @@ class ManageChat extends CI_Controller
         $this->load->model('Contact_model');
         $this->load->model('Milis_member_model');
         $this->load->model('Hotline_model');
+        $this->load->model('User_model');
 
         $this->load->library('form_validation');
         $this->load->library('datatables');
@@ -143,6 +144,7 @@ class ManageChat extends CI_Controller
         // exit();
         $count      = $this->Hotline_model->count_all($whereArr,$table);
         foreach ($datas as $key => $value) {
+                // full_name  as username
             if (!empty($value->image_name)) {
                 // $datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
                 $datas[$key]->image	= base_url("API/DirectLink/file/")."image/".$value->image_name;
@@ -167,6 +169,8 @@ class ManageChat extends CI_Controller
                     // /$datas[$key]->image 	= base_url('assets/foto_wa')."/".$value->image_name;
                 }
 
+            } else {
+                $datas[$key]->username = $this->User_model->get_by_where(["email" => $value->createdby ])->full_name;
             }
             $datas[$key]->_idUser = $value->user_phone ?? $value->customer_phone;
          }

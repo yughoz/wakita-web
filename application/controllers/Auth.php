@@ -82,7 +82,7 @@ Class Auth extends CI_Controller{
                 $twitter
                 ];
 
-                $newContentSendgrid	= str_replace($originalMail, $replaceMail, $message);
+                $newContentSendgrid = str_replace($originalMail, $replaceMail, $message);
 
                 try{
                     $this->ManageUser_model->update($user['id_users'], $data);
@@ -164,6 +164,7 @@ Class Auth extends CI_Controller{
         $this->load->model('ManageUserLevel_model');
         $this->load->model('ManageHotlineMember_model');
         $this->load->model('ManageHotline_model');
+        $this->load->model('User_model');
 
         $email      = $this->input->post('email');
         //$password   = $this->input->post('password');
@@ -171,20 +172,24 @@ Class Auth extends CI_Controller{
         $hashPass = password_hash($password,PASSWORD_DEFAULT);
         $test     = password_verify($password, $hashPass);
         // query chek users
-        $this->db->where('email',$email);
+        // $this->db->where('email',$email);
         //$this->db->where('password',  $test);
-        $users       = $this->db->get('tbl_user');
-        $whereServer['ms_users.email'] = $email;
-        $dataUrlServer  = $this->ManageUser_model->get_by_where_server($whereServer);
+        // $users       = $this->db->get('tbl_user');
 
-        if($users->num_rows()>0){
-            $user = $users->row_array();
-            if(password_verify($password,$user['password'])){
+
+        
+        $users = $this->User_model->get_by_where(["email" =>$email]);
+        $whereServer['ms_users.email'] = $email;
+        // $dataUrlServer  = $this->ManageUser_model->get_by_where_server($whereServer);
+        if($users){
+            $user = json_decode(json_encode($users),true);
+        // echo print_r($user);die();
+            // if(password_verify($password,$user['password'])){
                 // retrive user data to session
                 // $this->db->where('user_id',$email);
                 $datasLevel = $this->ManageUserLevel_model->get_by_id($user['id_user_level']);
                 // echo print_r($datasLevel);die();
-                $dataHotline  = $this->ManageHotlineMember_model->get_all_where(['user_id' => $user['id_users']]);
+                $dataHotline  = $this->ManageHotlineMember_model->get_all_where(['user_id' => $user['pid']]);
                 // echo print_r($dataHotline);die();
                 $pidHotlineArr = [];
                 foreach ($dataHotline as $key => $value) {
@@ -196,17 +201,21 @@ Class Auth extends CI_Controller{
 
 
                 $user['user_level'] = $datasLevel->nama_level;
-                $user['company_pid'] = $dataUrlServer->company_id;
+                $user['company_pid'] = $users->company_id;
+                $user['id_users'] = $users->pid;
                 $user['pidHotlineArr'] = $pidHotlineArr;
-
+                $data['data_level'] =   $this->ManageUserLevel_model->get_akses($user['id_user_level']) ;
                 // echo print_r($user);die();
+
+                $data['dataHotline']=   $dataHotlineDetail ;
                 // retrive user data to session
                 $this->session->set_userdata($user);
 
                 redirect('welcome');
-            }else{
-                redirect('auth');
-            }
+            // }else{
+            //     $this->session->set_flashdata('status_login','password yang anda input salah');
+            //     redirect('auth');
+            // }
         }else{
             $this->session->set_flashdata('status_login','email atau password yang anda input salah');
             redirect('auth');

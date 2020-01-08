@@ -230,7 +230,7 @@
                     ajax: {"url": '<?php echo base_url("ManageHotlineMember/user/").$member ?>', "type": "POST"},
                     columns: [
                         {
-                            "data": "id_users",
+                            "data": "pid",
                             "orderable": false
                         },{"data": "full_name"},{"data": "phone"},
                         {

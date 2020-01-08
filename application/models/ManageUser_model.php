@@ -6,8 +6,10 @@ if (!defined('BASEPATH'))
 class ManageUser_model extends CI_Model
 {
 
-    public $table = 'tbl_user';
-    public $id = 'id_users';
+    // public $table = 'tbl_user';
+    public $table = 'ms_users';
+    public $table_server = 'ms_users';
+    public $id = 'pid';
     public $order = 'DESC';
 
     function __construct()
@@ -21,11 +23,13 @@ class ManageUser_model extends CI_Model
 
     // datatables
     function json() {
-        $this->datatables->select('id_users,full_name,email,nama_level,is_aktif,phone');
-        $this->datatables->from('tbl_user');
-        $this->datatables->add_column('is_aktif', '$1', 'rename_string_is_aktif(is_aktif)');
+        $this->datatables->set_database("server_admin");
+        $this->datatables->select('pid,pid as id_users,full_name,email,phone,id_user_level');
+        $this->datatables->from($this->table_server);
+        $this->datatables->where(["company_id" =>$this->session->userdata('company_pid')]);
+        // $this->datatables->add_column('is_aktif', '$1', 'rename_string_is_aktif(is_aktif)');
         //add this line for join
-        $this->datatables->join('tbl_user_level', 'tbl_user.id_user_level = tbl_user_level.id_user_level');
+        // $this->datatables->join('tbl_user_level', 'tbl_user.id_user_level = tbl_user_level.id_user_level');
         $this->datatables->add_column('action',anchor(site_url('ManageUser/update/$1'),'<i class="fa fa-pencil-square-o" aria-hidden="true"></i>', array('class' => 'btn btn-warning btn-sm'))." 
                 ".anchor(site_url('ManageUser/delete/$1'),'<i class="fa fa-trash-o" aria-hidden="true"></i>','class="btn btn-danger btn-sm" onclick="javasciprt: return confirm(\'Are You Sure ?\')"'), 'id_users');
         return $this->datatables->generate();
@@ -42,13 +46,16 @@ class ManageUser_model extends CI_Model
 
     // datatables
     function jsonMember($user_arr) {
-        $this->datatables->select('id_users,full_name,email,phone');
-        $this->datatables->from('tbl_user');
-        // $this->datatables->where_not_in('id_users',$user_arr);
+        $this->datatables->set_database("server_admin");
+        $this->datatables->select('pid,full_name,email,phone');
+        $this->datatables->from($this->table);
+        // $this->datatables->where_not_in('pid',$user_arr);
         if (!empty($user_arr)) {
-            $this->datatables->where_not_in('id_users',$user_arr);
+            $this->datatables->where_not_in('pid',$user_arr);
         }
-        $this->datatables->add_column('selecting', '<a href="#" class="btn btn-danger btn-sm" onclick="selectingFunc($1);return false;"><i class="fa fa-check-circle" aria-hidden="true"></i> </a>', 'id_users');
+        $this->datatables->where(["company_id" =>$this->session->userdata('company_pid')]);
+        
+        $this->datatables->add_column('selecting', '<a href="#" class="btn btn-danger btn-sm" onclick="selectingFunc(\'$1\');return false;"><i class="fa fa-check-circle" aria-hidden="true"></i> </a>', 'pid');
         // $this->datatables->where('user_id',NULL);
 // 
 
@@ -57,11 +64,11 @@ class ManageUser_model extends CI_Model
         // echo print_r( $this->db->get()->result());
         // $data['data'] =  $this->db->query("
         //                             SELECT * FROM tbl_user 
-        //                             WHERE id_users not in (SELECT user_id
+        //                             WHERE pid not in (SELECT user_id
         //                             FROM `vw_milis_member`
         //                             WHERE milis_id = ".$milis_id.")")->result_array();
         // foreach ($data['data'] as $key => $value) {
-        //     $data['data'][$key]['selecting'] = '<a href="#" class="btn btn-danger btn-sm" onclick="selectingFunc('.$value['id_users'].');return false;"><i class="fa fa-check-circle" aria-hidden="true"></i> </a>';
+        //     $data['data'][$key]['selecting'] = '<a href="#" class="btn btn-danger btn-sm" onclick="selectingFunc('.$value['pid'].');return false;"><i class="fa fa-check-circle" aria-hidden="true"></i> </a>';
         // }
         // $data['draw']              = intval($this->input->post('draw'));
         // $data['recordsTotal' ]     = count($data['data']);
@@ -75,15 +82,15 @@ class ManageUser_model extends CI_Model
     // get all
     function get_all()
     {
-        $this->db->order_by($this->id, $this->order);
-        return $this->db->get($this->table)->result();
+        $this->dbServer->order_by($this->id, $this->order);
+        return $this->dbServer->get($this->table)->result();
     }
 
     // get data by id
     function get_by_id($id)
     {
-        $this->db->where($this->id, $id);
-        return $this->db->get($this->table)->row();
+        $this->dbServer->where($this->id, $id);
+        return $this->dbServer->get($this->table)->row();
     }
     
     // get total rows
@@ -114,26 +121,28 @@ class ManageUser_model extends CI_Model
     }
 
     function get_reset($q = NULL) {
-        $this->db->order_by($this->id, $this->order);
-        $this->db->like('forgot', $q);
-        return $this->db->get($this->table)->result();
+        $this->dbServer->order_by($this->id, $this->order);
+        $this->dbServer->like('forgot', $q);
+        return $this->dbServer->get($this->table)->result();
     }
 
 
     // insert data
     function insert($data)
     {
-        $this->db->insert($this->table, $data);
-        return $this->db->insert_id();
+        // echo print_r($data);die();
+        // $this->dbServer->insert($this->table, $data);
+        // return $this->dbServer->insert_id();
+        return $this->dbServer->insert("ms_users", $data);
     }
 
     // check data
     function check_insert($param)
     {
-        $pid  = $this->wakitalib->get_pid_id('tbl_user',"MSUser",'id_users',1);
+        $pid  = $this->wakitalib->get_pid('TUSR');
         $data = [
                 'pid'           => $pid,
-                'id_user_local' => $param['pid'],
+                // 'id_user_local' => $param['pid'],
                 'email'         => $param['email'],
                 'phone'         => $param['phone'],
                 'company_id'    => $this->config->item('company_id'),
@@ -147,7 +156,7 @@ class ManageUser_model extends CI_Model
         if (!empty($this->dbServer->get('ms_users')->row())) {
             return false;
         }
-        return $this->dbServer->insert("ms_users", $data);
+        return $this->dbServer->insert("ms_users", $param);
     }
 
     function getMSuser($pid)
@@ -161,8 +170,8 @@ class ManageUser_model extends CI_Model
     // update data
     function update($id, $data)
     {
-        $this->db->where($this->id, $id);
-        $this->db->update($this->table, $data);
+        $this->dbServer->where($this->id, $id);
+        $this->dbServer->update($this->table, $data);
     }
 
 
@@ -175,7 +184,7 @@ class ManageUser_model extends CI_Model
                 'phone' => $param['phone'],
             ];
         $this->dbServer->where('email', $param['email']);
-        $this->dbServer->or_where('phone', $param['phone']);
+        // $this->dbServer->or_where('phone', $param['phone']);
         $checkData = $this->dbServer->get('ms_users')->row();
         if (!empty($checkData)) {
             if ($checkData->pid == $oldData->pid) {
@@ -201,13 +210,12 @@ class ManageUser_model extends CI_Model
     // delete data
     function delete($id,$pid = "")
     {
-        $this->db->where($this->id, $id);
-        $this->db->delete($this->table);
-        if (!empty($pid)) {
-            // die("123123");
+        // $this->db->where($this->id, $id);
+        // $this->db->delete($this->table);
+        // if (!empty($pid)) {
             $this->dbServer->where('id_user_local', $pid);
             $this->dbServer->delete('ms_users');
-        }
+        // }
     }
 
 }

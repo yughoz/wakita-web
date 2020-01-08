@@ -22,7 +22,6 @@
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Nama Level</th>
-                    <th>Status</th>
                     <th width="200px">Action</th>
                 </tr>
             </thead>
@@ -195,7 +194,7 @@
                         {
                             "data": "id_users",
                             "orderable": false
-                        },{"data": "full_name"},{"data": "email"},{"data": "phone"},{"data": "nama_level"},{"data": "is_aktif"},
+                        },{"data": "full_name"},{"data": "email"},{"data": "phone"},{"data": "nama_level"},
                         {
                             "data" : "action",
                             "orderable": false,

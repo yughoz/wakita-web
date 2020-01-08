@@ -16,19 +16,28 @@ class ManageUser extends CI_Controller
         $this->load->model('ManageUser_model');
         $this->load->model('ManageHotline_model');
         $this->load->model('ManageHotlineMember_model');
+        $this->load->model('ManageUserLevel_model');
         $this->startRes = time();
     }
 
+    public function company_pid(){
+        echo $this->session->userdata('company_pid');
+    }
     public function index()
     {
-        $data['hotline'] = $this->ManageHotline_model->get_all_where(['company_id'    => $this->config->item('company_id')]);
+        $data['hotline'] = $this->ManageHotline_model->get_all_where(['company_id'    => $this->session->userdata('company_pid')]);
         // echo print_r($data);die(); 
         $this->template->load('template','ManageUser/ManageUser_list',$data);
     } 
     
     public function json() {
         header('Content-Type: application/json');
-        echo $this->ManageUser_model->json();
+        $arrData  = json_decode($this->ManageUser_model->json(),true);
+        foreach ($arrData['data'] as $key => $value) {
+            $userLevel = $this->ManageUserLevel_model->get_by_id($value['id_user_level']);
+           $arrData['data'][$key]['nama_level'] = $userLevel->nama_level ?? "";
+        }
+        echo json_encode($arrData);
     }
 
     public function read($id) 
@@ -36,14 +45,14 @@ class ManageUser extends CI_Controller
         $row = $this->User_model->get_by_id($id);
         if ($row) {
             $data = array(
-            'id_users'      => $row->id_users,
+            'pid'      => $row->pid,
             'full_name'     => $row->full_name,
             'email'         => $row->email,
             'phone'         => $row->phone,
             'password'      => $row->password,
             'images'        => $row->images,
             'id_user_level' => $row->id_user_level,
-            'is_aktif'      => $row->is_aktif,
+            // 'is_aktif'      => $row->is_aktif,
 	        );
             $this->template->load('template','ManageUser/ManageUser_read', $data);
         } else {
@@ -57,14 +66,14 @@ class ManageUser extends CI_Controller
         $data = array(
             'button'        => 'Create',
             'action'        => site_url('ManageUser/create_action'),
-            'id_users'      => set_value('id_users'),
+            'pid'           => set_value('pid'),
             'full_name'     => set_value('full_name'),
             'phone'         => set_value('phone'),
             'email'         => set_value('email'),
             'password'      => set_value('password'),
             'images'        => set_value('images'),
             'id_user_level' => set_value('id_user_level'),
-            'is_aktif'      => set_value('is_aktif'),
+            // 'is_aktif'      => set_value('is_aktif'),
 	    );
         $this->template->load('template','ManageUser/ManageUser_form', $data);
     }
@@ -82,25 +91,33 @@ class ManageUser extends CI_Controller
             $hashPassword   = password_hash($password,PASSWORD_BCRYPT,$options);
             
             $data = array(
-                'pid'           => $this->wakitalib->get_pid_id('tbl_user',"TUSER",'id_users',1),
+                'pid'           => $this->wakitalib->get_pid('TUSR'),
                 'full_name'     => $this->input->post('full_name',TRUE),
                 'email'         => $this->input->post('email',TRUE),
                 'phone'         => $this->input->post('phone',TRUE),
                 'password'      => $hashPassword,
                 'images'        => $foto['file_name'],
                 'id_user_level' => $this->input->post('id_user_level',TRUE),
-                'is_aktif'      => $this->input->post('is_aktif',TRUE),
+                'company_id'    => $this->session->userdata('company_pid'),
+                'created'       => date("Y-m-d H:i:s"),
+                'createdby'     => $this->session->userdata('email'),
+                'updated'       => date("Y-m-d H:i:s"),
+                'updatedby'     => $this->session->userdata('email'),
+                // 'is_aktif'      => $this->input->post('is_aktif',TRUE),
             );
 
-            if ($this->ManageUser_model->check_insert($data)) {
+
+            // echo print_r($data);die;
+
+            // if ($this->ManageUser_model->check_insert($data)) {
                 $this->ManageUser_model->insert($data);
                 $this->session->set_flashdata('message', 'Create Record Success');
                 redirect(site_url('ManageUser'));
 
-            } else {
-                $this->session->set_flashdata('message', 'Email or phone already exist');
-                redirect(site_url('ManageUser/create'));
-            }
+            // } else {
+            //     $this->session->set_flashdata('message', 'Email or phone already exist');
+            //     redirect(site_url('ManageUser/create'));
+            // }
         }
     }
 
@@ -131,14 +148,14 @@ class ManageUser extends CI_Controller
                 $hashPassword   = password_hash($password,PASSWORD_BCRYPT,$options);
                 
                 $data = array(
-                    'pid'           => $this->wakitalib->get_pid_id('tbl_user',"TRIAL",'id_users',1),
+                    'pid'           => $this->wakitalib->get_pid_id('tbl_user',"TRIAL",'pid',1),
                     'full_name'     => $username,
                     'email'         => $email,
                     'phone'         => "0812345".rand(100,999),
                     'password'      => $hashPassword,
                     'images'        => "",
                     'id_user_level' => $this->input->post('id_user_level',TRUE),
-                    'is_aktif'      => "1",
+                    // 'is_aktif'      => "1",
                 );
 
                 if ($this->ManageUser_model->check_insert($data)) {
@@ -199,7 +216,7 @@ class ManageUser extends CI_Controller
             $data = array(
                 'button'        => 'Update',
                 'action'        => site_url('ManageUser/update_action'),
-                'id_users'      => set_value('id_users', $row->id_users),
+                'pid'      => set_value('pid', $row->pid),
                 'pid'           => set_value('pid', $row->pid),
                 'full_name'     => set_value('full_name', $row->full_name),
                 'email'         => set_value('email', $row->email),
@@ -207,7 +224,7 @@ class ManageUser extends CI_Controller
                 'password'      => set_value('password', $row->password),
                 'images'        => set_value('images', $row->images),
                 'id_user_level' => set_value('id_user_level', $row->id_user_level),
-                'is_aktif'      => set_value('is_aktif', $row->is_aktif),
+                // 'is_aktif'      => set_value('is_aktif', $row->is_aktif),
             );
 
             $this->template->load('template','ManageUser/ManageUser_form', $data);
@@ -222,7 +239,7 @@ class ManageUser extends CI_Controller
         $this->_rules();
         $foto = $this->upload_foto();
         if ($this->form_validation->run() == FALSE) {
-            $this->update($this->input->post('id_users', TRUE));
+            $this->update($this->input->post('pid', TRUE));
         } else {
             if($foto['file_name']==''){
                 $data = array(
@@ -230,7 +247,8 @@ class ManageUser extends CI_Controller
                     'email'         => $this->input->post('email',TRUE),
                     'phone'         => $this->input->post('phone',TRUE),
                     'id_user_level' => $this->input->post('id_user_level',TRUE),
-                    'is_aktif'      => $this->input->post('is_aktif',TRUE));
+                    // 'is_aktif'      => $this->input->post('is_aktif',TRUE)
+                );
             }else{
                 $data = array(
                     'full_name'     => $this->input->post('full_name',TRUE),
@@ -238,25 +256,26 @@ class ManageUser extends CI_Controller
                     'phone'         => $this->input->post('phone',TRUE),
                     'images'        => $foto['file_name'],
                     'id_user_level' => $this->input->post('id_user_level',TRUE),
-                    'is_aktif'      => $this->input->post('is_aktif',TRUE));
+                    // 'is_aktif'      => $this->input->post('is_aktif',TRUE)
+                );
                 
                 // ubah foto profil yang aktif
                 $this->session->set_userdata('images',$foto['file_name']);
             }
-            $oldData = $this->ManageUser_model->get_by_id($this->input->post('id_users', TRUE));
-            $msData  = $this->ManageUser_model->getMSuser($oldData->pid);
+            $msData = $this->ManageUser_model->get_by_id($this->input->post('pid', TRUE));
+            // $msData  = $this->ManageUser_model->getMSuser($this->input->post('pid', TRUE));
             // print_r($oldData);
             // print_r($msData);
             // die();
             if ($this->ManageUser_model->updateMST($msData->pid,$data,$msData) == true) {
-                $this->ManageUser_model->update($this->input->post('id_users', TRUE), $data);
+                $this->ManageUser_model->update($this->input->post('pid', TRUE), $data);
                 $this->session->set_flashdata('message', 'Update Record Success');
                 // print_r($msData);
                 // die();
                 redirect(site_url('ManageUser'));
             } else {
                 $this->session->set_flashdata('message', 'Email or phone already exist');
-                $this->update($this->input->post('id_users', TRUE));
+                $this->update($this->input->post('pid', TRUE));
             }
             
         }
@@ -267,7 +286,7 @@ class ManageUser extends CI_Controller
         $this->_rules_profile();
         $foto = $this->upload_foto();
         if ($this->form_validation->run() == FALSE) {
-            $this->profile($this->input->post('id_users', TRUE));
+            $this->profile($this->input->post('pid', TRUE));
         } else {
             if($foto['file_name']==''){
                 $data = [
@@ -304,7 +323,7 @@ class ManageUser extends CI_Controller
                 }
             }
 
-            $this->ManageUser_model->update($this->input->post('id_users', TRUE), $data);
+            $this->ManageUser_model->update($this->input->post('pid', TRUE), $data);
             $this->session->set_flashdata('message', 'Update Record Success');
             redirect(site_url('ManageUser/profile'));
         }
@@ -345,9 +364,9 @@ class ManageUser extends CI_Controller
     	//$this->form_validation->set_rules('password', 'password', 'trim|required');
     	//$this->form_validation->set_rules('images', 'images', 'trim|required');
     	$this->form_validation->set_rules('id_user_level', 'id user level', 'trim|required');
-    	$this->form_validation->set_rules('is_aktif', 'is aktif', 'trim|required');
+    	// $this->form_validation->set_rules('is_aktif', 'is aktif', 'trim|required');
 
-    	$this->form_validation->set_rules('id_users', 'id_users', 'trim');
+    	$this->form_validation->set_rules('pid', 'pid', 'trim');
     	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
     }
     public function _rules_profile() 
@@ -355,7 +374,7 @@ class ManageUser extends CI_Controller
         $this->form_validation->set_rules('full_name', 'full name', 'trim|required');
         $this->form_validation->set_rules('email', 'email', 'trim|required');
         $this->form_validation->set_rules('phone', 'phone', 'trim|required');
-        $this->form_validation->set_rules('id_users', 'id_users', 'trim');
+        $this->form_validation->set_rules('pid', 'pid', 'trim');
         if (!empty($this->input->post('old_password'))) {
             // $this->form_validation->set_rules('old_password', 'password', 'trim|required');
             $this->form_validation->set_rules('new_password', 'new password', 'trim|required');
@@ -404,7 +423,7 @@ class ManageUser extends CI_Controller
         xlsWriteLabel($tablebody, $kolombody++, $data->password);
         xlsWriteLabel($tablebody, $kolombody++, $data->images);
         xlsWriteNumber($tablebody, $kolombody++, $data->id_user_level);
-        xlsWriteLabel($tablebody, $kolombody++, $data->is_aktif);
+        // xlsWriteLabel($tablebody, $kolombody++, $data->is_aktif);
 
 	    $tablebody++;
             $nourut++;
@@ -428,21 +447,21 @@ class ManageUser extends CI_Controller
     }
     
     function profile(){
-        $id = $this->session->userdata('id_users');
+        $id = $this->session->userdata('pid');
         $row = $this->ManageUser_model->get_by_id($id);
 
         if ($row) {
             $data = array(
                 'button'        => 'Update',
                 'action'        => site_url('ManageUser/update_profile_action'),
-                'id_users'      => set_value('id_users', $row->id_users),
+                'pid'      => set_value('pid', $row->pid),
                 'full_name'     => set_value('full_name', $row->full_name),
                 'email'         => set_value('email', $row->email),
                 'phone'         => set_value('phone', $row->phone),
                 'password'      => set_value('password', $row->password),
                 'images'        => set_value('images', $row->images),
                 'id_user_level' => set_value('id_user_level', $row->id_user_level),
-                'is_aktif'      => set_value('is_aktif', $row->is_aktif),
+                // 'is_aktif'      => set_value('is_aktif', $row->is_aktif),
             );
             $this->template->load('template','ManageUser/ManageUser_profile', $data);
         } else {

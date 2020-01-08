@@ -21,16 +21,16 @@ class Inbox extends CI_Controller
         $data = array(
             'button' => 'Create',
             'action' => site_url('inbox/create_action'),
-	    'id' => set_value(''),
-	    'message_id' => set_value(''),
-	    'fromMe' => set_value(''),
-	    'pushName' => set_value(''),
-	    'phone' => set_value(''),
-	    'message' => set_value(''),
-	    'timestamp' => set_value(''),
-	    'receiver' => set_value(''),
-	    'groupId' => set_value(''),
-	);
+    	    'id' => set_value(''),
+    	    'message_id' => set_value(''),
+    	    'fromMe' => set_value(''),
+    	    'pushName' => set_value(''),
+    	    'phone' => set_value(''),
+    	    'message' => set_value(''),
+    	    'timestamp' => set_value(''),
+    	    'receiver' => set_value(''),
+    	    'groupId' => set_value(''),
+    	);
         $this->template->load('template','inbox/inbox_list', $data);
     } 
     
@@ -71,14 +71,14 @@ class Inbox extends CI_Controller
             ]);die();
         } else {
             $data = array(
-		'message_id' => $this->input->post('message_id',TRUE),
-		'fromMe' => $this->input->post('fromMe',TRUE),
-		'pushName' => $this->input->post('pushName',TRUE),
-		'phone' => $this->input->post('phone',TRUE),
-		'message' => $this->input->post('message',TRUE),
-		'timestamp' => $this->input->post('timestamp',TRUE),
-		'receiver' => $this->input->post('receiver',TRUE),
-		'groupId' => $this->input->post('groupId',TRUE),
+    		'message_id' => $this->input->post('message_id',TRUE),
+    		'fromMe' => $this->input->post('fromMe',TRUE),
+    		'pushName' => $this->input->post('pushName',TRUE),
+    		'phone' => $this->input->post('phone',TRUE),
+    		'message' => $this->input->post('message',TRUE),
+    		'timestamp' => $this->input->post('timestamp',TRUE),
+    		'receiver' => $this->input->post('receiver',TRUE),
+    		'groupId' => $this->input->post('groupId',TRUE),
 	    );
 
             $this->Inbox_model->insert($data);
@@ -103,14 +103,14 @@ class Inbox extends CI_Controller
             ]);die();
         } else {
             $data = array(
-		'message_id' => $this->input->post('message_id',TRUE),
-		'fromMe' => $this->input->post('fromMe',TRUE),
-		'pushName' => $this->input->post('pushName',TRUE),
-		'phone' => $this->input->post('phone',TRUE),
-		'message' => $this->input->post('message',TRUE),
-		'timestamp' => $this->input->post('timestamp',TRUE),
-		'receiver' => $this->input->post('receiver',TRUE),
-		'groupId' => $this->input->post('groupId',TRUE),
+    		'message_id' => $this->input->post('message_id',TRUE),
+    		'fromMe' => $this->input->post('fromMe',TRUE),
+    		'pushName' => $this->input->post('pushName',TRUE),
+    		'phone' => $this->input->post('phone',TRUE),
+    		'message' => $this->input->post('message',TRUE),
+    		'timestamp' => $this->input->post('timestamp',TRUE),
+    		'receiver' => $this->input->post('receiver',TRUE),
+    		'groupId' => $this->input->post('groupId',TRUE),
 	    );
 
             $this->Inbox_model->update($this->input->post('id', TRUE), $data);

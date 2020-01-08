@@ -73,7 +73,7 @@ class Whatsapp extends CI_Controller
         $this->company_pid = $this->input->post('company_pid',TRUE);
         $this->group_hotline = $this->input->post('receiver',TRUE);
         $data = array(
-            'pid'           => $this->wakitalib->get_pid_id('inbox_'.$this->company_pid,"WAIN",'pid',1),
+            'pid'           => $this->wakitalib->get_pid("WAIN"),
             'message_id'    => $this->input->post('id',TRUE),
             'fromMe'        => $this->input->post('fromMe',TRUE),
             'pushName'      => $this->input->post('pushName',TRUE),
@@ -119,8 +119,33 @@ class Whatsapp extends CI_Controller
         $customer_name  = $this->Contact_model->insert_update($dataContat);
         $dataHotline    = $this->Hotline_model->get_by_where(["customer_phone" =>$data['phone']]);
         // echo print_r($dataHotline);die();
+
+        $insHotline = array(
+                        'pid'           => $this->wakitalib->get_pid("HOTIN"),
+                        'customer_phone' => $this->input->post('phone',TRUE),
+                        'message'       => $this->input->post('message',TRUE),
+                        'company_pid'   => $this->company_pid,
+                        'created'       => date("Y-m-d H:i:s"),
+                        'message_id'    => $data['message_id'],
+                        'group_hotline' => $data['receiver'],
+                        'createdby'     => "API_WABLAS",
+                        'image_name'    => $this->input->post('image',TRUE),
+                        // 'document_name' => $this->input->post('file',TRUE),
+                        'flag_status'   => "4",
+                    );
+        
+        if (!empty($this->input->post('file'))) {
+
+            $ext = pathinfo($this->input->post('file',TRUE), PATHINFO_EXTENSION);
+            if(in_array($ext, ["mp4" ,"mpeg"] )){
+                $insHotline['video_name']       = $this->input->post('file');
+            } else {
+                $insHotline['document_name']    = $this->input->post('file');
+            }
+        }
+
         if (!empty($dataHotline)) {
-            if ($dataHotline->flag_status == 1) {   
+            if ($dataHotline->flag_status == 1) {
             //     $messageArr = explode(" ", $this->input->post('message',TRUE));
             //     $name  = end($messageArr);
             //     // echo end($messageArr);die();
@@ -137,23 +162,27 @@ class Whatsapp extends CI_Controller
             //     echo "Terimakasih infonya \napa yang bisa kami bantu ?";
 
             // } elseif ($dataHotline->flag_status == 2) {
-                $insHotline = array(
-                    'pid'           => $this->wakitalib->get_pid_id('hotline_'.$this->company_pid,"HOTIN",'pid',1),
-                    'customer_phone' => $this->input->post('phone',TRUE),
-                    'message'       => $this->input->post('message',TRUE),
-                    'company_pid'   => $this->company_pid,
-                    'created'       => date("Y-m-d H:i:s"),
-                    'message_id'	=> $data['message_id'],
-                    'group_hotline'	=> $data['receiver'],
-                    'createdby'     => "API_WABLAS",
-                    'flag_status'   => "3",
-                );
+                
+                // $insHotline = array(
+                //     'pid'           => $this->wakitalib->get_pid("HOTIN"),
+                //     'customer_phone' => $this->input->post('phone',TRUE),
+                //     'message'       => $this->input->post('message',TRUE),
+                //     'company_pid'   => $this->company_pid,
+                //     'created'       => date("Y-m-d H:i:s"),
+                //     'message_id'	=> $data['message_id'],
+                //     'group_hotline'	=> $data['receiver'],
+                //     'image_name'    => $this->input->post('image',TRUE),
+                //     'createdby'     => "API_WABLAS",
+                //     'flag_status'   => "3",
+                // );
+                
+                $insHotline['flag_status']    = "3";
                 $this->Inbox_model->insertHotlineCustom($insHotline,'hotline_'.$this->company_pid);
                 // 
-                $dataMilis = $this->parsingNum($data['receiver']);
-                $dataMsg   = $this->parsingMsg($data['phone']);
-                $this->apiToken  = $this->ManageHotline_model->get_token($data['receiver']);
-                $this->sendMessage($dataMilis,$dataMsg);
+                // $dataMilis = $this->parsingNum($data['receiver']);
+                // $dataMsg   = $this->parsingMsg($data['phone']);
+                // $this->apiToken  = $this->ManageHotline_model->get_token($data['receiver']);
+                // $this->sendMessage($dataMilis,$dataMsg);
 
 
                 // $this->sendSocket($insHotline);
@@ -163,29 +192,7 @@ class Whatsapp extends CI_Controller
                 // echo "Layanan apa yang ingin di tanyakan";
 
             } else{
-            	$insHotline = array(
-                    'pid'           => $this->wakitalib->get_pid_id('hotline_'.$this->company_pid,"HOTIN",'pid',1),
-                    'customer_phone' => $this->input->post('phone',TRUE),
-                    'message'       => $this->input->post('message',TRUE),
-                    'company_pid'   => $this->company_pid,
-                    'created'       => date("Y-m-d H:i:s"),
-                    'message_id'	=> $data['message_id'],
-                    'group_hotline'	=> $data['receiver'],
-                    'createdby'     => "API_WABLAS",
-                    'image_name'    => $this->input->post('image',TRUE),
-                    
-                    // 'document_name' => $this->input->post('file',TRUE),
-                    'flag_status'   => "4",
-                );
-                if (!empty($this->input->post('file'))) {
-
-                    $ext = pathinfo($this->input->post('file',TRUE), PATHINFO_EXTENSION);
-                    if(in_array($ext, ["mp4" ,"mpeg"] )){
-                        $insHotline['video_name']       = $this->input->post('file');
-                    } else {
-                        $insHotline['document_name']    = $this->input->post('file');
-                    }
-                }
+            	
                 $this->Inbox_model->insertHotlineCustom($insHotline,'hotline_'.$this->company_pid);
                 // $this->Inbox_model->insertHotline($insHotline);
                 // $tableName = $this->Hotline_model->getTable();
@@ -241,23 +248,27 @@ class Whatsapp extends CI_Controller
 
             // if ($data['message'] == "HALO SAYA CUSTOMER") {
                 // customer_phone
-                if ($this->input->post('groupId',TRUE) == "62") {
-                    $insHotline = array(
-                        'customer_phone' => $this->input->post('phone',TRUE),
-                        'message'       => $this->input->post('message',TRUE),
-                        'company_pid'   => $this->company_pid,
-                        'created'       => date("Y-m-d H:i:s"),
-                        'message_id'	=> $data['message_id'],
-                        'group_hotline'	=> $data['receiver'],
-                        'createdby'     => "API_WABLAS",
-                        'flag_status'   => "1",
-                    );
-                    $this->Inbox_model->insertHotlineCustom($insHotline);
+
+                // if ($this->input->post('groupId',TRUE) == "62") {
+                    // $insHotline = array(
+                    //     'pid'           => $this->wakitalib->get_pid("HOTIN"),
+                    //     'customer_phone' => $this->input->post('phone',TRUE),
+                    //     'message'       => $this->input->post('message',TRUE),
+                    //     'company_pid'   => $this->company_pid,
+                    //     'created'       => date("Y-m-d H:i:s"),
+                    //     'message_id'	=> $data['message_id'],
+                    //     'group_hotline'	=> $data['receiver'],
+                    //     'createdby'     => "API_WABLAS",
+                    //     'flag_status'   => "1",
+                    // );
+
+                    $insHotline['flag_status']    = "3";
+                    $this->Inbox_model->insertHotlineCustom($insHotline,'hotline_'.$this->company_pid);
 
                     $timeStr = $this->parsingTime(date("H"));
                     echo $timeStr.", kami dari ".$this->config->item('wa_company_name')." \nAda yang bisa kami bantu ? ?";
                     # code...
-                }
+                // }
             // }
 
         }

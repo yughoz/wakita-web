@@ -6,7 +6,7 @@ if (!defined('BASEPATH'))
 class ManageHotlineMember_model extends CI_Model
 {
 
-    public $table = 'hotline_member';
+    public $table = 'ms_hotline_member';
     public $id = 'pid';
     public $order = 'DESC';
 
@@ -18,12 +18,13 @@ class ManageHotlineMember_model extends CI_Model
 
     // datatables
     function json($group_number="") {
-        $this->datatables->select('hotline_member.*,hotline_member.pid,tbl_user.full_name as username');
-        $this->datatables->from('hotline_member');
+        $this->datatables->set_database("server_admin");
+        $this->datatables->select('ms_hotline_member.*,ms_hotline_member.pid,ms_users.full_name as username');
+        $this->datatables->from('ms_hotline_member');
         //add this line for join
-        $this->datatables->where('hotline_member.group_number',$group_number);
+        $this->datatables->where('ms_hotline_member.group_number',$group_number);
         // $this->datatables->join('milis', 'milis_id = milis.id');
-        $this->datatables->join('tbl_user', 'user_id = id_users');
+        $this->datatables->join('ms_users', 'user_id = ms_users.pid');
         $this->datatables->add_column('action', ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf(\'$1\');return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', $this->id);
 
         return $this->datatables->generate();
@@ -32,91 +33,91 @@ class ManageHotlineMember_model extends CI_Model
     // get all
     function get_all($where = [])
     {
-        $this->db->order_by($this->id, $this->order);
+        $this->dbServer->order_by($this->id, $this->order);
         if(!empty($where)){
-            $this->db->where($where);
+            $this->dbServer->where($where);
         }
-        return $this->db->get($this->table)->result();
+        return $this->dbServer->get($this->table)->result();
     }
     // get all
     function getAllCustom($milis_id)
     {
         $this->datatables->select('hotline_member.*,hotline_member.pid,tbl_user.full_name as username,phone');
-        $this->db->order_by($this->id, $this->order);
-        $this->db->where('milis_id',$milis_id);
+        $this->dbServer->order_by($this->id, $this->order);
+        $this->dbServer->where('milis_id',$milis_id);
         $this->datatables->join('tbl_user', 'user_id = id_users');
-        return $this->db->get($this->table)->result();
+        return $this->dbServer->get($this->table)->result();
     }
 
     // get all
     function getAllCustomWebhook($phone_number)
     {
         $this->datatables->select('vw_hotline_member.*,vw_hotline_member.pid,tbl_user.full_name as username,phone');
-        $this->db->where('phone_number',$phone_number);
+        $this->dbServer->where('phone_number',$phone_number);
         $this->datatables->join('tbl_user', 'user_id = id_users');
-        return $this->db->get("vw_hotline_member")->result();
+        return $this->dbServer->get("vw_hotline_member")->result();
     }
 
     // get data by id
     function get_by_id($id)
     {
-        $this->db->where($this->id, $id);
-        return $this->db->get($this->table)->row();
+        $this->dbServer->where($this->id, $id);
+        return $this->dbServer->get($this->table)->row();
     }
     
     // get all
     function get_all_where($where)
     {
-        $this->db->order_by($this->id, 'asc');
-        $this->db->where($where);
-        return $this->db->get($this->table)->result();
+        $this->dbServer->order_by($this->id, 'asc');
+        $this->dbServer->where($where);
+        return $this->dbServer->get($this->table)->result();
     }
 
     // get total rows
     function total_rows($q = NULL) {
-        $this->db->like($this->id, $q);
-    	$this->db->or_like('milis_id', $q);
-    	$this->db->or_like('user_id', $q);
-    	$this->db->or_like('created', $q);
-    	$this->db->or_like('createdby', $q);
-    	$this->db->or_like('updated', $q);
-    	$this->db->or_like('updatedby', $q);
-    	$this->db->from($this->table);
-        return $this->db->count_all_results();
+        $this->dbServer->like($this->id, $q);
+    	$this->dbServer->or_like('milis_id', $q);
+    	$this->dbServer->or_like('user_id', $q);
+    	$this->dbServer->or_like('created', $q);
+    	$this->dbServer->or_like('createdby', $q);
+    	$this->dbServer->or_like('updated', $q);
+    	$this->dbServer->or_like('updatedby', $q);
+    	$this->dbServer->from($this->table);
+        return $this->dbServer->count_all_results();
     }
 
     // get data with limit and search
     function get_limit_data($limit, $start = 0, $q = NULL) {
-        $this->db->order_by($this->id, $this->order);
-        $this->db->like($this->id, $q);
-    	$this->db->or_like('milis_id', $q);
-    	$this->db->or_like('user_id', $q);
-    	$this->db->or_like('created', $q);
-    	$this->db->or_like('createdby', $q);
-    	$this->db->or_like('updated', $q);
-    	$this->db->or_like('updatedby', $q);
-    	$this->db->limit($limit, $start);
-        return $this->db->get($this->table)->result();
+        $this->dbServer->order_by($this->id, $this->order);
+        $this->dbServer->like($this->id, $q);
+    	$this->dbServer->or_like('milis_id', $q);
+    	$this->dbServer->or_like('user_id', $q);
+    	$this->dbServer->or_like('created', $q);
+    	$this->dbServer->or_like('createdby', $q);
+    	$this->dbServer->or_like('updated', $q);
+    	$this->dbServer->or_like('updatedby', $q);
+    	$this->dbServer->limit($limit, $start);
+        return $this->dbServer->get($this->table)->result();
     }
 
     // insert data
     function insert($data)
     {
-        $this->db->insert($this->table, $data);
+        $this->dbServer->insert($this->table, $data);
     }
 
     // update data
     function update($id, $data)
     {
-        $this->db->where($this->id, $id);
-        $this->db->update($this->table, $data);
+        $this->dbServer->where($this->id, $id);
+        $this->dbServer->update($this->table, $data);
     }
 
     // delete data
     function delete($id)
     {
-        $this->db->where($this->id, $id);
-        $this->db->delete($this->table);
+        $this->dbServer->where($this->id, $id);
+        $this->dbServer->delete($this->table);
     }
 
 }

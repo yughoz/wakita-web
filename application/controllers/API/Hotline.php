@@ -91,8 +91,8 @@ class Hotline extends CI_Controller
         echo json_encode(["data" => $dataTemp,"dataNew" => $dataNew ]);
     } 
 
-    function testView(){
-        echo $this->Hotline_model->vw_group_milis("vw_group_milis_".$this->session->userdata('company_pid'));
+    function createView(){
+        echo $this->Hotline_model->vw_group_milis($this->session->userdata('company_pid'));
     }
 
     function parsingTrialNumber($str)
@@ -384,7 +384,7 @@ class Hotline extends CI_Controller
 
     public function list() 
     {
-        $dataHotline  = $this->ManageHotlineMember_model->get_all_where(['user_id' => $this->session->userdata('id_users')]);
+        $dataHotline  = $this->ManageHotlineMember_model->get_all_where(['user_id' => $this->session->userdata('pid')]);
 
         if ($dataHotline) {
             $row = [];

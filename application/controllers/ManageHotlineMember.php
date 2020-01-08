@@ -135,7 +135,7 @@ class ManageHotlineMember extends CI_Controller
         //     ]);die();
         // } else {
             $data = array(
-                'pid'       => $this->wakitalib->get_pid_id('hotline_member',"HM",'pid',1),
+                'pid'       => $this->wakitalib->get_pid('HM'),
                 'group_number'  => $group_number,
                 'user_id'   => $user_id,
                 'created'   => date("Y-m-d H:i:s"),

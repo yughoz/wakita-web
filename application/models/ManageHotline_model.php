@@ -33,7 +33,7 @@ class ManageHotline_model extends CI_Model
         $this->datatables->set_database("server_admin");
         $this->datatables->select('a.pid,a.name,a.wa_status,phone_number,a.device_id,a.device_name,a.domain_api,a.token,a.phone_number,a.created,a.createdby,a.updated,a.updatedby');
         $this->datatables->from($this->table_server.' as a');
-        $this->datatables->where("company_id",$this->config->item('company_id'));
+        $this->datatables->where("company_id",$this->session->userdata('company_pid'));
         //add this line for join
         $this->datatables->add_column('action', '<a href="#" onclick="barcodeModal(\'$2\');return false;"  class="btn btn-info btn-sm" ><i class="fa fa-qrcode" aria-hidden="true"></i> </a> <a href="'.base_url().'ManageHotlineMember/member/$1" class="btn btn-danger btn-sm" ><i class="fa fa-eye" aria-hidden="true"></i> </a> ', 'phone_number,token');
         return $this->datatables->generate();

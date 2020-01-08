@@ -7,16 +7,19 @@ class User_model extends CI_Model
 {
 
     public $table = 'tbl_user';
+    public $table_server = 'ms_users';
     public $id = 'id_users';
     public $order = 'DESC';
 
     function __construct()
     {
         parent::__construct();
+        $this->dbServer = $this->load->database('server_admin', TRUE);
     }
 
     // datatables
     function json() {
+        $this->datatables->set_database("server_admin");
         $this->datatables->select('id_users,full_name,email,nama_level,is_aktif,phone');
         $this->datatables->from('tbl_user');
         $this->datatables->add_column('is_aktif', '$1', 'rename_string_is_aktif(is_aktif)');
@@ -72,16 +75,23 @@ class User_model extends CI_Model
         return $this->db->get($this->table)->row();
     }
     
+    // get data by id
+    function get_by_where($where)
+    {
+        $this->dbServer->where($where);
+        return $this->dbServer->get($this->table_server)->row();
+    }
+    
     // get total rows
     function total_rows($q = NULL) {
         $this->db->like('id_users', $q);
-	$this->db->or_like('full_name', $q);
-	$this->db->or_like('email', $q);
-	$this->db->or_like('password', $q);
-	$this->db->or_like('images', $q);
-	$this->db->or_like('id_user_level', $q);
-	$this->db->or_like('is_aktif', $q);
-	$this->db->from($this->table);
+    $this->db->or_like('full_name', $q);
+    $this->db->or_like('email', $q);
+    $this->db->or_like('password', $q);
+    $this->db->or_like('images', $q);
+    $this->db->or_like('id_user_level', $q);
+    $this->db->or_like('is_aktif', $q);
+    $this->db->from($this->table);
         return $this->db->count_all_results();
     }
 
@@ -89,13 +99,13 @@ class User_model extends CI_Model
     function get_limit_data($limit, $start = 0, $q = NULL) {
         $this->db->order_by($this->id, $this->order);
         $this->db->like('id_users', $q);
-	$this->db->or_like('full_name', $q);
-	$this->db->or_like('email', $q);
-	$this->db->or_like('password', $q);
-	$this->db->or_like('images', $q);
-	$this->db->or_like('id_user_level', $q);
-	$this->db->or_like('is_aktif', $q);
-	$this->db->limit($limit, $start);
+    $this->db->or_like('full_name', $q);
+    $this->db->or_like('email', $q);
+    $this->db->or_like('password', $q);
+    $this->db->or_like('images', $q);
+    $this->db->or_like('id_user_level', $q);
+    $this->db->or_like('is_aktif', $q);
+    $this->db->limit($limit, $start);
         return $this->db->get($this->table)->result();
     }
 
