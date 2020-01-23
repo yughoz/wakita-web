@@ -9,7 +9,7 @@ class ManageUserLevel extends CI_Controller
     {
         parent::__construct();
         //is_login();
-        $this->load->model('ManageUserLevel_model');
+        $this->load->model('API/ManageUserLevel_model');
         $this->load->library('form_validation');
 	    $this->load->library('datatables');
     }

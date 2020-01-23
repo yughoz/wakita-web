@@ -19,7 +19,7 @@ class TestSend extends CI_Controller
     {
         parent::__construct();
         is_login();
-        $this->load->model('User_model');
+        $this->load->model('API/User_model');
         $this->load->library('form_validation');        
         $this->load->library('datatables');
         $apiToken = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";

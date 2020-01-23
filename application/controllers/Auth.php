@@ -26,7 +26,7 @@ Class Auth extends CI_Controller{
         if(!empty($email) || !empty($phone))
         {
             $this->load->config('variable');
-            $this->load->model('ManageUser_model');
+            $this->load->model('API/ManageUser_model');
             $this->load->library('wablas');
 
             $subject    = "Wakita Reset Password";
@@ -123,7 +123,7 @@ Class Auth extends CI_Controller{
                         'password'      => $hashPassword,
                         'forgot'        => ''
                     ];
-                    $this->load->model('ManageUser_model');
+                    $this->load->model('API/ManageUser_model');
                     $this->ManageUser_model->update($id, $data);
                     $this->session->set_flashdata('message', 'Update Record Success');
                     redirect(site_url('auth'));
@@ -139,7 +139,7 @@ Class Auth extends CI_Controller{
     }
 
     function requestReset($id){
-        $this->load->model('ManageUser_model');
+        $this->load->model('API/ManageUser_model');
         $users=$this->ManageUser_model->get_reset($id);
         // print_r($users);
         if($users){
@@ -160,11 +160,11 @@ Class Auth extends CI_Controller{
     }
     
     function cheklogin(){
-        $this->load->model('ManageUser_model');
-        $this->load->model('ManageUserLevel_model');
-        $this->load->model('ManageHotlineMember_model');
-        $this->load->model('ManageHotline_model');
-        $this->load->model('User_model');
+        $this->load->model('API/ManageUser_model');
+        $this->load->model('API/ManageUserLevel_model');
+        $this->load->model('API/ManageHotlineMember_model');
+        $this->load->model('API/ManageHotline_model');
+        $this->load->model('API/User_model');
 
         $email      = $this->input->post('email');
         //$password   = $this->input->post('password');

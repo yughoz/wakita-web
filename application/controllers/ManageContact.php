@@ -10,7 +10,7 @@ class ManageContact extends CI_Controller
         parent::__construct();
         is_login();
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('ManageContact_model');
+        $this->load->model('API/ManageContact_model');
         $this->load->library('form_validation');
 	    $this->load->library('datatables');
     }

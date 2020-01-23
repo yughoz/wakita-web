@@ -38,27 +38,8 @@ class User_model extends CI_Model
             $this->datatables->where_not_in('id_users',$milis_arr);
         }
         $this->datatables->add_column('selecting', '<a href="#" class="btn btn-danger btn-sm" onclick="selectingFunc($1);return false;"><i class="fa fa-check-circle" aria-hidden="true"></i> </a>', 'id_users');
-        // $this->datatables->where('user_id',NULL);
-// 
-
+        
         return $this->datatables->generate();
-        // echo $this->datatables->last_query();die();
-        // echo print_r( $this->db->get()->result());
-        // $data['data'] =  $this->db->query("
-        //                             SELECT * FROM tbl_user 
-        //                             WHERE id_users not in (SELECT user_id
-        //                             FROM `vw_milis_member`
-        //                             WHERE milis_id = ".$milis_id.")")->result_array();
-        // foreach ($data['data'] as $key => $value) {
-        //     $data['data'][$key]['selecting'] = '<a href="#" class="btn btn-danger btn-sm" onclick="selectingFunc('.$value['id_users'].');return false;"><i class="fa fa-check-circle" aria-hidden="true"></i> </a>';
-        // }
-        // $data['draw']              = intval($this->input->post('draw'));
-        // $data['recordsTotal' ]     = count($data['data']);
-        // $data['recordsFiltered']   = count($data['data']);
-
-        // return $data;
-        // return "" ;
-        // return  $this->db->get()->result();
     }
 
     // get all
@@ -85,13 +66,13 @@ class User_model extends CI_Model
     // get total rows
     function total_rows($q = NULL) {
         $this->db->like('id_users', $q);
-    $this->db->or_like('full_name', $q);
-    $this->db->or_like('email', $q);
-    $this->db->or_like('password', $q);
-    $this->db->or_like('images', $q);
-    $this->db->or_like('id_user_level', $q);
-    $this->db->or_like('is_aktif', $q);
-    $this->db->from($this->table);
+        $this->db->or_like('full_name', $q);
+        $this->db->or_like('email', $q);
+        $this->db->or_like('password', $q);
+        $this->db->or_like('images', $q);
+        $this->db->or_like('id_user_level', $q);
+        $this->db->or_like('is_aktif', $q);
+        $this->db->from($this->table);
         return $this->db->count_all_results();
     }
 
@@ -99,13 +80,13 @@ class User_model extends CI_Model
     function get_limit_data($limit, $start = 0, $q = NULL) {
         $this->db->order_by($this->id, $this->order);
         $this->db->like('id_users', $q);
-    $this->db->or_like('full_name', $q);
-    $this->db->or_like('email', $q);
-    $this->db->or_like('password', $q);
-    $this->db->or_like('images', $q);
-    $this->db->or_like('id_user_level', $q);
-    $this->db->or_like('is_aktif', $q);
-    $this->db->limit($limit, $start);
+        $this->db->or_like('full_name', $q);
+        $this->db->or_like('email', $q);
+        $this->db->or_like('password', $q);
+        $this->db->or_like('images', $q);
+        $this->db->or_like('id_user_level', $q);
+        $this->db->or_like('is_aktif', $q);
+        $this->db->limit($limit, $start);
         return $this->db->get($this->table)->result();
     }
 

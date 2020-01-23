@@ -3,62 +3,22 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
-class Hotline_model extends CI_Model
+class Hotline_private_model extends CI_Model
 {
 
-    public $table   = 'hotline';
-    // public $table   = 'ms_';
-    public $id      = 'id';
-    public $order   = 'DESC';
-    public $table_server = 'ms_hotline';
-    public $view    = 'vw_group_milis';
+    public $table = 'hotline_private';
+    public $id = 'id';
+    public $order = 'DESC';
 
     function __construct()
     {
         parent::__construct();
-        $this->config->load('companyProfile');
-        $this->dbServer = $this->load->database('server_admin', TRUE);
-    }
-
-
-    function setView($view)
-    {
-        $this->view = $this->view."_".$view;
-    }
-
-
-    function getView()
-    {
-        return $this->view;
-    }
-
-
-    function setTable($table)
-    {
-        $this->table = $table;
-    }
-
-
-    function getTable()
-    {
-        return $this->table;
-    }
-
-
-    function getTableCompanyFromHotline($hotline_num)
-    {
-
-        $this->dbServer->order_by('pid', 'asc');
-        $this->dbServer->where(['phone_number' => $hotline_num]);
-        $result = $this->dbServer->get($this->table_server)->row();
-        return $result->company_id;
-        // return $this->table_server;
     }
 
     // datatables
     function json() {
         $this->datatables->select('id,customer_phone,message,flag_status,created,createdby');
-        $this->datatables->from('hotline');
+        $this->datatables->from('hotline_private');
         //add this line for join
         //$this->datatables->join('table2', 'hotline.field = table2.field');
         $this->datatables->add_column('action', '<a href="#" class="btn btn-danger btn-sm" onclick="editModal($1);return false;"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> </a>'. ' <a href="#" class="btn btn-danger btn-sm" onclick="delete_conf($1);return false;"><i class="fa fa-trash-o" aria-hidden="true"></i></a>', 'id');
@@ -67,18 +27,14 @@ class Hotline_model extends CI_Model
 
     // datatables
     function group_json($where = []) {
-        $vw_group_milis = "vw_group_milis";
-        if ($this->session->userdata('company_pid')) {
-            $vw_group_milis .= "_".$this->session->userdata('company_pid');
-        }
-        $this->db->select('max('.$vw_group_milis.'.pid),'.$vw_group_milis.'.pid,customer_phone,SUBSTR(message, 1, 30) as message,flag_status,'.$vw_group_milis.'.created,'.$vw_group_milis.'.createdby,'.$vw_group_milis.'.group_hotline,image_name,name_replace as customer_title,SUBSTR(name_replace, 1, 14) as username_title_sort');  
+        $this->db->select('max(vw_group_milis.id),vw_group_milis.id,customer_phone,SUBSTR(message, 1, 30) as message,flag_status,vw_group_milis.created,vw_group_milis.createdby,vw_group_milis.group_hotline,image_name,name_replace as customer_title,SUBSTR(name_replace, 1, 14) as username_title_sort');  
         // $this->db->from('hotline');
         $this->db->where($where);
         $this->db->group_by('customer_phone');
-        $this->db->order_by($vw_group_milis.'.pid', 'DESC'); 
+        $this->db->order_by('vw_group_milis.id', 'DESC'); 
         // $this->db->order_by('flag_status', 'ASC'); 
         // $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
-        return $this->db->get($vw_group_milis)->result();
+        return $this->db->get('vw_group_milis')->result();
     } 
     // datatables
     function group_json_search($where = [],$where_like = []) {
@@ -128,9 +84,9 @@ class Hotline_model extends CI_Model
         return $this->db->query($sql, $where_condition)->row();;
     }
     
-	function detail_list($where, $start, $table = 'hotline',$limit = 10) {
-        $this->db->select($table.".*, ".$table.".pid as id,name_replace as username_title,(@cnt := @cnt + 1) AS rowNumber");
-        // $this->db->from('hotline');
+	function detail_list($where, $start, $table = 'hotline_private',$limit = 10) {
+        $this->db->select($table.".*,".$table.".pid as id,name_replace as username_title,(@cnt := @cnt + 1) AS rowNumber");
+        // $this->db->from('hotline_private');
         // $this->db->join('tbl_user', $table.'.createdby = email',"LEFT");
         $this->db->join('mst_contact', 'mst_contact.phone = customer_phone',"LEFT");
         $this->db->join('(SELECT @cnt := 0) AS dummy','1=1');
@@ -142,7 +98,7 @@ class Hotline_model extends CI_Model
         return $this->db->get($table)->result();
     }
 
-    function count_all($where, $table = 'hotline') {
+    function count_all($where, $table = 'hotline_private') {
         // $this->db->select($this->table.".*,tbl_user.full_name as username");
         // $this->db->from('hotline');
         // $this->db->join('tbl_user', $this->table.'.createdby = email',"LEFT");
@@ -166,17 +122,22 @@ class Hotline_model extends CI_Model
         return $this->db->get($this->table)->result();
     }
 
+
+    function setTable($table)
+    {
+        $this->table = $table;
+    }
+
+
+    function getTable()
+    {
+        return $this->table;
+    }
+
     // get data by id
     function get_by_id($id)
     {
         $this->db->where($this->id, $id);
-        return $this->db->get($this->table)->row();
-    }
-    // get data by id
-    function get_by_where($where)
-    {
-        $this->db->where($where);
-        $this->db->order_by('created', 'DESC');
         return $this->db->get($this->table)->row();
     }
     
@@ -223,53 +184,6 @@ class Hotline_model extends CI_Model
     {
         $this->db->where($this->id, $id);
         $this->db->delete($this->table);
-    }
- 
-    function vw_group_milis($company_pid){
-        $vw_group_milis = "vw_group_milis_".$company_pid;
-        $table = $this->table."_".$company_pid;
-        // echo $table;die();
-        try {
-            // if (!($this->db->get($table)->result() )){
-
-                // $this->db->query("CREATE OR REPLACE VIEW  ".$vw_group_milis." AS 
-                $this->db->query("CREATE  ".$vw_group_milis." AS 
-                SELECT
-                            `t`.`pid`,
-                            `t`.`image_name` AS `image_name`,
-                            `m`.`name_wa` AS `name_wa`,
-                            `m`.`name_replace` AS `name_replace`,
-                            `t`.`customer_phone` AS `customer_phone`,
-                            `t`.`user_phone` AS `user_phone`,
-                            `t`.`message` AS `message`,
-                            `t`.`flag_status` AS `flag_status`,
-                            `t`.`message_id` AS `message_id`,
-                            `t`.`group_hotline` AS `group_hotline`,
-                            `t`.`created` AS `created`,
-                            `t`.`createdby` AS `createdby` 
-                        FROM
-                            (
-                            ( `".$table."` `t` LEFT JOIN `mst_contact` `m` ON ( ( `m`.`phone` = `t`.`customer_phone` ) ) )
-                            JOIN (
-                        SELECT
-                            max( `".$table."`.`created` ) AS `max_date_sent`,
-                            `".$table."`.`customer_phone` AS `customer_phone` 
-                        FROM
-                            `".$table."` 
-                        GROUP BY
-                            `".$table."`.`customer_phone` 
-                            ) `tg` ON ( ( ( `tg`.`customer_phone` = `t`.`customer_phone` ) AND ( `tg`.`max_date_sent` = `t`.`created` ) ) ) 
-                            ) 
-                        ORDER BY
-                            `t`.`created` DESC ");
-            // } else {
-            //     return false;
-            // }
-            
-        } catch (Exception $e) {
-                return false;
-        }
-        return true;
     }
 
 }

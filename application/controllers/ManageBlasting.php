@@ -11,8 +11,8 @@ class ManageBlasting     extends CI_Controller
         // is_login();
         date_default_timezone_set('Asia/Jakarta');
         $this->config->load('companyProfile');
-        $this->load->model('ManageBlasting_model');
-        // $this->load->model('ManageBlasting_model');
+        $this->load->model('API/ManageBlasting_model');
+        // $this->load->model('API/ManageBlasting_model');
         $this->load->library('form_validation');
 	    $this->load->library('datatables');
        

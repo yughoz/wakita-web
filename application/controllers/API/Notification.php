@@ -15,23 +15,23 @@ class Notification extends CI_Controller
         // is_login();
         
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('Send_message_detail_model');
+        $this->load->model('API/Send_message_detail_model');
         $this->load->library('form_validation');        
         $this->load->library('datatables');
         $this->config->load('apiwha');
         $this->config->load('companyProfile');
-        $this->load->model('Inbox_model');
-        $this->load->model('Milis_model');
-        $this->load->model('Notification_model');
+        $this->load->model('API/Inbox_model');
+        $this->load->model('API/Milis_model');
+        $this->load->model('API/Notification_model');
 
         // $this->apiToken     = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";
         // $this->wablasClient = new WablasClient($apiToken);
         $this->apiToken     = "";
         $this->url          = $this->config->item('APIWeb');
         $this->client       = new GuzzleHttp\Client();
-        $this->load->model('Milis_member_model');
-        $this->load->model('Hotline_model');
-        $this->load->model('Contact_model');
+        $this->load->model('API/Milis_member_model');
+        $this->load->model('API/Hotline_model');
+        $this->load->model('API/Contact_model');
         $this->startRes = time();
 
     }

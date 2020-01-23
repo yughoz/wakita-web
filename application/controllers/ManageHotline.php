@@ -10,7 +10,7 @@ class ManageHotline extends CI_Controller
         parent::__construct();
         is_login();
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('ManageHotline_model');
+        $this->load->model('API/ManageHotline_model');
         $this->load->library('form_validation');
 	    $this->load->library('datatables');
     }

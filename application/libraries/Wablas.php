@@ -53,11 +53,11 @@ class Wablas
         $this->_ci = & get_instance();
         $this->_ci->load->library('email');
         
-        $this->_ci->load->model('Milis_model');
-        $this->_ci->load->model('Milis_member_model');
-        $this->_ci->load->model('Inbox_model');
-        $this->_ci->load->model('Hotline_model');
-        $this->_ci->load->model('Send_message_detail_model');
+        $this->_ci->load->model('API/Milis_model');
+        $this->_ci->load->model('API/Milis_member_model');
+        $this->_ci->load->model('API/Inbox_model');
+        $this->_ci->load->model('API/Hotline_model');
+        $this->_ci->load->model('API/Send_message_detail_model');
         $this->_ci->load->helper(array('form', 'url'));
 
         $this->client       = new GuzzleHttp\Client();

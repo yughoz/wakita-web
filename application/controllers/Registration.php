@@ -18,7 +18,7 @@ Class Registration extends CI_Controller{
     }
 
     function requestConfirm($verify){
-        $this->load->model('ManageCustomer_model');
+        $this->load->model('API/ManageCustomer_model');
         $customer   = $this->ManageCustomer_model->get_verification($verify);
         print_r($customer);
         if($customer){
@@ -48,7 +48,7 @@ Class Registration extends CI_Controller{
 
                     try{
                         $this->load->config('variable');
-                        $this->load->model('ManageCustomer_model');
+                        $this->load->model('API/ManageCustomer_model');
                         $this->load->library('wablas');
                         $this->load->library('wakitalib');
 

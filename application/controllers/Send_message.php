@@ -10,7 +10,7 @@ class Send_message extends CI_Controller
         parent::__construct();
         // is_login();
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('Send_message_detail_model');
+        $this->load->model('API/Send_message_detail_model');
         $this->load->library('form_validation');        
 	    $this->load->library('datatables');
         $this->config->load('apiwha');

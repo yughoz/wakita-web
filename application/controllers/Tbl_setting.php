@@ -9,7 +9,7 @@ class Tbl_setting extends CI_Controller
     {
         parent::__construct();
         is_login();
-        $this->load->model('Tbl_setting_model');
+        $this->load->model('API/Tbl_setting_model');
         $this->load->library('form_validation');
     }
 

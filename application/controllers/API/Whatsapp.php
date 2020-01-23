@@ -16,15 +16,15 @@ class Whatsapp extends CI_Controller
         // checking_login_api();
         
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('Send_message_detail_model');
+        $this->load->model('API/Send_message_detail_model');
         $this->load->library('form_validation');        
         $this->load->library('datatables');
         $this->config->load('apiwha');
         $this->config->load('companyProfile');
-        $this->load->model('Inbox_model');
-        $this->load->model('Milis_model');
-        $this->load->model('ManageHotline_model');
-        $this->load->model('ManageUserLevel_model');
+        $this->load->model('API/Inbox_model');
+        $this->load->model('API/Milis_model');
+        $this->load->model('API/ManageHotline_model');
+        $this->load->model('API/ManageUserLevel_model');
 
         // $this->apiToken     = "2iNvy9zUUVSwMXSO71SIvdNwjE2c7DrfV6Kn3tCRcOvrkMnvl74kraCUbhZAHZZO";
         // $this->wablasClient = new WablasClient($apiToken);
@@ -33,9 +33,9 @@ class Whatsapp extends CI_Controller
         $this->group_hotline   = "";
         $this->url          = $this->config->item('APIWeb');
         $this->client       = new GuzzleHttp\Client();
-        $this->load->model('Milis_member_model');
-        $this->load->model('Hotline_model');
-        $this->load->model('Contact_model');
+        $this->load->model('API/Milis_member_model');
+        $this->load->model('API/Hotline_model');
+        $this->load->model('API/Contact_model');
         $this->startRes = time();
 
 
@@ -193,6 +193,14 @@ class Whatsapp extends CI_Controller
 
             } else{
             	
+
+                $checkHotlineNew    = $this->Hotline_model->get_by_where(["customer_phone" =>$data['phone'] , "createdby !=" => "API_WABLAS"]);
+
+                
+                if (empty($checkHotlineNew)) {
+                    $insHotline['flag_status']    = "3";
+                }
+                
                 $this->Inbox_model->insertHotlineCustom($insHotline,'hotline_'.$this->company_pid);
                 // $this->Inbox_model->insertHotline($insHotline);
                 // $tableName = $this->Hotline_model->getTable();
@@ -262,7 +270,7 @@ class Whatsapp extends CI_Controller
                     //     'flag_status'   => "1",
                     // );
 
-                    $insHotline['flag_status']    = "3";
+                    $insHotline['flag_status']    = "1";
                     $this->Inbox_model->insertHotlineCustom($insHotline,'hotline_'.$this->company_pid);
 
                     $timeStr = $this->parsingTime(date("H"));

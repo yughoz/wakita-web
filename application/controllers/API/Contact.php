@@ -6,9 +6,9 @@ Class Contact extends CI_Controller{
         parent::__construct();
         // is_login();
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('Milis_member_model');
-        $this->load->model('Milis_model');
-        $this->load->model('Contact_model');
+        $this->load->model('API/Milis_member_model');
+        $this->load->model('API/Milis_model');
+        $this->load->model('API/Contact_model');
     }
     
     public function index(){

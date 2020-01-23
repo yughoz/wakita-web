@@ -13,7 +13,7 @@ class DirectLink extends CI_Controller
 
         $this->config->load('apiwha');
         $this->load->library('directlinklib');
-        $this->load->model('Contact_model');
+        $this->load->model('API/Contact_model');
 
     }
  

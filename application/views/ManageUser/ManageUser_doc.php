@@ -7,7 +7,7 @@
             .word-table {
                 border:1px solid black !important; 
                 border-collapse: collapse !important;
-                width: 100%;
+                width: 100%; 
             }
             .word-table tr th, .word-table tr td{
                 border:1px solid black !important; 

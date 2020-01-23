@@ -1,4 +1,3 @@
-
 <?php
 
 if (!defined('BASEPATH'))
@@ -14,19 +13,19 @@ class ManageChat extends CI_Controller
         parent::__construct();
         is_login();
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('Send_message_detail_model');
-        $this->load->model('ManageChat_model');
-        $this->load->model('ManageHotline_model');
-        $this->load->model('Contact_model');
-        $this->load->model('Milis_member_model');
-        $this->load->model('Hotline_model');
-        $this->load->model('User_model');
+        $this->load->model('API/Send_message_detail_model');
+        $this->load->model('API/ManageChat_model');
+        $this->load->model('API/ManageHotline_model');
+        $this->load->model('API/Contact_model');
+        $this->load->model('API/Milis_member_model');
+        $this->load->model('API/Hotline_model');
+        $this->load->model('API/User_model');
 
         $this->load->library('form_validation');
         $this->load->library('datatables');
 
         $this->config->load('apiwha');
-        $this->load->model('Inbox_model');
+        $this->load->model('API/Inbox_model');
         
         $this->apiToken     = "";
         $this->url          = $this->config->item('APIWeb');

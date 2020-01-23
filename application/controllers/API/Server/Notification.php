@@ -13,11 +13,11 @@ class Notification extends CI_Controller
         // is_login();
         date_default_timezone_set('Asia/Jakarta');
 
-        // $this->load->model('msuser_model');   
-        $this->load->model('notification_model');  
-        $this->load->model('Milis_member_model');
-        $this->load->model('ManageHotline_model');
-        // $this->load->model('company_model');  
+        // $this->load->model('API/msuser_model');   
+        $this->load->model('API/notification_model');  
+        $this->load->model('API/Milis_member_model');
+        $this->load->model('API/ManageHotline_model');
+        // $this->load->model('API/company_model');  
         $this->url          = "";
         $this->apiToken     = "";
         $this->startRes     = time();

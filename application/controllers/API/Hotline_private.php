@@ -14,15 +14,17 @@ class Hotline_private extends CI_Controller
         parent::__construct();
         // is_login();
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('Hotline_private_model');
+        $this->load->model('API/Hotline_private_model');
         $this->load->library('form_validation');        
         $this->load->library('datatables');
-        $this->load->model('Milis_member_model');
-        $this->load->model('ManageHotlineMember_model');
-        $this->load->model('ManageHotline_model');
-        $this->load->model('Inbox_model');
+        $this->load->model('API/Milis_member_model');
+        $this->load->model('API/ManageHotlineMember_model');
+        $this->load->model('API/ManageHotline_model');
+        $this->load->model('API/Inbox_model');
 
         $this->client       = new GuzzleHttp\Client();
+        $this->startRes     = time();
+        $this->company_pid  = $this->session->userdata('company_pid');
     }
 
     public function index()
@@ -219,9 +221,14 @@ class Hotline_private extends CI_Controller
     public function detail()
     {
         header('Content-Type: application/json');
+
+        $tableName = $this->Hotline_private_model->getTable();
+        $tableName .= "_".$this->session->userdata('company_pid');
+        $this->Hotline_private_model->setTable($tableName);
+
          $whereArr = array(
             'customer_phone'    => $this->input->post('customer_phone',TRUE),
-            'hotline_private.group_hotline'     => $this->input->post('group_hotline',TRUE),
+            $tableName.'.group_hotline'     => $this->input->post('group_hotline',TRUE),
         );
         $limit 		= $this->input->post('limit') ?? 10;
         $startFrom = 0;
@@ -246,13 +253,14 @@ class Hotline_private extends CI_Controller
             // echo print_r($limitSearchData);
             // die();
         }
-        $datas =  $this->Hotline_private_model->detail_list($whereArr,$startFrom,'hotline_private',$limit);
-        $count =  $this->Hotline_private_model->count_all($whereArr);
+        $datas =  $this->Hotline_private_model->detail_list($whereArr,$startFrom,$tableName,$limit);
+        $count =  $this->Hotline_private_model->count_all($whereArr,$tableName);
         foreach ($datas as $key => $value) {
             if (!empty($value->image_name)) {
                 // $datas[$key]->image = base_url('assets/foto_wa')."/".$value->image_name;
                 $datas[$key]->image	= base_url("API/DirectLink/file/")."image/".$value->image_name;
             }
+            $datas[$key]->username = $value->username_title;
             if ($value->createdby == "API_WABLAS") {
                 $datas[$key]->username = "Customer - ".$value->username_title;
                 if (!empty($value->image_name)) {
@@ -311,6 +319,7 @@ class Hotline_private extends CI_Controller
         // $this->Inbox_model->insertHotline($insHotline);
 
         $insHotline = array(
+            'pid'           => $this->wakitalib->get_pid("HTOUT"),               
             'created'           => date("Y-m-d H:i:s"),
             'createdby'         => $this->session->userdata('email'),
             'customer_phone'    => $this->input->post('noPhone',TRUE),
@@ -319,7 +328,11 @@ class Hotline_private extends CI_Controller
             'group_hotline'     => $this->input->post('group_hotline',TRUE),
             'flag_status'       => "4",
         );
-        $this->Inbox_model->insertHotlinePrivate($insHotline);
+        $tableName = $this->Hotline_private_model->getTable();
+        $tableName .= "_".$this->company_pid;
+        $this->Hotline_private_model->setTable($tableName);
+
+        $this->Hotline_private_model->insert($insHotline);
 
         $insHotline['customer_username']    = "";
         $insHotline['customer_title']       = "";
@@ -333,6 +346,7 @@ class Hotline_private extends CI_Controller
         $insHotline['fileUrl']  = "";
         $insHotline['video']    = "";
         $insHotline['videoUrl'] = "";
+        $insHotline['private'] = "1";
         
         $insHotline['destination'] = "inbox";
         // $insHotline['username'] = $this->session->userdata('full_name');
@@ -527,6 +541,22 @@ class Hotline_private extends CI_Controller
 
         $this->form_validation->set_rules('id', 'id', 'trim');
         $this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
+    }
+
+
+    function Loging($name,$param){
+
+      $fullpath=FCPATH.'Log/'.date('Y').'/'.date('m').'/'.date('d');
+      $filepath = $fullpath.'/'.$name.'.txt';
+      if (!is_dir($fullpath)) {
+        mkdir($fullpath, 0755, TRUE);
+      }
+      $saveData = [
+        "timeRes" => time() - $this->startRes,
+        "param" => $param
+      ];
+
+      file_put_contents($filepath,json_encode($saveData).PHP_EOL, FILE_APPEND);
     }
 
 }

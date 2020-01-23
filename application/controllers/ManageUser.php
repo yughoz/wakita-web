@@ -9,14 +9,14 @@ class ManageUser extends CI_Controller
     {
         parent::__construct();
         is_login();
-        $this->load->model('ManageUser_model');
+        $this->load->model('API/ManageUser_model');
         $this->load->library('form_validation');        
 	    $this->load->library('datatables');
         $this->load->library('wakitalib');
-        $this->load->model('ManageUser_model');
-        $this->load->model('ManageHotline_model');
-        $this->load->model('ManageHotlineMember_model');
-        $this->load->model('ManageUserLevel_model');
+        $this->load->model('API/ManageUser_model');
+        $this->load->model('API/ManageHotline_model');
+        $this->load->model('API/ManageHotlineMember_model');
+        $this->load->model('API/ManageUserLevel_model');
         $this->startRes = time();
     }
 

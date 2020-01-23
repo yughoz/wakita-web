@@ -8,7 +8,7 @@ class ManageMenu extends CI_Controller
     function __construct()
     {
         parent::__construct();
-        $this->load->model('ManageMenu_model');
+        $this->load->model('API/ManageMenu_model');
         $this->load->library('form_validation');
 	    $this->load->library('datatables');
     }

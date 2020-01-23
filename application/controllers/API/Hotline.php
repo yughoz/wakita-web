@@ -11,12 +11,12 @@ class Hotline extends CI_Controller
         // is_login();
         checking_login_api();
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('Hotline_model');
+        $this->load->model('API/Hotline_model');
         $this->load->library('form_validation');        
         $this->load->library('datatables');
-        $this->load->model('Milis_member_model');
-        $this->load->model('ManageHotlineMember_model');
-        $this->load->model('ManageHotline_model');
+        $this->load->model('API/Milis_member_model');
+        $this->load->model('API/ManageHotlineMember_model');
+        $this->load->model('API/ManageHotline_model');
 
     }
 
